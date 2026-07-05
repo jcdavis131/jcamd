@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Journal — J. Cameron Davis</title>
+<meta name="description" content="Field notes from building Blue Hen RE — stories and the skills agents distilled along the way, collected as an open (OKF) knowledge base.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📓</text></svg>">
+<link rel="stylesheet" href="/assets/site.css">
+<style>
+  .journal-shell { max-width: 760px; margin: 0 auto; padding: 6vh 20px 8vh; }
+  .journal-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
+  .journal-head a.back { font: 700 13px var(--bh-font-mono); color: var(--bh-clay); text-decoration: none; }
+  .journal-sub { color: var(--bh-muted); margin-bottom: 24px; font-size: .95rem; }
+  .j-filters { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 24px; }
+  .j-chip {
+    min-height: 40px; padding: 0 14px; cursor: pointer;
+    font: 700 12.5px var(--bh-font-body); color: var(--bh-text);
+    background: var(--bh-surface); border: 2px solid var(--bh-card-border);
+    border-radius: 12px; box-shadow: var(--block-x) var(--block-y) 0 var(--bh-ink-shadow);
+    transition: transform 120ms, box-shadow 120ms;
+  }
+  .j-chip[aria-pressed="true"] { background: var(--bh-clay); color: var(--bh-on-accent); transform: translate(4px,4px); box-shadow: none; }
+  .entry {
+    background: var(--bh-surface); border: 2px solid var(--bh-card-border);
+    border-radius: 4px 16px 6px 14px;
+    box-shadow: var(--block-x) var(--block-y) 0 var(--bh-ink-shadow);
+    padding: 20px 22px; margin-bottom: 26px;
+  }
+  .entry .e-meta { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 10px; }
+  .entry time { font: 600 11.5px var(--bh-font-mono); color: var(--bh-muted); background: var(--bh-inset); border-radius: 6px; padding: 3px 8px; }
+  .entry .e-kind { font: 700 10.5px var(--bh-font-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--bh-clay); }
+  .entry h3 { font-family: var(--bh-font-display); font-size: 1.45rem; font-weight: 500; line-height: 1.2; }
+  .entry .e-body { margin-top: 12px; color: var(--bh-text-secondary); }
+  .entry .e-body p { margin-bottom: 12px; }
+  .entry .e-body .wl { text-decoration: underline; text-decoration-color: var(--bh-clay); cursor: pointer; }
+  .entry .e-src a { font: 700 12px var(--bh-font-mono); color: var(--bh-clay); text-decoration: none; }
+  .e-more { background: none; border: 0; cursor: pointer; font: 700 12.5px var(--bh-font-mono); color: var(--bh-clay); padding: 6px 0; }
+  .j-status { color: var(--bh-muted); padding: 20px 0; }
+</style>
+</head>
+<body>
+<main class="journal-shell">
+  <div class="journal-head">
+    <h1 style="font-size:clamp(1.8rem,5vw,2.6rem)">The Journal</h1>
+    <a class="back" href="/">← jcamd.com</a>
+  </div>
+  <p class="journal-sub">
+    Field notes from building Blue Hen RE — the stories, and the 42 skills
+    agents distilled by watching the work. Collected as an open (OKF)
+    knowledge base that agents keep growing;
+    <a href="/knowledge">see it as a map →</a>
+  </p>
+  <div class="j-filters" id="j-filters"></div>
+  <div id="j-list"><p class="j-status">reading the knowledge base…</p></div>
+</main>
+
+<script>
+(function () {
+  var RAW = "https://raw.githubusercontent.com/jcdavis131/bluehen/main/knowledge/personal/";
+  var list = document.getElementById("j-list");
+  var filters = document.getElementById("j-filters");
+  var KINDS = [
+    { id: "journal", label: "Stories", on: true },
+    { id: "skills",  label: "Skills (fable-watch)", on: false },
+    { id: "papers",  label: "Papers", on: false }
+  ];
+  var nodes = [];
+
+  function esc(s) { return s.replace(/&/g, "&amp;").replace(/</g, "&lt;"); }
+
+  function renderBody(md) {
+    var body = md.split(/^---$/m).slice(2).join("---").trim();
+    return body.split(/\n\s*\n/).map(function (p) {
+      var h = esc(p);
+      h = h.replace(/\[\[(.+?)\]\]/g, '<span class="wl" data-wl="$1">$1</span>');
+      h = h.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+      h = h.replace(/^- /gm, "· ");
+      return "<p>" + h.replace(/\n/g, "<br>") + "</p>";
+    }).join("");
+  }
+
+  function draw() {
+    var on = KINDS.filter(function (k) { return k.on; }).map(function (k) { return k.id; });
+    var rows = nodes.filter(function (n) { return on.indexOf(n.kind) !== -1; })
+      .sort(function (a, b) { return (b.added || "").localeCompare(a.added || ""); });
+    list.innerHTML = "";
+    if (!rows.length) {
+      list.innerHTML = '<p class="j-status">Nothing under these filters yet — the agents are still writing.</p>';
+      return;
+    }
+    rows.forEach(function (n) {
+      var el = document.createElement("article");
+      el.className = "entry";
+      var srcLink = /^http/.test(n.source)
+        ? '<p class="e-src"><a href="' + n.source + '" target="_blank" rel="noopener">source ↗</a></p>' : "";
+      el.innerHTML =
+        '<div class="e-meta"><time>' + (n.added || "") + '</time>' +
+        '<span class="e-kind">' + n.kind + "</span></div>" +
+        "<h3>" + esc(n.title) + "</h3>" +
+        '<div class="e-body"><button class="e-more" type="button">read →</button></div>' + srcLink;
+      var bodyEl = el.querySelector(".e-body");
+      var btn = el.querySelector(".e-more");
+      var loaded = false;
+      btn.addEventListener("click", function () {
+        if (loaded) return;
+        btn.textContent = "…";
+        fetch(RAW + n.kind + "/" + n.slug + ".md")
+          .then(function (r) { if (!r.ok) throw 0; return r.text(); })
+          .then(function (md) {
+            loaded = true;
+            bodyEl.innerHTML = renderBody(md);
+            bodyEl.querySelectorAll(".wl").forEach(function (w) {
+              w.addEventListener("click", function () {
+                location.href = "/knowledge";
+              });
+            });
+          })
+          .catch(function () { btn.textContent = "unreachable — try the map"; });
+      });
+      // stories auto-expand
+      if (n.kind === "journal") btn.click();
+      list.appendChild(el);
+    });
+  }
+
+  KINDS.forEach(function (k) {
+    var b = document.createElement("button");
+    b.className = "j-chip"; b.type = "button"; b.textContent = k.label;
+    b.setAttribute("aria-pressed", String(k.on));
+    b.addEventListener("click", function () {
+      k.on = !k.on;
+      b.setAttribute("aria-pressed", String(k.on));
+      draw();
+    });
+    filters.appendChild(b);
+  });
+
+  fetch(RAW + "graph.json")
+    .then(function (r) { if (!r.ok) throw 0; return r.json(); })
+    .then(function (g) { nodes = g.nodes || []; draw(); })
+    .catch(function () {
+      list.innerHTML = '<p class="j-status">The knowledge base is unreachable — it lives at ' +
+        '<a href="https://github.com/jcdavis131/bluehen/tree/main/knowledge/personal">github.com/jcdavis131/bluehen</a>.</p>';
+    });
+})();
+</script>
+</body>
+</html>
