@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JC Davis — builder of Blue Hen RE</title>
+<meta name="description" content="JC Davis: founder and operator of Blue Hen RE, a self-sustaining intelligence engine — recommendation systems, custom embeddings, and honest evaluation.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚙️</text></svg>">
+<style>
+  :root {
+    --ink: #e8e4dc;
+    --ink-dim: #9a948a;
+    --bg: #12100e;
+    --panel: #1a1815;
+    --line: #2c2823;
+    --accent: #d4a24e;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg); color: var(--ink);
+    font: 17px/1.65 Georgia, 'Times New Roman', serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  main { max-width: 680px; margin: 0 auto; padding: 12vh 24px 8vh; }
+  .kicker {
+    font: 600 12px/1 system-ui, sans-serif; letter-spacing: .18em;
+    text-transform: uppercase; color: var(--accent); margin-bottom: 18px;
+  }
+  h1 { font-size: clamp(2.2rem, 7vw, 3.4rem); line-height: 1.08; font-weight: 400; letter-spacing: -.01em; }
+  .lede { margin-top: 22px; font-size: 1.15rem; color: var(--ink-dim); max-width: 56ch; }
+  .lede strong { color: var(--ink); font-weight: 600; }
+  section { margin-top: 64px; }
+  h2 {
+    font: 600 13px/1 system-ui, sans-serif; letter-spacing: .16em;
+    text-transform: uppercase; color: var(--ink-dim);
+    padding-bottom: 10px; border-bottom: 1px solid var(--line); margin-bottom: 22px;
+  }
+  .venture { display: flex; gap: 14px; padding: 13px 0; border-bottom: 1px solid var(--line); align-items: baseline; }
+  .venture:last-child { border-bottom: 0; }
+  .venture a { color: var(--ink); text-decoration: none; font-weight: 600; white-space: nowrap; }
+  .venture a:hover { color: var(--accent); }
+  .venture span { color: var(--ink-dim); font-size: .95rem; }
+  .pending {
+    background: var(--panel); border: 1px dashed var(--line); border-radius: 6px;
+    padding: 16px 18px; color: var(--ink-dim); font-size: .95rem; font-style: italic;
+  }
+  .links { display: flex; flex-wrap: wrap; gap: 12px; }
+  .links a {
+    font: 600 14px/1 system-ui, sans-serif; color: var(--ink);
+    text-decoration: none; border: 1px solid var(--line); border-radius: 999px;
+    padding: 10px 18px; transition: border-color .15s;
+  }
+  .links a:hover { border-color: var(--accent); color: var(--accent); }
+  footer { margin-top: 80px; color: var(--ink-dim); font-size: .85rem; font-family: system-ui, sans-serif; }
+  a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 2px; }
+  @media (prefers-reduced-motion: no-preference) {
+    main > * { animation: rise .5s ease both; }
+    main > *:nth-child(2) { animation-delay: .06s; }
+    main > *:nth-child(3) { animation-delay: .12s; }
+    main > *:nth-child(4) { animation-delay: .18s; }
+    main > *:nth-child(5) { animation-delay: .24s; }
+    @keyframes rise { from { opacity: 0; transform: translateY(10px); } }
+  }
+</style>
+</head>
+<body>
+<main>
+  <div>
+    <p class="kicker">JC Davis · jcamd.com</p>
+    <h1>I build systems that<br>improve themselves.</h1>
+    <p class="lede">Founder and operator of <strong>Blue Hen RE</strong> — a
+    self-sustaining intelligence engine: recommendation systems and custom
+    embedding models that train on their own data exhaust, gated by honest
+    evaluation, run by a fleet of coordinated AI agents. Largely built in
+    public, receipts included.</p>
+  </div>
+
+  <section>
+    <h2>Live ventures</h2>
+    <div class="venture"><a href="https://bhenre.com">Blue Hen RE</a><span>Recommend Everything — out-of-the-box recommendation engines with evaluation receipts</span></div>
+    <div class="venture"><a href="https://dumbmodel.com">DumbModel</a><span>free embedding health checks, the Rank Arena, and Beat the Baseline</span></div>
+    <div class="venture"><a href="https://slasso.com">Validation Lab</a><span>automated RAG certification — measured, fail-closed</span></div>
+    <div class="venture"><a href="https://arxiviq.com">ArXivIQ</a><span>research retrieval that beats the big-name embeddings on its own corpus</span></div>
+    <div class="venture"><a href="https://data.bhenre.com">Data Refinery</a><span>datasets with provenance receipts and a self-writing wiki</span></div>
+    <div class="venture"><a href="https://signals.bhenre.com">Simulation Lab</a><span>strategy research, strictly simulation-only</span></div>
+  </section>
+
+  <section>
+    <h2>Background</h2>
+    <p class="pending">Career history and education land here shortly —
+    this site ships facts only, and those are being imported.</p>
+  </section>
+
+  <section>
+    <h2>Elsewhere</h2>
+    <div class="links">
+      <a href="https://github.com/jcdavis131">GitHub</a>
+      <a href="https://github.com/jcdavis131/bluehen">Blue Hen (open source)</a>
+      <a href="mailto:jcdavis131@gmail.com">Email</a>
+    </div>
+  </section>
+
+  <footer>© 2026 JC Davis · Built and deployed by the Blue Hen agent fleet.</footer>
+</main>
+</body>
+</html>
