@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Arcade — J. Cameron Davis</title>
+<meta name="description" content="Play the Blue Hen studio games — Beat the Baseline, Rank Arena, The Verdict, and The Overworld — right here.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🕹️</text></svg>">
+<link rel="stylesheet" href="/assets/site.css">
+<style>
+  .arcade-shell { max-width: 1080px; margin: 0 auto; padding: 5vh 20px 6vh; }
+  .arcade-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+  .arcade-head a.back { font: 700 13px var(--bh-font-mono); color: var(--bh-clay); text-decoration: none; }
+  .cabinet-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
+  .cab-btn {
+    min-height: 44px; padding: 0 16px; cursor: pointer;
+    font: 700 13px var(--bh-font-body); color: var(--bh-text);
+    background: var(--bh-surface); border: 2px solid var(--bh-card-border);
+    border-radius: 12px; box-shadow: var(--block-x) var(--block-y) 0 var(--bh-ink-shadow);
+    transition: transform 120ms, box-shadow 120ms, background 120ms;
+  }
+  .cab-btn:hover { transform: translate(2px,2px); box-shadow: 2px 2px 0 var(--bh-ink-shadow); }
+  .cab-btn[aria-pressed="true"] {
+    background: var(--bh-clay); color: var(--bh-on-accent);
+    transform: translate(4px,4px); box-shadow: none;
+  }
+  .screen-frame {
+    background: var(--bh-surface);
+    border: 2px solid var(--bh-card-border);
+    border-radius: 4px 16px 6px 14px;
+    box-shadow: var(--block-x) var(--block-y) 0 var(--bh-ink-shadow);
+    padding: 10px;
+  }
+  .screen-bar { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 0 4px 10px; flex-wrap: wrap; }
+  .screen-bar .game-note { font: 500 12.5px var(--bh-font-mono); color: var(--bh-muted); }
+  .screen-bar .bar-actions { display: flex; gap: 10px; }
+  .screen-bar a, .screen-bar button {
+    font: 700 12px var(--bh-font-mono); letter-spacing: .04em; cursor: pointer;
+    color: var(--bh-clay); background: none; border: 0; text-decoration: none; padding: 6px 4px;
+  }
+  #game-screen {
+    width: 100%; height: min(78vh, 900px); border: 0; display: block;
+    border-radius: 6px; background: var(--bh-inset);
+  }
+  .fallback { padding: 40px 20px; text-align: center; color: var(--bh-muted); display: none; }
+  @media (max-width: 700px) { #game-screen { height: 74vh; } }
+</style>
+</head>
+<body>
+<main class="arcade-shell">
+  <div class="arcade-head">
+    <h1 style="font-size:clamp(1.8rem,5vw,2.6rem)">The Arcade</h1>
+    <a class="back" href="/">← jcamd.com</a>
+  </div>
+
+  <div class="cabinet-row" role="tablist" aria-label="Pick a game" id="cabinets"></div>
+
+  <div class="screen-frame">
+    <div class="screen-bar">
+      <span class="game-note" id="game-note"></span>
+      <span class="bar-actions">
+        <button id="btn-full" type="button">fullscreen</button>
+        <a id="btn-source" target="_blank" rel="noopener">open at source ↗</a>
+      </span>
+    </div>
+    <iframe id="game-screen" title="game screen" allow="fullscreen"></iframe>
+    <div class="fallback" id="fallback">
+      This cabinet needs its own screen —
+      <a id="fallback-link" target="_blank" rel="noopener">open the game directly</a>.
+    </div>
+  </div>
+
+  <p class="capture-caption" style="margin-top:16px">
+    Every game runs live from its home site — same engine, same honest
+    scores. Your plays feed the Blue Hen data engine exactly as they
+    would there.
+  </p>
+</main>
+
+<script>
+(function () {
+  var GAMES = [
+    { id: "beat",      name: "Beat the Baseline", url: "https://dumbmodel.com/beat",
+      note: "craft the query that breaks the model" },
+    { id: "arena",     name: "Rank Arena",        url: "https://dumbmodel.com/arena",
+      note: "it guesses your taste — prove it wrong" },
+    { id: "verdict",   name: "The Verdict",       url: "https://www.slasso.com/verdict",
+      note: "judge the retrieval; overrules are prized" },
+    { id: "overworld", name: "The Overworld",     url: "https://www.slasso.com/overworld",
+      note: "walk the Blue Hen universe" }
+  ];
+  var row = document.getElementById("cabinets");
+  var frame = document.getElementById("game-screen");
+  var note = document.getElementById("game-note");
+  var src = document.getElementById("btn-source");
+  var fallback = document.getElementById("fallback");
+  var fallbackLink = document.getElementById("fallback-link");
+  var buttons = {};
+
+  function select(id, push) {
+    var g = GAMES.find(function (x) { return x.id === id; }) || GAMES[0];
+    Object.keys(buttons).forEach(function (k) {
+      buttons[k].setAttribute("aria-pressed", String(k === g.id));
+    });
+    note.textContent = g.note;
+    src.href = g.url;
+    fallbackLink.href = g.url;
+    fallback.style.display = "none";
+    frame.style.display = "block";
+    frame.src = g.url;
+    if (push) history.replaceState(null, "", "?game=" + g.id);
+    // honest fallback: if the frame never loads, offer the direct door
+    var loaded = false;
+    frame.onload = function () { loaded = true; };
+    setTimeout(function () {
+      if (!loaded) { frame.style.display = "none"; fallback.style.display = "block"; }
+    }, 12000);
+  }
+
+  GAMES.forEach(function (g) {
+    var b = document.createElement("button");
+    b.className = "cab-btn"; b.type = "button"; b.textContent = g.name;
+    b.setAttribute("role", "tab"); b.setAttribute("aria-pressed", "false");
+    b.addEventListener("click", function () { select(g.id, true); });
+    row.appendChild(b);
+    buttons[g.id] = b;
+  });
+
+  document.getElementById("btn-full").addEventListener("click", function () {
+    if (frame.requestFullscreen) frame.requestFullscreen();
+  });
+
+  var initial = new URLSearchParams(location.search).get("game") || "beat";
+  select(initial, false);
+})();
+</script>
+</body>
+</html>
