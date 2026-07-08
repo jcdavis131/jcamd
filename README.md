@@ -1,8 +1,14 @@
-# jcamd.com — J. Cameron Davis
+# jcamd.com
 
-Workforce intelligence consulting site. Static, zero-dependency, deployed on Vercel.
+Workforce intelligence consulting site. Static, zero dependencies, Vercel project **`jcamd`**.
 
-- `index.html` — practice overview, services, track record, lab (GitHub), contact
-- `assets/site.css` — drafting-board UI
-- `assets/site.js` — nav scroll-spy, mobile menu
-- `assets/github.js` — live GitHub feed
+| Path | Role |
+|------|------|
+| `index.html` | Practice, services, track record, lab, contact |
+| `assets/site.css` | Drafting-board UI |
+| `assets/site.js` | Nav scroll-spy, mobile menu |
+| `assets/github.js` | GitHub profile, activity, repos |
+
+**Deploy:** push to `master` on `jcdavis131/jcamd`.
+
+**Routes:** `/arcade` → hoops.jcamd.com · `/knowledge`, `/journal` → home.

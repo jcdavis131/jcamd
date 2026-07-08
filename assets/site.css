@@ -436,11 +436,6 @@ main { max-width: var(--max); margin: 0 auto; padding: 0 20px 80px; }
 }
 
 /* ── GitHub / lab ── */
-.lab-note {
-  font: 500 10px/1 var(--font-mono);
-  color: var(--pencil);
-  margin-top: 12px;
-}
 .activity-grid {
   display: grid; gap: 12px;
   grid-template-columns: 1fr;
