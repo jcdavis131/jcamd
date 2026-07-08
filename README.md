@@ -1,8 +1,8 @@
-# jcamd.com — JC Davis, personal site
+# jcamd.com — J. Cameron Davis
 
-Static, zero-dependency personal site. Deployed on Vercel; domain
-`jcamd.com`. Content policy: verified facts only — career/education
-sections stay as honest placeholders until imported from a provided
-source (LinkedIn export).
+Workforce intelligence consulting site. Static, zero-dependency, deployed on Vercel.
 
-Edit `index.html`, push to `main`, Vercel deploys.
+- `index.html` — practice overview, services, track record, lab (GitHub), contact
+- `assets/site.css` — drafting-board UI
+- `assets/site.js` — nav scroll-spy, mobile menu
+- `assets/github.js` — live GitHub feed
