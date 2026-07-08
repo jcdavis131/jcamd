@@ -1,9 +1,10 @@
-/* Generic GitHub activity — profile, events, repos. Zero deps. */
+/* GitHub activity — profile, events, repos. Zero deps. */
 (function () {
   'use strict';
 
   var USER = 'jcdavis131';
   var API = 'https://api.github.com/users/' + USER;
+  var SKIP_REPOS = { jcamd: 1, 'vector-hoops': 1, bluehen: 1 };
 
   function esc(s) {
     return String(s).replace(/[&<>"']/g, function (c) {
@@ -29,6 +30,28 @@
     });
   }
 
+  function repoName(ev) {
+    return ev.repo && ev.repo.name ? ev.repo.name.replace(USER + '/', '') : 'repo';
+  }
+
+  function pickEvents(events, limit) {
+    var counts = {};
+    var picked = [];
+    events.forEach(function (ev) {
+      if (picked.length >= limit) return;
+      var name = repoName(ev);
+      counts[name] = (counts[name] || 0) + 1;
+      if (counts[name] <= 2) picked.push(ev);
+    });
+    if (picked.length < limit) {
+      events.forEach(function (ev) {
+        if (picked.length >= limit) return;
+        if (picked.indexOf(ev) === -1) picked.push(ev);
+      });
+    }
+    return picked;
+  }
+
   function mountProfile(el) {
     if (!el) return;
     getJSON(API).then(function (u) {
@@ -47,7 +70,7 @@
 
   function eventLabel(ev) {
     var t = ev.type;
-    var repo = ev.repo && ev.repo.name ? ev.repo.name.replace(USER + '/', '') : 'repo';
+    var repo = repoName(ev);
     var url = (ev.repo && ev.repo.url) ? ev.repo.url.replace('api.github.com/repos', 'github.com') : '#';
 
     if (t === 'PushEvent' && ev.payload && ev.payload.commits && ev.payload.commits.length) {
@@ -71,13 +94,13 @@
     if (!el) return;
     el.classList.add('is-loading');
 
-    getJSON(API + '/events/public?per_page=12').then(function (events) {
+    getJSON(API + '/events/public?per_page=20').then(function (events) {
       el.classList.remove('is-loading');
       if (!Array.isArray(events) || !events.length) {
         el.innerHTML = '<p class="activity-empty">No recent public activity.</p>';
         return;
       }
-      var items = events.slice(0, 8).map(function (ev) {
+      var items = pickEvents(events, 8).map(function (ev) {
         var label = eventLabel(ev);
         return '<li>' + label.text +
           (label.detail ? '<span class="activity-meta">' + label.detail + '</span>' : '') +
@@ -92,12 +115,14 @@
 
   function mountRepos(el) {
     if (!el) return;
-    getJSON(API + '/repos?sort=updated&per_page=6').then(function (repos) {
+    getJSON(API + '/repos?sort=updated&per_page=30').then(function (repos) {
       if (!Array.isArray(repos) || !repos.length) {
         el.innerHTML = '';
         return;
       }
-      var cards = repos.filter(function (r) { return !r.fork; }).slice(0, 6).map(function (r) {
+      var cards = repos.filter(function (r) {
+        return !r.fork && !SKIP_REPOS[r.name];
+      }).slice(0, 6).map(function (r) {
         var lang = r.language ? r.language : '';
         var stars = r.stargazers_count ? '★ ' + r.stargazers_count : '';
         var meta = [lang, stars].filter(Boolean).join(' · ');
