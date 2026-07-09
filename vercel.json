@@ -1,8 +1,8 @@
 {
   "cleanUrls": true,
   "redirects": [
-    { "source": "/knowledge", "destination": "/", "permanent": false },
-    { "source": "/journal", "destination": "/", "permanent": false },
-    { "source": "/arcade", "destination": "https://hoops.jcamd.com", "permanent": true }
+    { "source": "/knowledge", "destination": "/", "permanent": true },
+    { "source": "/journal", "destination": "/", "permanent": true },
+    { "source": "/arcade", "destination": "https://dumbmodel.com", "permanent": true }
   ]
 }
