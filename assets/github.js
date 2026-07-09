@@ -1,10 +1,11 @@
-/* GitHub activity — profile, events, repos. Zero deps. */
+/* GitHub profile card. Zero deps.
+   The activity feed and repo grid were dropped in favour of the contribution
+   heatmap (assets/contributions.js), which is served from /api/contributions. */
 (function () {
   'use strict';
 
   var USER = 'jcdavis131';
   var API = 'https://api.github.com/users/' + USER;
-  var SKIP_REPOS = { jcamd: 1, 'vector-hoops': 1, bluehen: 1 };
 
   function esc(s) {
     return String(s).replace(/[&<>"']/g, function (c) {
@@ -12,44 +13,11 @@
     });
   }
 
-  function relTime(when) {
-    var diff = Date.now() - new Date(when).getTime();
-    var sec = Math.floor(diff / 1000);
-    if (sec < 60) return 'just now';
-    var min = Math.floor(sec / 60);
-    if (min < 60) return min + 'm ago';
-    var hr = Math.floor(min / 60);
-    if (hr < 24) return hr + 'h ago';
-    return Math.floor(hr / 24) + 'd ago';
-  }
-
   function getJSON(url) {
     return fetch(url).then(function (r) {
       if (!r.ok) throw new Error('status ' + r.status);
       return r.json();
     });
-  }
-
-  function repoName(ev) {
-    return ev.repo && ev.repo.name ? ev.repo.name.replace(USER + '/', '') : 'repo';
-  }
-
-  function pickEvents(events, limit) {
-    var counts = {};
-    var picked = [];
-    events.forEach(function (ev) {
-      if (picked.length >= limit) return;
-      var name = repoName(ev);
-      counts[name] = (counts[name] || 0) + 1;
-      if (counts[name] <= 2) picked.push(ev);
-    });
-    if (picked.length < limit) {
-      events.forEach(function (ev) {
-        if (picked.length >= limit) return;
-        if (picked.indexOf(ev) === -1) picked.push(ev);
-      });
-    }
-    return picked;
   }
 
   function mountProfile(el) {
@@ -68,77 +36,5 @@
     });
   }
 
-  function eventLabel(ev) {
-    var t = ev.type;
-    var repo = repoName(ev);
-    var url = (ev.repo && ev.repo.url) ? ev.repo.url.replace('api.github.com/repos', 'github.com') : '#';
-
-    if (t === 'PushEvent' && ev.payload && ev.payload.commits && ev.payload.commits.length) {
-      var msg = ev.payload.commits[0].message.split('\n')[0];
-      return { text: 'Pushed to <a href="' + url + '">' + esc(repo) + '</a>', detail: esc(msg) };
-    }
-    if (t === 'CreateEvent') {
-      return { text: 'Created <a href="' + url + '">' + esc(repo) + '</a>', detail: ev.payload.ref_type || '' };
-    }
-    if (t === 'WatchEvent') {
-      return { text: 'Starred <a href="' + url + '">' + esc(repo) + '</a>', detail: '' };
-    }
-    if (t === 'PullRequestEvent') {
-      var action = (ev.payload && ev.payload.action) || 'updated';
-      return { text: action + ' PR on <a href="' + url + '">' + esc(repo) + '</a>', detail: '' };
-    }
-    return { text: t.replace('Event', '') + ' on <a href="' + url + '">' + esc(repo) + '</a>', detail: '' };
-  }
-
-  function mountActivity(el) {
-    if (!el) return;
-    el.classList.add('is-loading');
-
-    getJSON(API + '/events/public?per_page=20').then(function (events) {
-      el.classList.remove('is-loading');
-      if (!Array.isArray(events) || !events.length) {
-        el.innerHTML = '<p class="activity-empty">No recent public activity.</p>';
-        return;
-      }
-      var items = pickEvents(events, 8).map(function (ev) {
-        var label = eventLabel(ev);
-        return '<li>' + label.text +
-          (label.detail ? '<span class="activity-meta">' + label.detail + '</span>' : '') +
-          '<span class="activity-meta">' + relTime(ev.created_at) + '</span></li>';
-      });
-      el.innerHTML = '<ul class="activity-list">' + items.join('') + '</ul>';
-    }).catch(function () {
-      el.classList.remove('is-loading');
-      el.innerHTML = '<p class="activity-error">Feed unavailable. <a href="https://github.com/' + USER + '">See GitHub</a>.</p>';
-    });
-  }
-
-  function mountRepos(el) {
-    if (!el) return;
-    getJSON(API + '/repos?sort=updated&per_page=30').then(function (repos) {
-      if (!Array.isArray(repos) || !repos.length) {
-        el.innerHTML = '';
-        return;
-      }
-      var cards = repos.filter(function (r) {
-        return !r.fork && !SKIP_REPOS[r.name];
-      }).slice(0, 6).map(function (r) {
-        var lang = r.language ? r.language : '';
-        var stars = r.stargazers_count ? '★ ' + r.stargazers_count : '';
-        var meta = [lang, stars].filter(Boolean).join(' · ');
-        return '<a class="repo-card" href="' + esc(r.html_url) + '" target="_blank" rel="noopener">' +
-          '<h3>' + esc(r.name) + '</h3>' +
-          (r.description ? '<p>' + esc(r.description) + '</p>' : '') +
-          (meta ? '<div class="repo-card__meta">' + esc(meta) + '</div>' : '') +
-          '</a>';
-      });
-      el.innerHTML = cards.join('');
-    }).catch(function () {
-      el.innerHTML = '';
-    });
-  }
-
   mountProfile(document.getElementById('gh-profile'));
-  mountActivity(document.getElementById('gh-activity'));
-  mountRepos(document.getElementById('gh-repos'));
 })();

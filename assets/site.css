@@ -680,3 +680,51 @@ a:focus-visible, button:focus-visible {
 @media (prefers-reduced-motion: reduce) {
   .btn, .repo-card, .activity-feed.is-loading::after { transition: none; animation: none; }
 }
+
+/* --- Lab: game list + GitHub contribution heatmap --- */
+.lab-games {
+  list-style: none;
+  margin: 14px 0 18px;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+.lab-games li {
+  font: 400 13px/1.5 var(--font-body);
+  color: var(--text-secondary);
+}
+.lab-games a {
+  font: 700 12px/1.3 var(--font-mono);
+  color: var(--accent);
+}
+
+.lab-github {
+  display: grid;
+  gap: 14px;
+}
+@media (min-width: 720px) {
+  .lab-github { grid-template-columns: 220px 1fr; align-items: start; }
+}
+
+.gh-contrib__scroll { overflow-x: auto; }
+.gh-contrib__svg { display: block; max-width: 100%; height: auto; }
+.gh-contrib__axis {
+  font: 400 9px/1 var(--font-mono);
+  fill: var(--muted);
+}
+.gh-contrib__legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 10px;
+  font: 400 11px/1.4 var(--font-mono);
+  color: var(--muted);
+}
+.gh-contrib__scale { display: inline-flex; align-items: center; gap: 3px; }
+.gh-contrib__swatch {
+  display: inline-block;
+  width: 11px;
+  height: 11px;
+  border-radius: 2px;
+}

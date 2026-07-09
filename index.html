@@ -193,17 +193,21 @@
 
   <section class="section" id="lab" aria-labelledby="lab-heading">
     <p class="sheet-label" id="lab-heading">Lab</p>
-    <p class="section-intro">Public GitHub. Side projects and prototypes.</p>
-    <a class="repo-card lab-featured" href="https://hoops.jcamd.com/">
-      <h3>Vector Hoops</h3>
-      <p>Daily NBA chimera puzzle — 12k player-seasons, era-honest stats, six ranked modes.</p>
-      <div class="repo-card__meta">hoops.jcamd.com</div>
+    <p class="section-intro">Daily puzzles built on learned player embeddings. Public GitHub below.</p>
+    <a class="repo-card lab-featured" href="https://dumbmodel.com/">
+      <h3>dumbmodel.com</h3>
+      <p>The arcade for the vector games. Each one turns a sport's public data into a player embedding, then makes you guess your way around inside it.</p>
+      <div class="repo-card__meta">dumbmodel.com</div>
     </a>
-    <div class="activity-grid">
+    <ul class="lab-games">
+      <li><a href="https://hoops.dumbmodel.com/">Vector Hoops</a> — daily NBA chimera; 12,966 player-seasons in a 48-d multi-task embedding.</li>
+      <li><a href="https://gridiron.dumbmodel.com/">Vector Gridiron</a> — NFL start/sit and draft board off a shared-trunk net.</li>
+      <li><a href="https://pitch.dumbmodel.com/">Vector Pitch</a> — World Cup chimera from StatsBomb open data.</li>
+    </ul>
+    <div class="lab-github">
       <div class="card" id="gh-profile" aria-live="polite"></div>
-      <div class="card activity-feed is-loading" id="gh-activity" aria-live="polite"></div>
+      <div class="card gh-contrib" id="gh-contrib" aria-live="polite"></div>
     </div>
-    <div class="repo-grid" id="gh-repos" aria-live="polite"></div>
   </section>
 
   <section class="section" id="contact" aria-labelledby="contact-heading">
@@ -237,7 +241,7 @@
         <ul class="site-footer__list">
           <li><a href="mailto:jcdavis131@gmail.com">Email</a></li>
           <li><a href="https://www.linkedin.com/in/jcdavis2">LinkedIn</a></li>
-          <li><a href="https://hoops.jcamd.com/">Vector Hoops</a></li>
+          <li><a href="https://dumbmodel.com/">Arcade</a></li>
           <li><a href="https://github.com/jcdavis131">GitHub</a></li>
         </ul>
       </div>
@@ -250,5 +254,6 @@
 
 <script src="/assets/site.js" defer></script>
 <script src="/assets/github.js" defer></script>
+<script src="/assets/contributions.js" defer></script>
 </body>
 </html>
