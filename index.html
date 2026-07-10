@@ -14,6 +14,7 @@
 <meta name="twitter:card" content="summary">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23faf9f5' stroke='%232c2a26' stroke-width='2'/%3E%3Ctext x='16' y='21' text-anchor='middle' font-family='monospace' font-size='11' font-weight='700' fill='%232c2a26'%3EJC%3C/text%3E%3C/svg%3E">
 <link rel="stylesheet" href="/assets/site.css">
+<link rel="stylesheet" href="/assets/responsive-patch.css">
 </head>
 <body>
 <a class="skip-link" href="#main-content">Skip to content</a>
@@ -193,12 +194,24 @@
 
   <section class="section" id="lab" aria-labelledby="lab-heading">
     <p class="sheet-label" id="lab-heading">Lab</p>
-    <p class="section-intro">Public GitHub. Side projects and prototypes.</p>
-    <a class="repo-card lab-featured" href="https://hoops.jcamd.com/">
-      <h3>Vector Hoops</h3>
-      <p>Daily NBA chimera puzzle — 12k player-seasons, era-honest stats, six ranked modes.</p>
-      <div class="repo-card__meta">hoops.jcamd.com</div>
-    </a>
+    <p class="section-intro">Public GitHub. Side projects and prototypes. Mobile-first, zero tracking, era-honest.</p>
+    <div class="lab-featured-grid">
+      <a class="repo-card lab-featured" href="https://hoops.dumbmodel.com/">
+        <h3>Vector Hoops</h3>
+        <p>Daily NBA chimera puzzle — 12k player-seasons, era-honest stats, six ranked modes. Mobile-first fluid UI.</p>
+        <div class="repo-card__meta">hoops.dumbmodel.com → 17 families MTNN</div>
+      </a>
+      <a class="repo-card lab-featured" href="https://pitch.dumbmodel.com/">
+        <h3>Vector Pitch</h3>
+        <p>World Cup chimera — 633 tournaments, per-90 z-scores, attack+duel fusion. Same MTNN pattern, dark pitch theme.</p>
+        <div class="repo-card__meta">pitch.dumbmodel.com — new mobile-first</div>
+      </a>
+      <a class="repo-card lab-featured" href="https://hoops.dumbmodel.com/play">
+        <h3>Vector Gridiron (WIP)</h3>
+        <p>NFL fantasy companion — shareable league puzzles. Mobile-first blueprint landing in vector-gridiron repo.</p>
+        <div class="repo-card__meta">gridiron.dumbmodel.com — fantasy shareable</div>
+      </a>
+    </div>
     <div class="activity-grid">
       <div class="card" id="gh-profile" aria-live="polite"></div>
       <div class="card activity-feed is-loading" id="gh-activity" aria-live="polite"></div>
