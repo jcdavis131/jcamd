@@ -3,36 +3,43 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Personal Graphify — J. Cameron Davis</title>
-<meta name="description" content="Personal Graphify: Knowledge Graphs for AI coding assistants — 391 nodes, 735 edges, Ollama-first, non-PII public graph. Solo project, free-tier only.">
+<title>Personal Graphify — SOTA Knowledge Graphs for Agents · J. Cameron Davis</title>
+<meta name="description" content="Personal Graphify SOTA: 464 nodes 1074 edges, query + impact + task compiler + MCP server. Ollama-first, tree-sitter, 71x token reduction. Solo project.">
 <link rel="canonical" href="https://jcamd.com/graphify/">
 <link rel="stylesheet" href="/assets/site.css">
 <link rel="stylesheet" href="/assets/responsive-patch.css">
 <style>
-/* Graphify page — drafting board */
-.graphify-hero { max-width: var(--max-wide); margin: 0 auto; padding: 32px 20px 16px; }
-.graphify-sheet {
-  background: var(--surface);
-  border: 2px solid var(--ink);
-  box-shadow: var(--block-x) var(--block-y) 0 var(--ink-shadow);
-  padding: 22px 20px;
-}
-.graphify-meta { display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; font:600 10px/1.4 var(--font-mono); letter-spacing:.1em; text-transform:uppercase; color:var(--pencil); margin-bottom:14px; padding-bottom:10px; border-bottom:1px dashed var(--border); }
-.graphify-stats { display:flex; gap:16px; flex-wrap:wrap; margin:12px 0 16px; }
-.graphify-stat { background: var(--canvas); border:1.5px solid var(--ink); padding:8px 12px; font:600 11px/1 var(--font-mono); }
-.graphify-controls { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin:12px 0; }
-.graphify-controls input, .graphify-controls select {
-  min-height:40px; padding:0 12px; border:2px solid var(--ink); background:var(--surface);
-  font:500 12px/1 var(--font-mono); box-shadow:2px 2px 0 var(--ink-shadow);
-}
-.graphify-container { position:relative; background:var(--surface); border:2px solid var(--ink); box-shadow: var(--block-x) var(--block-y) 0 var(--ink-shadow); overflow:hidden; }
-#graph-network { width:100%; height:72vh; min-height:520px; background: #faf9f5; }
-.graphify-legend { font:500 10px/1.5 var(--font-mono); color:var(--pencil); padding:10px 14px; border-top:1px dashed var(--border); display:flex; gap:14px; flex-wrap:wrap; }
-.graphify-note { margin-top:18px; font-size:13px; color:var(--text-secondary); line-height:1.6; max-width:65ch; }
-.graphify-grid { display:grid; gap:16px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); margin-top:18px; }
-.card--graphify h3 { font:700 12px/1.2 var(--font-mono); text-transform:uppercase; letter-spacing:.08em; margin-bottom:8px; }
-.card--graphify p { font-size:13px; line-height:1.55; color:var(--text-secondary); }
-.btn--small { min-height:36px; padding:0 14px; font-size:10px; }
+.graphify-hero{max-width:var(--max-wide);margin:0 auto;padding:32px 20px 16px}
+.graphify-sheet{background:var(--surface);border:2px solid var(--ink);box-shadow:var(--block-x) var(--block-y) 0 var(--ink-shadow);padding:22px 20px}
+.graphify-meta{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font:600 10px/1.4 var(--font-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--pencil);margin-bottom:14px;padding-bottom:10px;border-bottom:1px dashed var(--border)}
+.graphify-stats{display:flex;gap:12px;flex-wrap:wrap;margin:12px 0 16px}
+.graphify-stat{background:var(--canvas);border:1.5px solid var(--ink);padding:8px 12px;font:600 11px/1 var(--font-mono)}
+.graphify-controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:12px 0}
+.graphify-controls input,.graphify-controls select,.graphify-controls textarea{min-height:40px;padding:0 12px;border:2px solid var(--ink);background:var(--surface);font:500 12px/1 var(--font-mono);box-shadow:2px 2px 0 var(--ink-shadow)}
+.graphify-controls textarea{min-height:72px;padding:10px 12px;width:100%;font-size:12px;line-height:1.4;resize:vertical}
+.graphify-container{position:relative;background:var(--surface);border:2px solid var(--ink);box-shadow:var(--block-x) var(--block-y) 0 var(--ink-shadow);overflow:hidden;display:grid;grid-template-columns:1fr 340px}
+#graph-network{width:100%;height:72vh;min-height:560px;background:#faf9f5}
+.graphify-panel{border-left:2px solid var(--ink);background:#fdfbf5;padding:12px 12px;overflow:auto;max-height:72vh}
+.graphify-panel h4{font:700 11px/1.2 var(--font-mono);text-transform:uppercase;letter-spacing:.08em;margin:10px 0 6px;border-bottom:1px dashed var(--border);padding-bottom:6px}
+.graphify-panel .kv{font:500 11px/1.5 var(--font-mono);margin:4px 0}
+.graphify-panel .mono{font:500 10px/1.4 var(--font-mono);white-space:pre-wrap;background:var(--canvas);border:1px solid var(--ink);padding:8px 8px;margin:6px 0;max-height:220px;overflow:auto}
+.graphify-legend{font:500 10px/1.5 var(--font-mono);color:var(--pencil);padding:10px 14px;border-top:1px dashed var(--border);display:flex;gap:14px;flex-wrap:wrap}
+.graphify-tabs{display:flex;gap:6px;margin-top:16px;flex-wrap:wrap}
+.graphify-tab{border:2px solid var(--ink);background:var(--canvas);padding:6px 12px;font:700 10px/1 var(--font-mono);text-transform:uppercase;cursor:pointer}
+.graphify-tab.is-active{background:var(--ink);color:var(--surface)}
+.graphify-tab-panels{margin-top:10px}
+.graphify-tab-panel{display:none}
+.graphify-tab-panel.is-active{display:block}
+.graphify-grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));margin-top:18px}
+.card--graphify h3{font:700 12px/1.2 var(--font-mono);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+.card--graphify p{font-size:13px;line-height:1.55;color:var(--text-secondary)}
+.btn--small{min-height:36px;padding:0 14px;font-size:10px}
+.pill{display:inline-block;border:1.5px solid var(--ink);padding:2px 6px;margin:2px 2px;font:600 9px/1 var(--font-mono);text-transform:uppercase;background:var(--canvas)}
+.pill--product{background:#F0E442}
+.pill--ml{background:#56B4E9}
+.pill--integration{background:#0072B2;color:#fff}
+.pill--file{background:#fff}
+@media(max-width:860px){.graphify-container{grid-template-columns:1fr}#graph-network{height:56vh}.graphify-panel{max-height:420px;border-left:0;border-top:2px solid var(--ink)}}
 </style>
 <script src="https://unpkg.com/vis-network@9.1.6/standalone/umd/vis-network.min.js"></script>
 </head>
@@ -45,143 +52,502 @@
   </div>
 </header>
 <main>
-  <div class="graphify-hero">
-    <div class="graphify-sheet">
-      <div class="graphify-meta"><span>Sheet GR-01 · Personal Graphify</span><span>Non-PII public · 390 nodes · Ollama-first</span></div>
-      <h1 style="font:600 clamp(1.6rem,4vw,2.2rem)/1.1 var(--font-body); letter-spacing:-0.02em;">Knowledge Graphs for AI coding assistants</h1>
-      <p style="margin-top:10px; color:var(--text-secondary); max-width:58ch;">Personal fork of Graphify-Labs/graphify (MIT, 71.5× token reduction). Tree-sitter AST local + Ollama semantic + NetworkX + Leiden/greedy. This public graph is sanitized — no account numbers, no $ balances, no emails — just code architecture + product concepts. Solo personal project, no connection to employer, built with public/free-tier only.</p>
+<div class="graphify-hero">
+<div class="graphify-sheet">
+<div class="graphify-meta"><span>Sheet GR-02 · Personal Graphify SOTA</span><span id="meta-right">464 nodes · 1074 edges · Ollama-first · MCP server</span></div>
+<h1 style="font:600 clamp(1.6rem,4vw,2.2rem)/1.1 var(--font-body);letter-spacing:-0.02em;">Knowledge Graphs for AI coding assistants — <em>task compiler for agents</em></h1>
+<p style="margin-top:10px;color:var(--text-secondary);max-width:68ch;">Private fork of Graphify-Labs/graphify. SOTA: tree-sitter JS/TS/Python AST local + personal ecosystem patterns (Stripe MRR $79-149, Plaid Family Brain $11k burn, Turnover Shield churn → retention playbook) + hybrid lexical+degree ranking + <strong>impact analysis</strong> + <strong>task compiler</strong> (files priority + plan + copy-paste context) + <strong>MCP server</strong> (http + stdio). 71× token reduction pattern — query returns ~1.5k vs naive ~155k. Public graph is non-PII sanitized, full private graph in private repo.</p>
 
-      <div class="graphify-stats">
-        <div class="graphify-stat" id="stat-nodes">390 nodes</div>
-        <div class="graphify-stat" id="stat-edges">735 edges</div>
-        <div class="graphify-stat">23 communities</div>
-        <div class="graphify-stat">~1.5k tokens / query vs ~155k naive</div>
-      </div>
+<div class="graphify-stats">
+<div class="graphify-stat" id="stat-nodes">464 nodes</div>
+<div class="graphify-stat" id="stat-edges">1074 edges</div>
+<div class="graphify-stat" id="stat-comm">18 communities</div>
+<div class="graphify-stat" id="stat-token">~1.5k tokens / query</div>
+<div class="graphify-stat">SOTA: query + path + explain + impact + task + onboard</div>
+</div>
 
-      <div class="graphify-controls">
-        <input id="search" type="search" placeholder="Search: Stripe, MTNN, Ava S2, Turnover Shield…" aria-label="Search graph">
-        <select id="community-filter"><option value="all">All communities</option></select>
-        <button class="btn btn--small" id="reset-btn" type="button">Reset view</button>
-        <a class="btn btn--small" href="/assets/graphify/graph.json" target="_blank" rel="noopener">graph.json</a>
-        <a class="btn btn--small" href="https://github.com/jcdavis131/personal-graphify" target="_blank" rel="noopener">Private repo</a>
-      </div>
+<div class="graphify-controls">
+<input id="search" type="search" placeholder="Search: Stripe, retention playbook, MTNN 48→64, Ava S2 Slow…" aria-label="Search graph" style="min-width:260px;flex:1">
+<select id="community-filter"><option value="all">All communities</option></select>
+<select id="type-filter"><option value="all">All types</option><option value="product">Product</option><option value="product_feature">Feature</option><option value="integration">Integration</option><option value="ml_concept">ML</option><option value="file">File</option><option value="function">Function</option><option value="class">Class</option><option value="rationale">Rationale</option></select>
+<button class="btn btn--small" id="reset-btn" type="button">Reset</button>
+<a class="btn btn--small" href="/assets/graphify/graph.json" target="_blank" rel="noopener">graph.json</a>
+<a class="btn btn--small" href="https://github.com/jcdavis131/personal-graphify" target="_blank" rel="noopener">repo</a>
+</div>
 
-      <div class="graphify-container">
-        <div id="graph-network" role="img" aria-label="Interactive knowledge graph"></div>
-        <div class="graphify-legend">
-          <span>● Solid = EXTRACTED (explicit)</span><span>◌ Dashed = INFERRED/AMBIGUOUS</span><span>Colors = Leiden communities (Okabe-Ito)</span><span>Drag · Scroll zoom · Click node → details</span>
-        </div>
-      </div>
+<div class="graphify-container">
+<div id="graph-network" role="img" aria-label="Interactive knowledge graph — SOTA"></div>
+<div class="graphify-panel" id="detail-panel">
+<h4>Selected / Top Result</h4>
+<div id="detail-content" class="kv">Click a node or search. Top search results become orange. Task compiler below auto-generates minimal files list.</div>
+<h4>Neighbors & Rationale</h4>
+<div id="neighbors-content" class="kv mono">—</div>
+<h4>Quick Impact</h4>
+<div id="impact-content" class="kv mono">Search "Turnover Shield" then click Impact to see upstream files.</div>
+<button class="btn btn--small" id="copy-context-btn" type="button">Copy context for agent</button>
+<button class="btn btn--small" id="impact-btn" type="button">Run impact (both)</button>
+</div>
+</div>
+<div class="graphify-legend">
+<span>● EXTRACTED solid = explicit AST/import/heading</span><span>◌ Dashed = INFERRED (uses)</span><span>Colors Okabe-Ito = communities</span><span>Orange border = search top-8</span><span>Drag · scroll zoom · click</span>
+</div>
 
-      <div class="graphify-grid">
-        <div class="card card--graphify">
-          <h3>What it is</h3>
-          <p>detect → extract (Tree-sitter 36 grammars) → build (NetworkX MultiDiGraph) → cluster (Leiden/greedy) → analyze (god nodes + surprises) → export graph.html / graph.json / GRAPH_REPORT.md. Code maps locally 0 LLM cost; docs/diagrams via Ollama qwen3:32b.</p>
-        </div>
-        <div class="card card--graphify">
-          <h3>Why vs vector search</h3>
-          <p>Karpathy mixed corpus: 52 files 92k words → 285 nodes 340 edges 53 communities, avg query 1.7k tokens vs 123k naive = 71.5×. Same pattern locally: Vector Hoops 3111 nodes query ~1.5k vs 155k naive = 103×. Query-first beats grep — senior-dev map in 30s.</p>
-        </div>
-        <div class="card card--graphify">
-          <h3>Personal overlay (sanitized)</h3>
-          <p>Trade Crew Turnover Shield (product), Davis Family Brain (generic), Ava AGI Factory S1 hl8 S2 hl300 Critic hl30 Planner hl150 YaRN 10k→1M, Vector Hoops 12,966 seasons MTNN v5_concat_b2_h160_t32_d48_mlp128 48→64→k CQS 85.87 leakfree. No balances, no account numbers.</p>
-        </div>
-      </div>
+<div class="graphify-tabs" role="tablist">
+<button class="graphify-tab is-active" data-tab="task">Task Compiler (SOTA for agents)</button>
+<button class="graphify-tab" data-tab="onboard">Onboarding — God Nodes & Hot Files</button>
+<button class="graphify-tab" data-tab="why">Why Graphify vs Vector</button>
+</div>
+<div class="graphify-tab-panels">
+<div class="graphify-tab-panel is-active" data-panel="task">
+<div class="graphify-controls" style="flex-direction:column;align-items:stretch">
+<textarea id="task-input" placeholder="Describe task: e.g. 'add retention playbook to Turnover Shield churn prediction', 'fix MRR calc Stripe webhook', 'onboard new dev to Family Brain Plaid hub'..."></textarea>
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+<button class="btn btn--small btn--fill" id="task-run-btn" type="button">Compile task → files + plan + copy context</button>
+<button class="btn btn--small" id="task-clear-btn" type="button">Clear</button>
+<span id="task-stats" class="pill">71.1× reduction pattern</span>
+</div>
+</div>
+<div id="task-output" class="mono" style="max-height:420px">Enter a task above. Example outputs:
+- Files priority (relevance score)
+- Token estimate naive vs scoped
+- Agent plan: query → explain → impact → edit + rebuild
+- Copy-paste context line: "Top files: cli.py, extract.py..."
+Mimics CLI: pgraphify task "add retention playbook..."</div>
+</div>
 
-      <p class="graphify-note">Security: http/https only, path containment, HTML-escaped labels. No telemetry. Public graph at <code>/assets/graphify/graph.json</code> is non-PII — financial buckets redacted to generic integration names. Full private graph stays in private repo <code>jcdavis131/personal-graphify</code>. Cursor rule <code>.cursor/rules/graphify.mdc</code> alwaysApply:true forces query-first.</p>
+<div class="graphify-tab-panel" data-panel="onboard">
+<div class="graphify-grid">
+<div class="card card--graphify"><h3>God Nodes (highest-degree)</h3><div id="onboard-god" class="mono">Loading graph.json…</div></div>
+<div class="card card--graphify"><h3>Hot Files & Entry Points</h3><div id="onboard-hot" class="mono">—</div></div>
+<div class="card card--graphify"><h3>Suggested Questions (copy)</h3><div id="onboard-questions" class="mono">Where is Turnover Shield implemented?
+Trace Stripe webhook → MRR dashboard
+Explain Ava S2 Slow vs Planner broadcast
+What is impact of changing Family Brain Plaid hub?
+How does churn prediction trigger retention playbook?</div>
+<button class="btn btn--small" id="copy-questions-btn" type="button">Copy questions</button>
+</div>
+</div>
+<div style="margin-top:12px" class="kv">
+<b>MCP server:</b> <code>pgraphify serve --transport http --port 8080</code> exposes <code>/mcp/tools</code> and <code>/mcp/call</code> with tools: graphify_query, graphify_path, graphify_explain, graphify_impact, graphify_task, graphify_onboard. Stdio transport for Cursor/Cline: <code>pgraphify serve --transport stdio</code>. Cursor rule <code>.cursor/rules/graphify.mdc alwaysApply:true</code> forces query-first. See private repo INSTALL_GUIDE.md.
+</div>
+</div>
 
-      <div style="margin-top:18px; display:flex; gap:8px; flex-wrap:wrap;">
-        <a class="btn" href="/">← Back to jcamd.com</a>
-        <a class="btn btn--fill" href="https://hoops.dumbmodel.com/">Vector Hoops</a>
-      </div>
-    </div>
-  </div>
+<div class="graphify-tab-panel" data-panel="why">
+<div class="graphify-grid">
+<div class="card card--graphify"><h3>What it is SOTA</h3><p>detect (.gitignore + .graphifyignore) → extract (Python AST + tree-sitter JS/TS + MD headings + frontmatter + personal patterns + rationale NOTE/WIY/HACK) → build NetworkX MultiDiGraph 474 nodes 1075 edges → cluster Leiden/greedy 18 comm → analyze god nodes + surprise cross-file edges → export graph.html (233K) + graph.json (393K) + GRAPH_REPORT.md. Local 0 LLM cost, Ollama qwen3:32b optional for docs/diagrams/judges.</p></div>
+<div class="card card--graphify"><h3>Why vs vector RAG</h3><p>Karpathy: 52 files 92k words → 285 nodes 340 edges, avg query 1.7k vs 123k naive = 71.5×. Vector Hoops: 3111 nodes query ~1.5k vs 155k naive = 103×. Personal Graphify: 391→464 nodes, 736→1074 edges, task "retention playbook" 275 tokens vs 19550 naive = 71.1×. Agents get minimal files list + impact + plan, not 40 files grep. Onboard in 30s, not 30min.</p></div>
+<div class="card card--graphify"><h3>Personal overlay (non-PII)</h3><p>Trade Crew Turnover Shield $79-149/mo goal $1k MRR = 7-13 customers ROI 1 tech = $5k, Retention Playbook feature, Churn Prediction ML (workforce embedding 120d + 4 heads + MTNN 48→64→k), Davis Family Brain V9 Household OS client-only Plaid, Ava AGI Factory v6.4 YaRN 10k→1M 4 J-Spaces S1 hl8 S2 hl300 Critic hl30 Planner hl150, Vector Hoops 12,966 seasons MTNN CQS 85.87 leakfree, dumbmodel.com Vercel static. No $ balances, no account numbers.</p></div>
+</div>
+</div>
+</div>
+
+<p class="graphify-note">Public graph at <code>/assets/graphify/graph.json</code> is sanitized via <code>scripts/sanitize_for_public.py</code> — PII stripped ($, account 0472/5594/8889, jcdavis131@gmail, 11k/206% burn), paths personal-graphify/. Full private graph in private repo. Security: http/https only, path containment, HTML-escaped. Solo personal project, no connection to employer, built with public/free-tier only. Vercel static.</p>
+
+<div style="margin-top:18px;display:flex;gap:8px;flex-wrap:wrap;">
+<a class="btn" href="/">← Back</a><a class="btn btn--fill" href="https://hoops.dumbmodel.com/">Vector Hoops</a><a class="btn" href="https://github.com/jcdavis131/personal-graphify">Private Repo</a>
+</div>
+</div>
+</div>
 </main>
-<footer class="site-footer"><div class="site-footer__grid"><div><p class="site-footer__brand">J. Cameron Davis</p><p class="site-footer__tag">Workforce intelligence</p></div><div><p class="site-footer__title">Graphify</p><ul class="site-footer__list"><li><a href="/assets/graphify/graph.json">graph.json (non-PII)</a></li><li><a href="https://github.com/jcdavis131/personal-graphify">private repo</a></li><li><a href="https://github.com/safishamsi/graphify">upstream Graphify-Labs</a></li></ul></div></div><div class="site-footer__legal"><span>© 2026 J. Cameron Davis — Solo personal project, no connection to employer, built with public/free-tier only</span></div></footer>
+<footer class="site-footer"><div class="site-footer__grid"><div><p class="site-footer__brand">J. Cameron Davis</p><p class="site-footer__tag">Workforce intelligence</p></div><div><p class="site-footer__title">Graphify</p><ul class="site-footer__list"><li><a href="/assets/graphify/graph.json">graph.json SOTA non-PII 464 nodes</a></li><li><a href="https://github.com/jcdavis131/personal-graphify">private repo SOTA</a></li><li><a href="https://github.com/safishamsi/graphify">upstream</a></li></ul></div></div><div class="site-footer__legal"><span>© 2026 J. Cameron Davis — Solo personal project, no connection to employer, built with public/free-tier only — SOTA MCP + task compiler</span></div></footer>
 <script src="/assets/site.js" defer></script>
 <script>
 (function(){
-  const search = document.getElementById('search');
-  const commFilter = document.getElementById('community-filter');
-  const resetBtn = document.getElementById('reset-btn');
-  const container = document.getElementById('graph-network');
+  const $search=document.getElementById('search');
+  const $comm=document.getElementById('community-filter');
+  const $type=document.getElementById('type-filter');
+  const $reset=document.getElementById('reset-btn');
+  const $detail=document.getElementById('detail-content');
+  const $neighbors=document.getElementById('neighbors-content');
+  const $impact=document.getElementById('impact-content');
+  const $copyBtn=document.getElementById('copy-context-btn');
+  const $impactBtn=document.getElementById('impact-btn');
+  const $taskInput=document.getElementById('task-input');
+  const $taskRun=document.getElementById('task-run-btn');
+  const $taskClear=document.getElementById('task-clear-btn');
+  const $taskOut=document.getElementById('task-output');
+  const tabs=document.querySelectorAll('.graphify-tab');
+  const panels=document.querySelectorAll('.graphify-tab-panel');
+
+  tabs.forEach(t=>t.addEventListener('click',()=>{
+    tabs.forEach(x=>x.classList.remove('is-active'));
+    panels.forEach(p=>p.classList.remove('is-active'));
+    t.classList.add('is-active');
+    const panel=document.querySelector(`[data-panel="${t.dataset.tab}"]`);
+    if(panel) panel.classList.add('is-active');
+  }));
+
+  function tokenize(s){
+    return s.toLowerCase().split(/[^a-z0-9→_]+/).filter(w=>w.length>=2 && !['or','and','the','for','with'].includes(w));
+  }
 
   fetch('/assets/graphify/graph.json').then(r=>r.json()).then(raw=>{
-    const palette = ["#0072B2","#D55E00","#009E73","#CC79A7","#F0E442","#56B4E9","#E69F00","#000000"];
-    const nodesArr = raw.nodes.map(n=>{
-      const comm = n.community||0;
+    const nodesRaw=raw.nodes||[];
+    const edgesRaw=raw.edges||[];
+    const palette=["#0072B2","#D55E00","#009E73","#CC79A7","#F0E442","#56B4E9","#E69F00","#000000"];
+    // precompute degrees
+    const degMap={}; edgesRaw.forEach(e=>{degMap[e.source]=(degMap[e.source]||0)+1; degMap[e.target]=(degMap[e.target]||0)+1;});
+    nodesRaw.forEach(n=>n._degree=degMap[n.id]||0);
+
+    const nodesArr=nodesRaw.map(n=>{
+      const comm=n.community||0;
+      const type=n.type||'';
+      let shape='dot';
+      if(type==='product') shape='star';
+      else if(type==='product_feature') shape='square';
+      else if(type==='integration') shape='triangle';
+      else if(type==='ml_concept') shape='diamond';
+      else if(type==='file') shape='dot';
+      else if(type==='rationale') shape='text';
       return {
-        id: n.id,
-        label: (n.label||n.id).slice(0,50),
-        group: comm,
-        color: { background: palette[comm % palette.length], border: '#2c2a26' },
-        title: `${n.label} [${n.type||''}] ${n.file||''} deg ${n.degree||''}`,
-        community: comm,
-        type: n.type||'',
-        file: n.file||''
-      };
-    });
-    const edgesArr = raw.edges.map(e=>{
-      const conf = e.confidence||'INFERRED';
-      return {
-        from: e.source,
-        to: e.target,
-        label: e.type||'',
-        dashes: conf !== 'EXTRACTED',
-        title: `${e.type} [${conf}]`,
-        color: { color: conf==='EXTRACTED' ? '#2c2a26' : '#6a655c' }
+        id:n.id,
+        label:(n.label||n.id).slice(0,48),
+        group:comm,
+        community:comm,
+        type,
+        file:n.file||'',
+        title:`${n.label} [${type}] ${n.file||''} deg ${n._degree} comm ${comm}`,
+        color:{background:palette[comm%palette.length], border:'#2c2a26', highlight:{background:palette[comm%palette.length], border:'#ff6b35'}},
+        shape,
+        size: type==='product' ? 18 : type==='product_feature' ? 16 : type==='rationale' ? 6 : Math.min(10+ n._degree*0.6, 22),
+        borderWidth:1.5
       };
     });
 
-    // community filter options
-    const comms = [...new Set(nodesArr.map(n=>n.community))].sort((a,b)=>a-b);
-    comms.forEach(c=>{
-      const opt=document.createElement('option');
-      opt.value=c; opt.textContent=`Community ${c}`;
-      commFilter.appendChild(opt);
+    const edgesArr=edgesRaw.map((e,i)=>{
+      const conf=e.confidence||'INFERRED';
+      return {
+        id:'e'+i,
+        from:e.source,
+        to:e.target,
+        label:e.type||'',
+        dashes: conf!=='EXTRACTED',
+        width: conf==='EXTRACTED'?1.6:0.8,
+        title:`${e.type} [${conf}]`,
+        color:{color: conf==='EXTRACTED' ? '#2c2a26' : '#9a9590', highlight:'#0072B2'}
+      };
     });
 
-    const nodes = new vis.DataSet(nodesArr);
-    const edges = new vis.DataSet(edgesArr);
-    const data = {nodes, edges};
-    const options = {
-      nodes:{shape:'dot', size:10, font:{size:10, face:'ui-monospace'}, borderWidth:1.5, shadow:false},
-      edges:{arrows:'to', font:{size:8, align:'top'}, smooth:{type:'continuous'}, width:1},
-      physics:{solver:'forceAtlas2Based', stabilization:{iterations:180}, barnesHut:{gravitationalConstant:-8000}},
-      interaction:{hover:true, tooltipDelay:80}
+    // comm options
+    const comms=[...new Set(nodesArr.map(n=>n.community))].sort((a,b)=>a-b);
+    comms.forEach(c=>{const opt=document.createElement('option');opt.value=c;opt.textContent=`Community ${c}`;$comm.appendChild(opt);});
+
+    const nodes=new vis.DataSet(nodesArr);
+    const edges=new vis.DataSet(edgesArr);
+    const container=document.getElementById('graph-network');
+    const data={nodes,edges};
+    const options={
+      nodes:{font:{size:10,face:'ui-monospace'},borderWidth:1.5,shadow:false},
+      edges:{arrows:'to',font:{size:8,align:'top'},smooth:{type:'continuous'}},
+      physics:{solver:'forceAtlas2Based',stabilization:{iterations:200},barnesHut:{gravitationalConstant:-9000, centralGravity:0.2}},
+      interaction:{hover:true,tooltipDelay:80}
     };
-    const network = new vis.Network(container, data, options);
+    const network=new vis.Network(container,data,options);
+
+    // Build adjacency maps for fast neighbor / impact
+    const adjOut={}; const adjIn={};
+    edgesRaw.forEach(e=>{
+      if(!adjOut[e.source]) adjOut[e.source]=[];
+      adjOut[e.source].push(e);
+      if(!adjIn[e.target]) adjIn[e.target]=[];
+      adjIn[e.target].push(e);
+    });
+
+    function findNodeById(id){ return nodesRaw.find(n=>n.id===id); }
+
+    function searchRanking(query){
+      const q=query.toLowerCase();
+      const terms=tokenize(query);
+      if(!terms.length) return [];
+      const scored=[];
+      nodesRaw.forEach(n=>{
+        const label=(n.label||'').toLowerCase();
+        const type=(n.type||'').toLowerCase();
+        const file=(n.file||'').toLowerCase();
+        const idl=n.id.toLowerCase();
+        const blob=`${label} ${type} ${file} ${idl}`;
+        let score=0;
+        if(q && blob.includes(q)) score+=20;
+        let matched=0;
+        terms.forEach(t=>{if(blob.includes(t)) matched++;});
+        if(matched===0) return;
+        score+=matched*3;
+        if(terms.some(t=>label.includes(t))) score+=5;
+        score+=Math.min(n._degree/10,3);
+        const boost={file:1.5,function:2,class:2,product:2.5,product_feature:2.8,ml_concept:2,integration:1.8,business_metric:1.5};
+        score+=(boost[n.type]||0);
+        scored.push({node:n,score,matched});
+      });
+      scored.sort((a,b)=>b.score-a.score);
+      return scored.slice(0,30);
+    }
+
+    let lastSelectedId=null;
+    let lastSearchRanked=[];
+
+    function renderDetailForId(id){
+      const n=findNodeById(id);
+      if(!n){ $detail.textContent='Node not found'; return; }
+      lastSelectedId=id;
+      const typePill=`<span class="pill pill--${n.type==='product'?'product':n.type.includes('ml')?'ml':n.type==='integration'?'integration':'file'}">${n.type}</span>`;
+      $detail.innerHTML=`<b>${n.label}</b> ${typePill}<br>id: <code>${n.id}</code><br>file: ${n.file||'-'}<br>deg: ${n._degree} · comm: ${n.community||0}<br>desc: ${n.desc||''}`;
+      // neighbors
+      const out=adjOut[id]||[]; const inn=adjIn[id]||[];
+      let txt=`OUT (${out.length}):\n`;
+      out.slice(0,12).forEach(e=>{
+        const tgt=findNodeById(e.target);
+        txt+=`  → ${tgt? tgt.label : e.target} --${e.type} [${e.confidence}]\n`;
+      });
+      txt+=`\nIN (${inn.length}):\n`;
+      inn.slice(0,12).forEach(e=>{
+        const src=findNodeById(e.source);
+        txt+=`  ← ${src? src.label : e.source} --${e.type} [${e.confidence}]\n`;
+      });
+      $neighbors.textContent=txt;
+      // quick impact placeholder
+      $impact.textContent=`Upstream files that reference ${n.label}: ${inn.length} · Downstream what it uses: ${out.length}\nClick "Run impact" for full BFS`;
+    }
 
     function applyFilters(){
-      const term = (search.value||'').toLowerCase();
-      const comm = commFilter.value;
-      nodes.forEach(n=>{
-        const orig = nodesArr.find(o=>o.id===n.id);
-        const matchTerm = !term || orig.label.toLowerCase().includes(term) || orig.type.toLowerCase().includes(term);
-        const matchComm = comm==='all' || String(orig.community)===String(comm);
-        nodes.update({id:n.id, hidden: !(matchTerm && matchComm)});
-      });
+      const term=($search.value||'').toLowerCase();
+      const comm=$comm.value;
+      const typ=$type.value;
+      if(term){
+        const ranked=searchRanking(term);
+        lastSearchRanked=ranked;
+        const topIds=new Set(ranked.slice(0,8).map(r=>r.node.id));
+        nodes.forEach(nd=>{
+          const orig=nodesArr.find(o=>o.id===nd.id);
+          const matchTerm=!term || orig.label.toLowerCase().includes(term) || orig.type.toLowerCase().includes(term) || (orig.file||'').toLowerCase().includes(term);
+          const matchComm=comm==='all' || String(orig.community)===String(comm);
+          const matchType=typ==='all' || orig.type===typ;
+          const hidden=!(matchTerm && matchComm && matchType);
+          const border = topIds.has(orig.id) ? '#ff6b35' : '#2c2a26';
+          const borderWidth = topIds.has(orig.id) ? 3 : 1.5;
+          nodes.update({id:nd.id, hidden, borderWidth, color:{background:orig.color.background, border}});
+        });
+        if(ranked[0]){
+          renderDetailForId(ranked[0].node.id);
+          network.focus(ranked[0].node.id,{scale:1.1, animation:true});
+        }
+      } else {
+        nodes.forEach(nd=>{
+          const orig=nodesArr.find(o=>o.id===nd.id);
+          const matchComm=comm==='all' || String(orig.community)===String(comm);
+          const matchType=typ==='all' || orig.type===typ;
+          nodes.update({id:nd.id, hidden: !(matchComm && matchType), borderWidth:1.5, color:{background:orig.color.background, border:'#2c2a26'}});
+        });
+      }
     }
-    search.addEventListener('input', applyFilters);
-    commFilter.addEventListener('change', applyFilters);
-    resetBtn.addEventListener('click', ()=>{
-      search.value=''; commFilter.value='all';
-      nodes.forEach(n=>nodes.update({id:n.id, hidden:false}));
+
+    $search.addEventListener('input', applyFilters);
+    $comm.addEventListener('change', applyFilters);
+    $type.addEventListener('change', applyFilters);
+    $reset.addEventListener('click', ()=>{
+      $search.value=''; $comm.value='all'; $type.value='all';
+      nodes.forEach(n=>nodes.update({id:n.id, hidden:false, borderWidth:1.5, color:{background:nodesArr.find(o=>o.id===n.id).color.background, border:'#2c2a26'}}));
       network.fit({animation:true});
+      $detail.textContent='Reset. Click node or search.';
     });
+
     network.on('click', params=>{
       if(params.nodes.length){
         const nid=params.nodes[0];
-        const node=nodes.get(nid);
-        // simple highlight: center
-        network.focus(nid,{scale:1.2, animation:true});
+        renderDetailForId(nid);
+        network.focus(nid,{scale:1.3, animation:true});
       }
     });
-    // update stats
-    document.getElementById('stat-nodes').textContent = `${nodesArr.length} nodes`;
-    document.getElementById('stat-edges').textContent = `${edgesArr.length} edges`;
+
+    // Impact BFS
+    function impactBFS(startId, depth=3){
+      const visited=new Set([startId]);
+      const down=[]; const up=[];
+      let frontier=[startId];
+      for(let d=0; d<depth; d++){
+        const nf=[];
+        frontier.forEach(id=>{
+          (adjOut[id]||[]).forEach(e=>{
+            if(!visited.has(e.target)){ visited.add(e.target); down.push({depth:d+1, edge:e, node:findNodeById(e.target)}); nf.push(e.target); }
+          });
+        });
+        frontier=nf;
+      }
+      visited.clear(); visited.add(startId);
+      frontier=[startId];
+      for(let d=0; d<depth; d++){
+        const nf=[];
+        frontier.forEach(id=>{
+          (adjIn[id]||[]).forEach(e=>{
+            if(!visited.has(e.source)){ visited.add(e.source); up.push({depth:d+1, edge:e, node:findNodeById(e.source)}); nf.push(e.source); }
+          });
+        });
+        frontier=nf;
+      }
+      return {down, up};
+    }
+
+    function renderImpact(id){
+      const imp=impactBFS(id, 3);
+      const fileDown={}; const fileUp={};
+      imp.down.forEach(x=>{ if(x.node && x.node.file){ fileDown[x.node.file]=(fileDown[x.node.file]||0)+1; }});
+      imp.up.forEach(x=>{ if(x.node && x.node.file){ fileUp[x.node.file]=(fileUp[x.node.file]||0)+1; } else if(x.edge && x.edge.source){ const src=findNodeById(x.edge.source); if(src && src.file) fileUp[src.file]=(fileUp[src.file]||0)+1; }});
+      let txt=`Impact for ${findNodeById(id).label}\n`;
+      txt+=`Downstream what this uses: ${imp.down.length} nodes in ${Object.keys(fileDown).length} files\n`;
+      imp.down.slice(0,12).forEach(x=>{ txt+=`  d${x.depth}: ${x.node?x.node.label:x.edge.target} --${x.edge.type} [${x.edge.confidence}] ${x.node?x.node.file:''}\n`; });
+      txt+=`\nUpstream dependents (what would break if you change it): ${imp.up.length} nodes in ${Object.keys(fileUp).length} files\n`;
+      imp.up.slice(0,14).forEach(x=>{ txt+=`  d${x.depth}: ${x.node?x.node.label:x.edge.source} in ${x.node?x.node.file||''}\n`; });
+      if(Object.keys(fileUp).length){
+        txt+=`\nHot downstream files: ${Object.entries(fileUp).sort((a,b)=>b[1]-a[1]).slice(0,8).map(([f,c])=>`${f.split('/').pop()}(${c})`).join(', ')}\n`;
+      }
+      $impact.textContent=txt;
+    }
+
+    $impactBtn.addEventListener('click', ()=>{ if(lastSelectedId) renderImpact(lastSelectedId); });
+
+    $copyBtn.addEventListener('click', ()=>{
+      if(!lastSelectedId){ alert('Select a node first'); return; }
+      const n=findNodeById(lastSelectedId);
+      const out=adjOut[lastSelectedId]||[]; const inn=adjIn[lastSelectedId]||[];
+      const ctx=`Context for agent — Personal Graphify SOTA
+Node: ${n.label} [${n.type}] file ${n.file||''} deg ${n._degree}
+Desc: ${n.desc||''}
+Uses (out): ${out.slice(0,8).map(e=>e.target).join(', ')}
+Dependents (in): ${inn.slice(0,8).map(e=>e.source).join(', ')}
+Top query: pgraphify query "${n.label}"
+Impact: pgraphify impact "${n.label}" --direction both --depth 3
+Copy from jcamd.com/graphify/ ${n.file||''}
+Solo personal project, no connection to employer`;
+      navigator.clipboard.writeText(ctx).then(()=>{ $copyBtn.textContent='Copied!'; setTimeout(()=>{$copyBtn.textContent='Copy context for agent';},1200); });
+    });
+
+    // Task compiler JS
+    const personalBoosts={
+      'turnover':'Turnover Shield', 'retention':'Retention Playbook', 'stripe':'Stripe',
+      'mrr':'MRR / Paid Users', 'plaid':'Plaid', 'family':'Davis Family Brain',
+      'brain':'Davis Family Brain', 'churn':'Churn Prediction', 'mtnn':'MTNN v5_concat_b2_h160_t32_d48_mlp128',
+      'ava':'Ava AGI Factory v6.4', 'vector':'Vector Hoops', 'dino':'Tennis DINOv3 ExecuTorch',
+      'workforce':'Workforce Embedding 120d + 4 heads', 'burn':'Burn Rate $11k/mo'
+    };
+
+    function compileTask(taskText){
+      const terms=tokenize(taskText);
+      const boosted=[];
+      terms.forEach(t=>{ if(personalBoosts[t]) boosted.push(personalBoosts[t]); });
+      const allTerms=[...new Set([...terms, ...boosted.map(b=>b.toLowerCase())])];
+      const matches=[];
+      allTerms.forEach(q=>{
+        if(q.length<3) return;
+        const ranked=searchRanking(q);
+        matches.push(...ranked.slice(0,3));
+      });
+      const byId={};
+      matches.forEach(m=>{
+        const id=m.node.id;
+        if(!byId[id] || m.score>byId[id].score) byId[id]=m;
+      });
+      const ranked=Object.values(byId).sort((a,b)=>b.score-a.score).slice(0,10);
+      if(!ranked.length){
+        return {error:`No relevant nodes for task "${taskText}"`, suggestion:"Try: Stripe, Turnover Shield, MTNN, Ava, Family Brain"};
+      }
+      const subNodeIds=new Set();
+      ranked.forEach(r=>{
+        subNodeIds.add(r.node.id);
+        (adjOut[r.node.id]||[]).forEach(e=>{
+          const tgt=findNodeById(e.target);
+          if(tgt && ['file','function','class','product','product_feature','integration','ml_concept'].includes(tgt.type)) subNodeIds.add(tgt.id);
+        });
+        (adjIn[r.node.id]||[]).forEach(e=>{
+          const src=findNodeById(e.source);
+          if(src && ['file','function','class'].includes(src.type)) subNodeIds.add(src.id);
+        });
+      });
+      const subList=[...subNodeIds].slice(0,80);
+      const fileCounter={};
+      subList.forEach(id=>{
+        const n=findNodeById(id);
+        if(n && n.file){
+          fileCounter[n.file]=(fileCounter[n.file]||0)+1 + (n._degree||0)/10;
+        }
+      });
+      const filesRanked=Object.entries(fileCounter).sort((a,b)=>b[1]-a[1]).slice(0,15).map(([f,c])=>({file:f, relevance:Math.round(c*10)/10}));
+      const naive=nodesRaw.length*50;
+      const scoped=subList.length*25;
+      const reduction=Math.round(naive/Math.max(scoped,1)*10)/10;
+
+      const isAdd=/add|create|implement/.test(taskText.toLowerCase());
+      const isFix=/fix|bug|debug/.test(taskText.toLowerCase());
+      let plan=[];
+      if(isAdd){
+        plan=[`1. Read graphify-out/GRAPH_REPORT.md god nodes + ${filesRanked.length} files`, `2. Query: pgraphify query "${taskText.slice(0,60)}"`, `3. Edit in relevance order (low dep first), check upstream`, `4. Impact: pgraphify impact "${ranked[0].node.label}" --direction both`, `5. Rebuild: pgraphify . --out graphify-out`];
+      } else if(isFix){
+        plan=[`1. Explain: pgraphify explain "${ranked[0].node.label}" --snippet`, `2. Impact both: pgraphify impact "${ranked[0].node.label}"`, `3. Edit minimal`, `4. Verify downstream`];
+      } else {
+        plan=[`1. Query graph for context`, `2. Explain top nodes`, `3. Impact check`, `4. Edit + rebuild`];
+      }
+
+      return {
+        task: taskText,
+        top_matches: ranked.slice(0,8).map(r=>({label:r.node.label, type:r.node.type, file:r.node.file||'', score:Math.round(r.score*10)/10})),
+        subgraph: {nodes: subList.length, edges: 0},
+        files: filesRanked,
+        token_estimate: {naive, scoped, reduction_x: reduction},
+        plan,
+        copy_paste_context: `Task: ${taskText}\nTop files: ${filesRanked.slice(0,5).map(f=>f.file.split('/').pop()).join(', ')}\nGod nodes: see graphify-out/GRAPH_REPORT.md\nQuery: pgraphify query "${taskText}"\nReduction: ${reduction}x vs naive (${scoped} vs ${naive} tokens)`
+      };
+    }
+
+    function renderTaskResult(res){
+      if(res.error){ $taskOut.textContent=res.error+' — '+res.suggestion; return; }
+      let out=`Task: ${res.task}\nSubgraph: ${res.subgraph.nodes} nodes | Token est ${res.token_estimate.scoped} vs naive ${res.token_estimate.naive} = ${res.token_estimate.reduction_x}x\n\nTop matches:\n`;
+      res.top_matches.forEach(m=>{ out+=`  - ${m.label} (${m.type}) ${m.file} score ${m.score}\n`; });
+      out+=`\nFiles to read (priority):\n`;
+      res.files.forEach(f=>{ out+=`  ${f.file} relevance ${f.relevance}\n`; });
+      out+=`\nAgent plan:\n`;
+      res.plan.forEach(p=>{ out+=`  ${p}\n`; });
+      out+=`\nCopy-paste context:\n${res.copy_paste_context}`;
+      $taskOut.textContent=out;
+    }
+
+    $taskRun.addEventListener('click', ()=>{
+      const txt=$taskInput.value.trim();
+      if(!txt){ $taskOut.textContent='Enter a task description first'; return; }
+      const res=compileTask(txt);
+      renderTaskResult(res);
+    });
+    $taskClear.addEventListener('click', ()=>{ $taskInput.value=''; $taskOut.textContent='Cleared.'; });
+
+    // allow Enter key
+    $taskInput.addEventListener('keydown', e=>{
+      if(e.key==='Enter' && (e.metaKey||e.ctrlKey)){ $taskRun.click(); }
+    });
+
+    // onboarding
+    function computeOnboard(){
+      const degSorted=[...nodesRaw].sort((a,b)=> (b._degree||0)-(a._degree||0));
+      const god=degSorted.slice(0,12).map(n=>`${n.label} (${n.type}) ${n.file||''} deg ${n._degree}`).join('\n');
+      document.getElementById('onboard-god').textContent=god;
+      const fileScore={};
+      nodesRaw.forEach(n=>{ if(n.file){ fileScore[n.file]=(fileScore[n.file]||0)+ (n._degree||0); }});
+      const hot=Object.entries(fileScore).sort((a,b)=>b[1]-a[1]).slice(0,12).map(([f,s])=>`${f.split('/').pop()} score ${Math.round(s)} — ${f}`).join('\n');
+      document.getElementById('onboard-hot').textContent=hot;
+    }
+    computeOnboard();
+
+    // stats
+    document.getElementById('stat-nodes').textContent=`${nodesRaw.length} nodes`;
+    document.getElementById('stat-edges').textContent=`${edgesRaw.length} edges`;
+    document.getElementById('meta-right').textContent=`${nodesRaw.length} nodes · ${edgesRaw.length} edges · Ollama-first · MCP`;
+
+    document.getElementById('copy-questions-btn').addEventListener('click', ()=>{
+      const txt=document.getElementById('onboard-questions').textContent;
+      navigator.clipboard.writeText(txt).then(()=>{ const b=document.getElementById('copy-questions-btn'); b.textContent='Copied!'; setTimeout(()=>b.textContent='Copy questions',1000); });
+    });
+
+    // auto focus example task
+    $taskInput.value='add retention playbook to Turnover Shield churn prediction';
   }).catch(err=>{
-    container.innerHTML = '<p style="padding:20px;">Failed to load graph.json — '+ err + '</p>';
+    document.getElementById('graph-network').innerHTML='<p style="padding:20px">Failed to load graph.json — '+err+'</p>';
+    console.error(err);
   });
 })();
 </script>
