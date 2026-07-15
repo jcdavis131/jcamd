@@ -1,0 +1,83 @@
+{
+  "nodes": 525,
+  "edges": 1254,
+  "llm_credits": 0,
+  "mode": "ollama-first local",
+  "queries": [
+    {
+      "ts": "2026-07-15T15:54:04.511078+00:00",
+      "question": "Turnover Shield MRR",
+      "naive": 26150,
+      "scoped": 1500,
+      "saved": 24650,
+      "reduction_x": 17.4,
+      "mode": "lexical"
+    },
+    {
+      "ts": "2026-07-15T15:54:04.829471+00:00",
+      "question": "First 1k MRR",
+      "naive": 26150,
+      "scoped": 1500,
+      "saved": 24650,
+      "reduction_x": 17.4,
+      "mode": "lexical"
+    },
+    {
+      "ts": "2026-07-15T15:57:17.270949+00:00",
+      "question": "Turnover Shield MRR",
+      "naive": 26150,
+      "scoped": 1500,
+      "saved": 24650,
+      "reduction_x": 17.4,
+      "mode": "semantic:mxbai-embed-large"
+    },
+    {
+      "ts": "2026-07-15T15:57:30.896430+00:00",
+      "question": "First 1k MRR tracker",
+      "naive": 26250,
+      "scoped": 1500,
+      "saved": 24750,
+      "reduction_x": 17.5,
+      "mode": "lexical"
+    },
+    {
+      "ts": "2026-07-15T16:01:50.390994+00:00",
+      "question": "Turnover Shield MRR",
+      "naive": 26250,
+      "scoped": 1500,
+      "saved": 24750,
+      "reduction_x": 17.5,
+      "mode": "lexical"
+    },
+    {
+      "ts": "2026-07-15T16:01:51.968708+00:00",
+      "question": "Turnover Shield MRR",
+      "naive": 26250,
+      "scoped": 1500,
+      "saved": 24750,
+      "reduction_x": 17.5,
+      "mode": "semantic:mxbai-embed-large"
+    },
+    {
+      "ts": "2026-07-15T16:01:53.776213+00:00",
+      "question": "First 1k MRR tracker",
+      "naive": 26250,
+      "scoped": 1500,
+      "saved": 24750,
+      "reduction_x": 17.5,
+      "mode": "semantic:mxbai-embed-large"
+    }
+  ],
+  "total_naive": 183450,
+  "total_scoped": 10500,
+  "total_saved_tokens": 172950,
+  "last_query": {
+    "ts": "2026-07-15T16:01:53.776213+00:00",
+    "question": "First 1k MRR tracker",
+    "naive": 26250,
+    "scoped": 1500,
+    "saved": 24750,
+    "reduction_x": 17.5,
+    "mode": "semantic:mxbai-embed-large"
+  }
+}
