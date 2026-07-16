@@ -1,39 +1,10 @@
 {
-  "nodes": 525,
-  "edges": 1254,
-  "llm_credits": 0,
-  "mode": "ollama-first local",
+  "nodes": 5330,
+  "edges": 15528,
   "queries": [
     {
-      "ts": "2026-07-15T15:54:04.511078+00:00",
-      "question": "Turnover Shield MRR",
-      "naive": 26150,
-      "scoped": 1500,
-      "saved": 24650,
-      "reduction_x": 17.4,
-      "mode": "lexical"
-    },
-    {
-      "ts": "2026-07-15T15:54:04.829471+00:00",
-      "question": "First 1k MRR",
-      "naive": 26150,
-      "scoped": 1500,
-      "saved": 24650,
-      "reduction_x": 17.4,
-      "mode": "lexical"
-    },
-    {
-      "ts": "2026-07-15T15:57:17.270949+00:00",
-      "question": "Turnover Shield MRR",
-      "naive": 26150,
-      "scoped": 1500,
-      "saved": 24650,
-      "reduction_x": 17.4,
-      "mode": "semantic:mxbai-embed-large"
-    },
-    {
-      "ts": "2026-07-15T15:57:30.896430+00:00",
-      "question": "First 1k MRR tracker",
+      "ts": "2026-07-16T16:50:23.479746+00:00",
+      "question": "Ava Planner Critic",
       "naive": 26250,
       "scoped": 1500,
       "saved": 24750,
@@ -41,43 +12,44 @@
       "mode": "lexical"
     },
     {
-      "ts": "2026-07-15T16:01:50.390994+00:00",
-      "question": "Turnover Shield MRR",
+      "ts": "2026-07-16T16:50:24.366115+00:00",
+      "question": "Scout",
       "naive": 26250,
-      "scoped": 1500,
-      "saved": 24750,
-      "reduction_x": 17.5,
+      "scoped": 0,
+      "saved": 26250,
+      "reduction_x": 0,
       "mode": "lexical"
     },
     {
-      "ts": "2026-07-15T16:01:51.968708+00:00",
-      "question": "Turnover Shield MRR",
-      "naive": 26250,
+      "ts": "2026-07-16T16:53:12.133474+00:00",
+      "question": "Scout",
+      "naive": 266500,
       "scoped": 1500,
-      "saved": 24750,
-      "reduction_x": 17.5,
-      "mode": "semantic:mxbai-embed-large"
+      "saved": 265000,
+      "reduction_x": 177.7,
+      "mode": "lexical"
     },
     {
-      "ts": "2026-07-15T16:01:53.776213+00:00",
-      "question": "First 1k MRR tracker",
-      "naive": 26250,
+      "ts": "2026-07-16T16:53:14.550602+00:00",
+      "question": "Ava Planner Critic",
+      "naive": 266500,
       "scoped": 1500,
-      "saved": 24750,
-      "reduction_x": 17.5,
-      "mode": "semantic:mxbai-embed-large"
+      "saved": 265000,
+      "reduction_x": 177.7,
+      "mode": "lexical"
     }
   ],
-  "total_naive": 183450,
-  "total_scoped": 10500,
-  "total_saved_tokens": 172950,
+  "total_saved_tokens": 581000,
+  "total_naive": 585500,
+  "total_scoped": 4500,
+  "mode": "ollama-first local",
   "last_query": {
-    "ts": "2026-07-15T16:01:53.776213+00:00",
-    "question": "First 1k MRR tracker",
-    "naive": 26250,
+    "ts": "2026-07-16T16:53:14.550602+00:00",
+    "question": "Ava Planner Critic",
+    "naive": 266500,
     "scoped": 1500,
-    "saved": 24750,
-    "reduction_x": 17.5,
-    "mode": "semantic:mxbai-embed-large"
+    "saved": 265000,
+    "reduction_x": 177.7,
+    "mode": "lexical"
   }
 }
