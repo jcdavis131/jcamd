@@ -1,6 +1,6 @@
 # jcamd.com
 
-Workforce intelligence consulting site. Static, zero dependencies, Vercel project **`jcamd`**.
+Personal consulting site for J. Cameron Davis (workforce intelligence). Static HTML/CSS/JS, no build step, served by the Vercel project `jcamd`.
 
 | Path | Role |
 |------|------|
@@ -11,4 +11,4 @@ Workforce intelligence consulting site. Static, zero dependencies, Vercel projec
 
 **Deploy:** push to `master` on `jcdavis131/jcamd`.
 
-**Routes:** `/arcade` → hoops.jcamd.com · `/knowledge`, `/journal` → home.
+**Routes** (see `vercel.json`): `/arcade` redirects to hoops.dumbmodel.com; `/knowledge` and `/journal` redirect to the home page. `/graphify/` serves a static knowledge-graph viewer.
