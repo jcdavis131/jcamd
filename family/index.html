@@ -1,0 +1,463 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Family Neural Architecture — J. Cameron Davis</title>
+<meta name="description" content="A brain-model backend that turns daily ephemeris data into one age-appropriate insight per family member. pyswisseph, Ray, FastAPI, and a graph second brain.">
+<link rel="canonical" href="https://jcamd.com/family/">
+<meta name="theme-color" content="#e8e4da">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://jcamd.com/family/">
+<meta property="og:title" content="Family Neural Architecture — J. Cameron Davis">
+<meta property="og:description" content="Ephemeris in, one age-appropriate suggestion per person out. Brain-model backend: pyswisseph, Ray, FastAPI, graph + RAG.">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23faf9f5' stroke='%232c2a26' stroke-width='2'/%3E%3Ctext x='16' y='21' text-anchor='middle' font-family='monospace' font-size='11' font-weight='700' fill='%232c2a26'%3EJC%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="/assets/site.css">
+<link rel="stylesheet" href="/assets/responsive-patch.css">
+<link rel="stylesheet" href="/assets/family.css">
+<link rel="stylesheet" href="/assets/motion.css">
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to content</a>
+
+<header class="site-header">
+  <div class="site-header__inner">
+    <a class="site-brand" href="/">
+      <span class="site-brand__mark" aria-hidden="true">JC</span>
+      <span class="site-brand__text">
+        <span class="site-brand__name">J. Cameron Davis</span>
+        <span class="site-brand__tag">Workforce intelligence</span>
+      </span>
+    </a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">Menu</button>
+    <nav class="site-nav" id="site-nav" aria-label="Primary">
+      <a href="#architecture">Architecture</a>
+      <a href="#wheel">The wheel</a>
+      <a href="#profiles">Profiles</a>
+      <a href="#second-brain">Second brain</a>
+      <a class="nav-cta" href="/#lab">Back to lab</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main-content">
+
+  <header class="hero">
+    <div class="hero__sheet">
+      <div class="hero__meta">
+        <span>Sheet 06 · Family app</span>
+        <span>Side project · private instance</span>
+      </div>
+      <h1>Family Neural Architecture.</h1>
+      <p class="hero__tagline">Raw ephemeris in. One age-appropriate suggestion per person out — every morning, for a family of four.</p>
+      <p class="hero__lede">A backend laid out like a brain: spherical trigonometry at the stem, pattern mapping in the cerebellum, fixed natal memory in the hippocampus, and a synthesis layer that branches on developmental stage before anything reaches a screen. Human Design is the symbolic vocabulary; the engineering underneath is ordinary and testable.</p>
+      <div class="hero__actions">
+        <a class="btn btn--fill" href="#architecture">Read the architecture</a>
+        <a class="btn" href="/#lab">Other lab projects</a>
+      </div>
+    </div>
+  </header>
+
+  <section class="section" id="architecture" aria-labelledby="architecture-heading">
+    <h2 class="sheet-label" id="architecture-heading">The brain model</h2>
+    <p class="section-intro">Seven layers, each with one job and one module. Naming them after brain regions is not decoration — it forces the boundary. Physics never reaches the API, and the API never does math.</p>
+    <ol class="arc" aria-label="System layers">
+      <li>
+        <span class="arc__when">Brain stem</span>
+        <span class="arc__what"><strong>core/ephemeris.py</strong> — pyswisseph over NASA JPL ephemeris data. Datetime to Julian day, Julian day to ecliptic longitude for ten bodies. Pure numbers, no interpretation.</span>
+      </li>
+      <li>
+        <span class="arc__when">Cerebellum</span>
+        <span class="arc__what"><strong>core/hd_math.py</strong> — the pattern map. 360° of longitude onto 64 hexagrams at 5.625° apiece, following a fixed wheel sequence. One function, no state.</span>
+      </li>
+      <li>
+        <span class="arc__when">Hippocampus</span>
+        <span class="arc__what"><strong>models/profiles.py</strong> — fixed natal baselines for each family member, schema-enforced with Pydantic. Written once, read every day.</span>
+      </li>
+      <li>
+        <span class="arc__when">Prefrontal</span>
+        <span class="arc__what"><strong>services/synthesis.py</strong> — the delta between today's transits and natal memory, then a branch on age. An adult gets metrics; a child gets a parenting instruction.</span>
+      </li>
+      <li>
+        <span class="arc__when">Autonomic</span>
+        <span class="arc__what"><strong>workers/cron.py</strong> — Ray actors run the whole chain at midnight and cache the result. Nothing is computed inside a request.</span>
+      </li>
+      <li>
+        <span class="arc__when">Motor</span>
+        <span class="arc__what"><strong>main.py</strong> — FastAPI serves the precomputed payload. The endpoint is a cache read, which is why it stays fast under a toddler's tapping.</span>
+      </li>
+      <li>
+        <span class="arc__when">Network</span>
+        <span class="arc__what"><strong>Second brain</strong> — a graph database and embedding pipeline that correlates what the family actually experienced against what the sky was doing. The only layer that learns.</span>
+      </li>
+    </ol>
+
+    <div class="callout">
+      <p class="callout__label">Scope of this page</p>
+      <p>This documents the architecture. Natal baselines, daily journal entries, mood check-ins and game scores live only in the private instance — none of that data is on this site, and no family member's chart values or birth details are published here.</p>
+    </div>
+  </section>
+
+  <section class="section" id="wheel" aria-labelledby="wheel-heading">
+    <h2 class="sheet-label" id="wheel-heading">The wheel</h2>
+    <p class="section-intro">The whole symbolic system reduces to one integer division. The Human Design wheel starts at Gate 41 sitting at 302.25° of the zodiac, and the 64 gates are distributed evenly from there — so mapping a longitude to a gate is an offset, a modulo, and an index into a fixed sequence.</p>
+
+    <div class="metrics" aria-label="Wheel constants">
+      <div class="metric">
+        <p class="metric__value">302.25°</p>
+        <p class="metric__label">Wheel start — Gate 41</p>
+      </div>
+      <div class="metric">
+        <p class="metric__value">5.625°</p>
+        <p class="metric__label">Arc per gate (360 ÷ 64)</p>
+      </div>
+      <div class="metric">
+        <p class="metric__value">64</p>
+        <p class="metric__label">Gates in the sequence</p>
+      </div>
+      <div class="metric">
+        <p class="metric__value">10</p>
+        <p class="metric__label">Bodies tracked daily</p>
+      </div>
+    </div>
+
+    <figure class="wheel-fig">
+      <svg viewBox="0 0 240 240" role="img" aria-labelledby="wheel-svg-title wheel-svg-desc">
+        <title id="wheel-svg-title">The 64-gate wheel</title>
+        <desc id="wheel-svg-desc">A circle divided into 64 evenly spaced ticks of 5.625 degrees each, with a marker at 302.25 degrees indicating where Gate 41 begins the sequence.</desc>
+        <circle cx="120" cy="120" r="104" fill="none" stroke="#b5aea2" stroke-width="2"/>
+        <circle cx="120" cy="120" r="92" fill="none" stroke="#2c2a26" stroke-width="10"
+                stroke-dasharray="1.8 7.232" stroke-dashoffset="0.9"/>
+        <circle cx="120" cy="120" r="74" fill="none" stroke="#b5aea2" stroke-width="1.5" stroke-dasharray="3 5"/>
+        <g transform="rotate(-302.25 120 120)">
+          <line x1="180" y1="120" x2="199" y2="120" stroke="#3d5a73" stroke-width="3"/>
+          <circle cx="204" cy="120" r="6" fill="#3d5a73"/>
+        </g>
+        <text x="120" y="114" text-anchor="middle" font-family="ui-monospace, monospace"
+              font-size="13" font-weight="700" fill="#2c2a26">GATE 41</text>
+        <text x="120" y="132" text-anchor="middle" font-family="ui-monospace, monospace"
+              font-size="10" fill="#5e5850">302.25°</text>
+        <text x="120" y="150" text-anchor="middle" font-family="ui-monospace, monospace"
+              font-size="9" fill="#5e5850">5.625° / GATE</text>
+      </svg>
+      <figcaption>
+        <strong>One tick per gate.</strong> Subtract the wheel's origin from a body's longitude, take it modulo 360, floor-divide by the gate width, and use the result as an index into the wheel sequence. The sequence is not numerically ordered — Gate 41 is followed by 19, then 13 — so the lookup table is the map, and the arithmetic is only there to find the slot.
+      </figcaption>
+    </figure>
+
+    <div class="codeblock">
+      <div class="codeblock__head"><span>core/hd_math.py</span><span>Cerebellum</span></div>
+<pre><code>HD_START_DEGREE = 302.25
+GATE_WIDTH = 360 / 64  # 5.625 degrees
+
+WHEEL_SEQUENCE = [
+    41, 19, 13, 49, 30, 55, 37, 63, 22, 36, 25, 17, 21, 51, 42, 3,
+    27, 24,  2, 23,  8, 20, 16, 35, 45, 12, 15, 52, 39, 53, 62, 56,
+    31, 33,  7,  4, 29, 59, 40, 64, 47,  6, 46, 18, 48, 57, 32, 50,
+    28, 44,  1, 43, 14, 34,  9,  5, 26, 11, 10, 58, 38, 54, 61, 60,
+]
+
+def calculate_gate(longitude: float) -&gt; int:
+    adjusted_long = (longitude - HD_START_DEGREE) % 360
+    index = int(adjusted_long // GATE_WIDTH)
+    return WHEEL_SEQUENCE[index]</code></pre>
+    </div>
+
+    <p class="section-intro section-heading--spaced">Longitudes come from the layer below it. <span class="code-inline">swe.julday()</span> converts the timestamp, <span class="code-inline">swe.calc_ut()</span> returns the ecliptic position, and the first element of that result is the only number the cerebellum ever sees.</p>
+
+    <div class="codeblock">
+      <div class="codeblock__head"><span>core/ephemeris.py</span><span>Brain stem</span></div>
+<pre><code>def get_daily_planets(dt: datetime.datetime) -&gt; Dict[str, float]:
+    """Calculates precise ecliptic longitudes for a given timestamp."""
+    fractional_hour = dt.hour + (dt.minute / 60.0) + (dt.second / 3600.0)
+    jd = swe.julday(dt.year, dt.month, dt.day, fractional_hour)
+
+    longitudes = {}
+    for name, planet_id in PLANETS.items():
+        calc_result, _ = swe.calc_ut(jd, planet_id)
+        longitudes[name] = calc_result[0]
+
+    return longitudes</code></pre>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="pipeline-heading">
+    <h2 class="sheet-label" id="pipeline-heading">Daily run</h2>
+    <p class="section-intro">The same four steps every night, off the request path entirely. By the time anyone opens the app, the day's answer already exists.</p>
+    <div class="process">
+      <div class="process__step">
+        <h3>Compute</h3>
+        <p>A Ray actor wakes at midnight and pulls ten ecliptic longitudes for the new date.</p>
+      </div>
+      <div class="process__step">
+        <h3>Map</h3>
+        <p>Each longitude becomes a gate. Ten floats collapse into ten integers.</p>
+      </div>
+      <div class="process__step">
+        <h3>Synthesize</h3>
+        <p>Transit gates are checked against each stored natal chart for completed channels, then routed by age.</p>
+      </div>
+      <div class="process__step">
+        <h3>Cache</h3>
+        <p>The finished per-person payload is written once. FastAPI only ever reads it.</p>
+      </div>
+    </div>
+
+    <div class="codeblock">
+      <div class="codeblock__head"><span>workers/cron.py</span><span>Autonomic system</span></div>
+<pre><code>@ray.remote
+def process_daily_transits():
+    today_longitudes = get_daily_planets(datetime.datetime.utcnow())
+
+    today_gates = {
+        planet: calculate_gate(lon)
+        for planet, lon in today_longitudes.items()
+    }
+
+    daily_cache = {}
+    for member in db.get_family("family_id_1"):
+        daily_cache[member.name] = generate_insights(
+            member.natal_gates, today_gates, member.age
+        )
+
+    db.save_daily_weather(daily_cache)</code></pre>
+    </div>
+  </section>
+
+  <section class="section" id="profiles" aria-labelledby="profiles-heading">
+    <h2 class="sheet-label" id="profiles-heading">Profiles</h2>
+    <p class="section-intro">Four people, two output shapes. An adult reads their own weather and decides what to do with it. A child never sees theirs — it is written for the parent, as an instruction about the environment, not a label about the kid.</p>
+    <div class="service-grid">
+      <article class="service-card">
+        <p class="service-card__num">PRF · 01</p>
+        <h3>Adults</h3>
+        <p>A data-dense daily view: energy level, communication friction, which centres are defined today, and a recommended focus. Reads like a status board, not a horoscope.</p>
+        <p class="service-card__deliverables">Focus energy · friction score · defined centres · recommended action</p>
+      </article>
+      <article class="service-card">
+        <p class="service-card__num">PRF · 02</p>
+        <h3>Preschool age</h3>
+        <p>One parenting instruction per day, phrased as something to <em>offer</em>. An activated throat centre becomes "expect high verbal output — good day for singing, storytelling, or interactive play."</p>
+        <p class="service-card__deliverables">Parenting focus · emotional regulation cue · energy outlet</p>
+      </article>
+      <article class="service-card">
+        <p class="service-card__num">PRF · 03</p>
+        <h3>Toddler age</h3>
+        <p>Environment only — routine stability, sensory load, nap timing. No cognitive claims about a one-year-old, because there is nothing defensible to claim.</p>
+        <p class="service-card__deliverables">Routine stability · sensory tracking · nap-window guidance</p>
+      </article>
+      <article class="service-card">
+        <p class="service-card__num">PRF · 04</p>
+        <h3>Activation logic</h3>
+        <p>An activation fires when a transiting gate completes a channel with a natal gate — one end from the sky, one end from memory. Everything above is a rendering of that one test.</p>
+        <p class="service-card__deliverables">Channel map · frozenset pair lookup · age branch</p>
+      </article>
+    </div>
+
+    <div class="codeblock">
+      <div class="codeblock__head"><span>services/synthesis.py</span><span>Prefrontal cortex</span></div>
+<pre><code>CHANNELS = {
+    frozenset([1, 8]):   "Inspiration",
+    frozenset([2, 14]):  "The Beat",
+    frozenset([3, 60]):  "Mutation",
+    frozenset([43, 23]): "Structuring",
+}
+
+def generate_insights(natal_gates, transit_gates, age) -&gt; dict:
+    """Detects chart activations and generates age-specific daily weather."""
+    activations = []
+    natal = set(natal_gates.values())
+    transit = set(transit_gates.values())
+
+    for pair, name in CHANNELS.items():
+        a, b = list(pair)
+        if (a in natal and b in transit) or (b in natal and a in transit):
+            activations.append(name)
+
+    if age &gt;= 18:
+        return {
+            "focus": "Deep Work" if "Structuring" in activations else "Adaptive",
+            "communication_friction": "Low" if "Inspiration" in activations else "Moderate",
+            "activations": activations,
+        }
+
+    return {
+        "parenting_focus": parenting_copy(age, activations),
+        "activations": activations,
+    }</code></pre>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="payload-heading">
+    <h2 class="sheet-label" id="payload-heading">The payload</h2>
+    <p class="section-intro">One endpoint. <span class="code-inline">GET /api/v1/daily-weather</span> returns the whole family in a single read, already split by output shape so the frontend does no branching of its own.</p>
+
+    <div class="spec-row">
+      <span class="spec-row__key">Method</span>
+      <span class="spec-row__val">GET — idempotent, no query parameters. The date is whatever the last cron run wrote.</span>
+    </div>
+    <div class="spec-row">
+      <span class="spec-row__key">Latency</span>
+      <span class="spec-row__val">Cache read only. No ephemeris calls, no Ray work, no graph traversal inside the request.</span>
+    </div>
+    <div class="spec-row">
+      <span class="spec-row__key">Shape</span>
+      <span class="spec-row__val">Adults return metric objects; kids return a parenting focus string plus the activations that produced it.</span>
+    </div>
+    <div class="spec-row">
+      <span class="spec-row__key">Auth</span>
+      <span class="spec-row__val">Private instance. Nothing about this family is served publicly, including from this documentation page.</span>
+    </div>
+
+    <div class="codeblock">
+      <div class="codeblock__head"><span>GET /api/v1/daily-weather</span><span>Motor cortex</span></div>
+<pre><code>{
+  "date": "2026-07-30",
+  "family_weather": {
+    "adults": [
+      {
+        "focus": "Deep Work",
+        "communication_friction": "Low",
+        "activations": ["Structuring", "Inspiration"]
+      }
+    ],
+    "kids": [
+      {
+        "focus": "High creative drive today; good for structured projects.",
+        "gates_activated": ["Inspiration"]
+      }
+    ]
+  }
+}</code></pre>
+    </div>
+  </section>
+
+  <section class="section" id="second-brain" aria-labelledby="second-brain-heading">
+    <h2 class="sheet-label" id="second-brain-heading">The second brain</h2>
+    <p class="section-intro">A calculator that says the same thing every year is not worth building. The graph layer is what turns this from a lookup into something that accumulates — it records what actually happened alongside what the sky was doing, and lets the two be queried together.</p>
+
+    <div class="service-grid">
+      <article class="service-card">
+        <p class="service-card__num">GRP · 01</p>
+        <h3>Nodes</h3>
+        <p>Profiles, gates, planets, daily summary text, and mini-game scores — each a first-class node rather than a column on a row.</p>
+        <p class="service-card__deliverables">profile · gate · planet · summary · score</p>
+      </article>
+      <article class="service-card">
+        <p class="service-card__num">GRP · 02</p>
+        <h3>Edges</h3>
+        <p>Experienced-transit, activated-channel, achieved-milestone. The relationships are the data; the nodes are just endpoints.</p>
+        <p class="service-card__deliverables">experienced · activated · achieved</p>
+      </article>
+      <article class="service-card">
+        <p class="service-card__num">GRP · 03</p>
+        <h3>Embeddings</h3>
+        <p>Daily summaries, mood check-ins and project notes are embedded on write, building a searchable vector space of the family's own history.</p>
+        <p class="service-card__deliverables">Text embedding pipeline · vector search</p>
+      </article>
+      <article class="service-card">
+        <p class="service-card__num">GRP · 04</p>
+        <h3>Retrieval</h3>
+        <p>Today's transits become the query. Historical context comes back as evidence, and the suggestion is grounded in it rather than in the symbolism alone.</p>
+        <p class="service-card__deliverables">RAG over personal history · Ray-side index updates</p>
+      </article>
+    </div>
+
+    <div class="callout">
+      <p class="callout__label">What retrieval sounds like</p>
+      <p>"The last three times Mars transited your Gate 34, your notes indicated high distributed-systems productivity but increased communication friction. Route today's energy into solo architecture rather than collaborative design."</p>
+      <p>That sentence is only possible because the notes were stored next to the transits. The astrology supplies the index; the useful part is the correlation with things that were actually written down.</p>
+    </div>
+  </section>
+
+  <section class="section" id="output" aria-labelledby="output-heading">
+    <h2 class="sheet-label" id="output-heading">Output layer</h2>
+    <p class="section-intro">The frontend consumes the daily payload and the graph history to build something age-appropriate to actually do — a dashboard for the adults, an adaptive game for everyone else.</p>
+
+    <article class="card feature-card">
+      <h3>Adult dashboards and mini-brain games</h3>
+      <ul>
+        <li><strong>Dashboard</strong> — energetic weather, historical graph correlations, and the day's recommended focus in one dense view</li>
+        <li><strong>Adaptive difficulty</strong> — when the day's transit indicates strong strategic energy, puzzle difficulty scales up to match it</li>
+        <li><strong>Feedback loop</strong> — completion metrics write back into the graph, so cognitive sharpness becomes a tracked series rather than a vibe</li>
+        <li><strong>Aesthetic</strong> — 1:1 pixel art, retro, closer to a handheld cartridge than to a productivity app</li>
+      </ul>
+    </article>
+
+    <article class="card feature-card">
+      <h3>Kids</h3>
+      <ul>
+        <li><strong>Preschool</strong> — daily challenges that follow the energetic weather; an expressive transit serves a vocal or storytelling game themed around whatever she is currently attached to</li>
+        <li><strong>Toddler</strong> — cause-and-effect sensory taps and algorithmically selected audio for calming the transition into a nap</li>
+        <li><strong>Parent-facing by default</strong> — the tip is for the adult reading it. The child's screen only ever has the activity on it</li>
+      </ul>
+    </article>
+
+    <h3 class="sheet-label section-heading--spaced">Stack</h3>
+    <div class="skill-group">
+      <div class="tag-cloud">
+        <span class="tag">pyswisseph</span>
+        <span class="tag">NASA JPL ephemeris</span>
+        <span class="tag">FastAPI</span>
+        <span class="tag">Ray</span>
+        <span class="tag">Pydantic</span>
+        <span class="tag">Graph database</span>
+        <span class="tag">Text embeddings</span>
+        <span class="tag">RAG</span>
+        <span class="tag">Python</span>
+      </div>
+    </div>
+
+    <div class="callout">
+      <p class="callout__label">Prior art</p>
+      <p>Referenced while building: <a href="https://github.com/dturkuler/humandesign_api">dturkuler/humandesign_api</a> for the FastAPI shape of a Human Design service, <a href="https://github.com/jdempcy/hdkit">jdempcy/hdkit</a> for bodygraph and planetary toolkits, and <a href="https://github.com/astrorigin/pyswisseph">astrorigin/pyswisseph</a>, which does the actual ephemeris work.</p>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="family-contact-heading">
+    <div class="contact-band">
+      <div class="contact-band__copy">
+        <h2 id="family-contact-heading">Ask about it</h2>
+        <p>Happy to talk about the architecture — the layer split, the Ray-versus-cron tradeoff, or the graph schema. The instance itself stays private.</p>
+        <p class="contact-band__note">Side project · not affiliated with any employer · public/free-tier only</p>
+      </div>
+      <a class="btn btn--fill" href="mailto:jcdavis131@gmail.com?subject=Family%20Neural%20Architecture">jcdavis131@gmail.com</a>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <div class="site-footer__grid">
+      <div>
+        <p class="site-footer__brand">J. Cameron Davis</p>
+        <p class="site-footer__tag">Workforce intelligence</p>
+        <p class="site-footer__note">I-O measurement, agents, neural nets. Meta is the day job; consulting is separate. This one is a side project.</p>
+      </div>
+      <div>
+        <p class="site-footer__title">This page</p>
+        <ul class="site-footer__list">
+          <li><a href="#architecture">Architecture</a></li>
+          <li><a href="#wheel">The wheel</a></li>
+          <li><a href="#profiles">Profiles</a></li>
+          <li><a href="#second-brain">Second brain</a></li>
+        </ul>
+      </div>
+      <div>
+        <p class="site-footer__title">Links</p>
+        <ul class="site-footer__list">
+          <li><a href="/">Home</a></li>
+          <li><a href="/#lab">Lab</a></li>
+          <li><a href="/graphify/">Personal Graphify</a></li>
+          <li><a href="https://github.com/jcdavis131">GitHub</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="site-footer__legal">
+      <span>© 2026 J. Cameron Davis</span>
+    </div>
+  </footer>
+</main>
+
+<script src="/assets/site.js" defer></script>
+</body>
+</html>
