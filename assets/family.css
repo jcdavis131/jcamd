@@ -6,12 +6,15 @@
  * shadows, mono labels — so the page reads as the same sheet stock as the
  * home page rather than a second design system.
  *
- * Five components site.css does not have a use for elsewhere:
+ * Components site.css does not have a use for elsewhere:
  *   .codeblock    — source and payload listings, horizontally scrollable
  *   .callout      — a bordered aside for scope/privacy notes
  *   .wheel-fig    — the 64-gate wheel diagram and its caption
  *   .spec-row     — two-column key/value rows for the output contract
  *   .feature-card — a .card carrying a heading and a bullet list
+ *   .profile-form, .profile-list, .feed-* — the live feed tool. site.css has
+ *     no input/select styling anywhere else on the site (the rest of the
+ *     site has no forms), so this is the first form component in the system.
  */
 
 /* ── Code and payload listings ──
@@ -148,3 +151,134 @@
   line-height: 1.55;
   color: var(--text-secondary);
 }
+
+/* ── Profile form ── */
+.profile-form {
+  margin-top: 18px;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 1fr;
+  background: var(--surface);
+  border: 2px solid var(--ink);
+  box-shadow: var(--block-x) var(--block-y) 0 var(--ink-shadow);
+  padding: 18px;
+}
+@media (min-width: 700px) {
+  .profile-form { grid-template-columns: repeat(4, 1fr) auto; align-items: end; }
+}
+.profile-form__row { display: grid; gap: 6px; min-width: 0; }
+.profile-form__row label {
+  font: 700 10px/1.3 var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.profile-form input, .profile-form select {
+  min-height: var(--touch-min, 44px);
+  padding: 0 10px;
+  border: 2px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font: 500 0.92rem/1.4 var(--font-body);
+  border-radius: 0;
+  appearance: none;
+  -webkit-appearance: none;
+}
+.profile-form select {
+  background-image: linear-gradient(45deg, transparent 50%, var(--pencil) 50%), linear-gradient(135deg, var(--pencil) 50%, transparent 50%);
+  background-position: calc(100% - 16px) center, calc(100% - 11px) center;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+  padding-right: 28px;
+}
+.profile-form input:focus, .profile-form select:focus,
+.profile-form input:focus-visible, .profile-form select:focus-visible {
+  outline: none;
+  border-color: var(--ink);
+}
+.profile-form__submit { min-height: var(--touch-min, 44px); white-space: nowrap; }
+
+/* ── Saved profiles ── */
+.profile-list { margin-top: 14px; display: flex; flex-direction: column; gap: 8px; }
+.profile-chip {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 4px 12px;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+.profile-chip__name { font: 600 0.92rem/1.3 var(--font-body); color: var(--text); }
+.profile-chip__meta {
+  font: 500 10px/1.3 var(--font-mono);
+  color: var(--pencil);
+  margin-right: auto;
+}
+.profile-chip__del {
+  min-height: var(--touch-min, 44px);
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  font: 600 10px/1 var(--font-mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.profile-chip__del:hover, .profile-chip__del:focus-visible { color: var(--ink); border-color: var(--ink); }
+
+/* ── Feed controls + output ── */
+.feed-controls { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.feed-output { margin-top: 16px; display: flex; flex-direction: column; gap: 14px; }
+.feed-empty {
+  font-size: 0.88rem;
+  color: var(--muted);
+  padding: 14px 0;
+}
+.feed-profile__head {
+  display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px dashed var(--border);
+}
+.feed-profile__head h3 { font: 600 1.05rem/1.3 var(--font-body); }
+.feed-profile__date {
+  font: 500 10px/1 var(--font-mono);
+  color: var(--pencil);
+  white-space: nowrap;
+}
+.feed-section-label {
+  font: 700 10px/1 var(--font-mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 14px 0 8px;
+}
+.feed-section-label:first-of-type { margin-top: 0; }
+.feed-item { padding: 10px 0; border-bottom: 1px dashed var(--border); }
+.feed-item:last-child { border-bottom: 0; }
+.feed-item__title {
+  font: 600 0.94rem/1.35 var(--font-body);
+  color: var(--text);
+}
+.feed-item__gates {
+  display: inline-block;
+  margin-right: 6px;
+  padding: 1px 6px;
+  border: 1px solid var(--border);
+  background: var(--inset);
+  font: 700 11px/1.4 var(--font-mono);
+  color: var(--accent);
+}
+.feed-item__prompt {
+  margin-top: 4px;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: var(--text-secondary);
+}
+.feed-item__meta {
+  margin-top: 4px;
+  font: 500 10px/1.4 var(--font-mono);
+  color: var(--pencil);
+}
+.feed-item__meta--standalone { margin-top: 0; margin-bottom: 8px; }
+.feed-item--echo .feed-item__title { font-weight: 600; color: var(--text-secondary); }
