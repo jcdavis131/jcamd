@@ -278,6 +278,69 @@
   }
 
   /* ==========================================================================
+   * PART 3b — Gate → center map (same bodygraph source as Part 3) and a
+   * one-paragraph daily summary built from it — this is the actual "generate
+   * a report instead of just listing channels" layer.
+   * ==========================================================================
+   */
+  var CENTER_LABELS = {
+    head: 'Head', ajna: 'Ajna', throat: 'Throat', g: 'G (Identity)', heart: 'Heart',
+    spleen: 'Spleen', sacral: 'Sacral', solarplexus: 'Solar Plexus', root: 'Root'
+  };
+  var MOTOR_CENTERS = { sacral: true, heart: true, solarplexus: true, root: true };
+  var GATE_CENTER = {
+    64: 'head', 61: 'head', 63: 'head',
+    47: 'ajna', 24: 'ajna', 4: 'ajna', 17: 'ajna', 11: 'ajna', 43: 'ajna',
+    62: 'throat', 23: 'throat', 56: 'throat', 35: 'throat', 12: 'throat', 45: 'throat',
+    33: 'throat', 8: 'throat', 31: 'throat', 20: 'throat', 16: 'throat',
+    1: 'g', 13: 'g', 25: 'g', 46: 'g', 2: 'g', 15: 'g', 10: 'g', 7: 'g',
+    21: 'heart', 40: 'heart', 26: 'heart', 51: 'heart',
+    48: 'spleen', 57: 'spleen', 44: 'spleen', 50: 'spleen', 32: 'spleen', 28: 'spleen', 18: 'spleen',
+    34: 'sacral', 5: 'sacral', 14: 'sacral', 29: 'sacral', 59: 'sacral', 9: 'sacral',
+    3: 'sacral', 42: 'sacral', 27: 'sacral',
+    6: 'solarplexus', 37: 'solarplexus', 30: 'solarplexus', 55: 'solarplexus',
+    49: 'solarplexus', 22: 'solarplexus', 36: 'solarplexus',
+    53: 'root', 60: 'root', 52: 'root', 19: 'root', 39: 'root', 41: 'root',
+    58: 'root', 38: 'root', 54: 'root'
+  };
+
+  function summarizeDay(activations, echoes) {
+    var centerCounts = {};
+    function touch(gate) {
+      var c = GATE_CENTER[gate];
+      if (c) centerCounts[c] = (centerCounts[c] || 0) + 1;
+    }
+    activations.forEach(function (a) { touch(a.gates[0]); touch(a.gates[1]); });
+    echoes.forEach(function (e) { touch(e.gate); });
+
+    var centers = Object.keys(centerCounts).sort(function (a, b) { return centerCounts[b] - centerCounts[a]; });
+    if (!centers.length) {
+      return 'A quiet day, astrologically speaking — no strong signal either way.';
+    }
+    var hasMotor = centers.some(function (c) { return MOTOR_CENTERS[c]; });
+    var hasThroat = centers.indexOf('throat') !== -1;
+    var labels = centers.slice(0, 3).map(function (c) { return CENTER_LABELS[c]; });
+    var centerPhrase = labels.length > 1
+      ? labels.slice(0, -1).join(', ') + ' and ' + labels[labels.length - 1]
+      : labels[0];
+
+    var mode;
+    if (hasThroat && hasMotor) {
+      mode = 'energy with somewhere to go — a good day to act and say so.';
+    } else if (hasThroat) {
+      mode = 'a talking day more than a doing day — good for the conversation, not the sprint.';
+    } else if (hasMotor) {
+      mode = 'energy that wants an outlet more than an announcement — good for doing, not explaining.';
+    } else if (centers.indexOf('ajna') !== -1 || centers.indexOf('head') !== -1) {
+      mode = 'a heady day — better for figuring something out than for deciding anything big.';
+    } else {
+      mode = 'a day about direction and connection more than output.';
+    }
+    var count = activations.length + echoes.length;
+    return count + (count === 1 ? ' signal' : ' signals') + ' today, mostly around ' + centerPhrase + ' — ' + mode;
+  }
+
+  /* ==========================================================================
    * PART 4 — Profiles (localStorage only; nothing here ever leaves the browser)
    * ==========================================================================
    */
@@ -352,10 +415,7 @@
     head.appendChild(el('h3', null, profile.name));
     head.appendChild(el('span', 'feed-profile__date', new Date().toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })));
     card.appendChild(head);
-
-    if (!activations.length && !echoes.length) {
-      card.appendChild(el('p', 'feed-empty', 'No channel activations or gate echoes for ' + profile.name + ' today — a quieter day, astrologically speaking.'));
-    }
+    card.appendChild(el('p', 'feed-summary', summarizeDay(activations, echoes)));
 
     if (activations.length) {
       var actHead = el('p', 'feed-section-label', 'Channel activations today');

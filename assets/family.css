@@ -246,6 +246,14 @@
   color: var(--pencil);
   white-space: nowrap;
 }
+.feed-summary {
+  font-size: 0.94rem;
+  line-height: 1.55;
+  color: var(--text);
+  padding-bottom: 12px;
+  margin-bottom: 4px;
+  border-bottom: 1px dashed var(--border);
+}
 .feed-section-label {
   font: 700 10px/1 var(--font-mono);
   letter-spacing: 0.1em;
