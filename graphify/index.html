@@ -6,7 +6,14 @@
 <title>Personal Graphify — SOTA 250 nodes | jcamd.com/graphify</title>
 <script src="https://unpkg.com/vis-network@9.1.6/standalone/umd/vis-network.min.js"></script>
 <style>
-:root{--bg:#fafaf9;--card:#ffffff;--ink:#1c1917;--muted:#78716c;--border:#e7e5e4;--blue:#0ea5e9;--amber:#f59e0b;--green:#10b981;--red:#ef4444}
+/* Same 5 contrast fixes verified in the personal-graphify source repo,
+   ported here since this page shares the identical CSS (not a version
+   bump — this deployment intentionally serves a lighter 250-node dataset,
+   only the accent tokens are backported): link blue 2.65:1->4.52:1, error
+   red 3.60:1->4.64:1, status-dot green 2.43:1->3.06:1, and --muted specifically
+   against .pill's own #f5f5f4 background (4.40:1, just under the 4.5:1 text
+   floor even though it cleared 4.5:1+ on the plain page background). */
+:root{--bg:#fafaf9;--card:#ffffff;--ink:#1c1917;--muted:#716a66;--border:#e7e5e4;--blue:#0a7bad;--amber:#c98108;--green:#0ea473;--red:#e21313}
 *{box-sizing:border-box}body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
 header{padding:24px 20px 12px;border-bottom:1px solid var(--border);background:var(--card);position:sticky;top:0;z-index:10;backdrop-filter:blur(8px)}
 .badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase}
@@ -38,6 +45,46 @@ code{background:#f5f5f4;padding:1px 5px;border-radius:6px;font-size:12px}
 .dot{width:8px;height:8px;border-radius:999px;display:inline-block}
 footer{padding:18px 20px;text-align:center;color:var(--muted);font-size:11px;border-top:1px solid var(--border);background:var(--card)}
 a{color:var(--blue);text-decoration:none}a:hover{text-decoration:underline}
+
+/* ── motion layer ──────────────────────────────────────────────────────────
+   Same system as the rest of the fleet, ported from the personal-graphify
+   source repo's copy of this page. Rigid personality: decisive, zero
+   overshoot. This page had no transition, no @keyframes and no
+   prefers-reduced-motion at all. Inline, because the page is self-contained. */
+:root{
+  --ease-standard:   cubic-bezier(.2, 0, 0, 1);
+  --ease-emphasized: cubic-bezier(.16, 1, .3, 1);  /* expo.out */
+  --dur-quick: 90ms;
+  --dur-base:  260ms;
+  --vx-stagger: 50ms;
+  --vx-rise:    12px;
+}
+/* primary — cards arrive in a short cascade. Opacity is never the only
+   channel; position carries the change too. */
+@keyframes vx-rise{
+  from{ opacity:0; transform:translateY(var(--vx-rise)) }
+  to  { opacity:1; transform:none }
+}
+.card{ animation: vx-rise var(--dur-base) var(--ease-emphasized) both }
+.card:nth-of-type(1){ animation-delay:0ms }
+.card:nth-of-type(2){ animation-delay:calc(var(--vx-stagger)*1) }
+.card:nth-of-type(3){ animation-delay:calc(var(--vx-stagger)*2) }
+.card:nth-of-type(4){ animation-delay:calc(var(--vx-stagger)*3) }
+.card:nth-of-type(n+5){ animation-delay:calc(var(--vx-stagger)*4) }
+/* secondary — colour settles rather than snapping */
+a{ transition: color var(--dur-quick) var(--ease-standard) }
+/* focus rings must not ease in — a keyboard user needs the ring at once */
+a:focus-visible, button:focus-visible{ transition:none }
+/* This page had no reduced-motion gate at any level. */
+@media (prefers-reduced-motion: reduce){
+  *, *::before, *::after{
+    animation-duration:.01ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:.01ms !important;
+    scroll-behavior:auto !important;
+  }
+  .card{ opacity:1; transform:none }
+}
 </style>
 </head>
 <body>
@@ -56,12 +103,12 @@ a{color:var(--blue);text-decoration:none}a:hover{text-decoration:underline}
 <div class="kpi" id="kpi"></div>
 </header>
 
-<div class="tabs" id="tabs">
-<div class="tab active" data-tab="search">Search + Graph</div>
-<div class="tab" data-tab="task">Task Compiler JS</div>
-<div class="tab" data-tab="impact">Impact BFS</div>
-<div class="tab" data-tab="onboard">Onboard • God Nodes</div>
-<div class="tab" data-tab="cost">Cost Dashboard</div>
+<div class="tabs" id="tabs" role="tablist">
+<div class="tab active" data-tab="search" role="tab" tabindex="0" aria-selected="true">Search + Graph</div>
+<div class="tab" data-tab="task" role="tab" tabindex="-1" aria-selected="false">Task Compiler JS</div>
+<div class="tab" data-tab="impact" role="tab" tabindex="-1" aria-selected="false">Impact BFS</div>
+<div class="tab" data-tab="onboard" role="tab" tabindex="-1" aria-selected="false">Onboard • God Nodes</div>
+<div class="tab" data-tab="cost" role="tab" tabindex="-1" aria-selected="false">Cost Dashboard</div>
 </div>
 
 <main>
@@ -129,14 +176,11 @@ async function loadGraph(){
     const res2 = await fetch('./assets/graphify/graph.json').catch(()=>fetch('../assets/graphify/graph.json'));
     data = await res2.json();
   }
-  // also try local public path for dev (docs/public)
-  if(!data || !data.nodes){
-    try{
-      const r3 = await fetch('/home/hatch/workspace/your_files/personal-graphify/docs/public/graphify-public-non-pii.json'); 
-      data = await r3.json();
-    }catch{}
-  }
-  // final fallback: if served from /graphify/ then /assets/...
+  // A third fallback here used to fetch a hardcoded local filesystem path
+  // (/home/hatch/workspace/...) — that can never resolve as a URL from a
+  // browser, on this machine or anyone else's, so it was dead code that
+  // only ever fell through to the "not loaded" error below anyway (same
+  // dead-fallback removed in the personal-graphify source repo's copy).
   if(!data) throw new Error('graph.json not loaded');
   // filter trivial or nodes (extra safety)
   data.nodes = data.nodes.filter(n=>{
@@ -187,6 +231,22 @@ function renderKPI(){
   `;
 }
 
+function activateTab(el){
+  document.querySelectorAll('#tabs .tab').forEach(t=>{
+    t.classList.remove('active');
+    t.setAttribute('aria-selected','false');
+    t.tabIndex=-1;
+  });
+  el.classList.add('active');
+  el.setAttribute('aria-selected','true');
+  el.tabIndex=0;
+  el.focus();
+  const tab=el.dataset.tab;
+  ['search','task','impact','onboard','cost'].forEach(t=>{
+    document.getElementById('panel-'+t).style.display = t===tab ? 'block' : 'none';
+  });
+}
+
 function initUI(){
   const types = [...new Set(graphData.nodes.map(n=>n.type))].sort();
   const typeSel = document.getElementById('typeFilter');
@@ -209,14 +269,30 @@ function initUI(){
   document.getElementById('taskInput').addEventListener('keydown', e=>{ if(e.key==='Enter') doTask(e.target.value); });
   document.getElementById('impactBtn').onclick=()=>doImpact();
   document.getElementById('tabs').addEventListener('click', e=>{
-    if(!e.target.classList.contains('tab')) return;
-    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-    e.target.classList.add('active');
-    const tab=e.target.dataset.tab;
-    ['search','task','impact','onboard','cost'].forEach(t=>{
-      document.getElementById('panel-'+t).style.display = t===tab ? 'block' : 'none';
-    });
-    // if graph tab hidden on small, keep graph visible? Search is main
+    const el = e.target.closest('.tab');
+    if(!el) return;
+    activateTab(el);
+  });
+  // The tabs were plain divs — click-only, unreachable and unactivatable by
+  // keyboard, so 4 of 5 panels (Task Compiler, Impact, Onboard, Cost) were
+  // unusable without a mouse. role="tab"+tabindex added in markup; this
+  // wires Enter/Space to activate and ArrowLeft/Right to move focus, the
+  // standard WAI-ARIA tabs pattern (same fix already verified in the
+  // personal-graphify source repo).
+  document.getElementById('tabs').addEventListener('keydown', e=>{
+    const el = e.target.closest('.tab');
+    if(!el) return;
+    if(e.key==='Enter' || e.key===' ' || e.key==='Spacebar'){
+      e.preventDefault();
+      activateTab(el);
+    } else if(e.key==='ArrowRight' || e.key==='ArrowLeft'){
+      e.preventDefault();
+      const tabs=[...document.querySelectorAll('#tabs .tab')];
+      const idx=tabs.indexOf(el);
+      const next = e.key==='ArrowRight' ? tabs[(idx+1)%tabs.length] : tabs[(idx-1+tabs.length)%tabs.length];
+      next.focus();
+      activateTab(next);
+    }
   });
 }
 
@@ -319,6 +395,15 @@ function renderGraph(nodes, edges){
   edgesDS = new vis.DataSet(edgeArr);
   const data = {nodes:nodesDS, edges:edgesDS};
   const options = {physics:{solver:'forceAtlas2Based', forceAtlas2Based:{gravitationalConstant:-80, springLength:80, springConstant:0.04}, stabilization:{iterations:120}}, interaction:{hover:true, tooltipDelay:120}, edges:{smooth:{type:'curvedCW', roundness:0.08}}};
+  // this re-fires on every search, filter change, node click and task/impact
+  // query — a normal exploration session calls it dozens of times. Each call
+  // built a brand-new vis.Network on the same #graph container without ever
+  // destroying the previous one, so every prior instance kept its physics
+  // simulation and event listeners alive underneath the new one: a real,
+  // compounding perf leak, not a one-off cost (same fix already verified in
+  // the personal-graphify source repo). destroy() is vis-network's
+  // documented teardown for exactly this.
+  if(network){ try{ network.destroy(); }catch{} }
   network = new vis.Network(container, data, options);
   network.on('click', params=>{
     if(params.nodes.length){
@@ -511,7 +596,24 @@ function renderCost(){
   `;
 }
 
-loadGraph().catch(e=>{ document.getElementById('graphMeta').textContent='Failed to load graph.json: '+e.message+' — trying ../../docs/public/ fallback'; console.error(e); });
+loadGraph().catch(e=>{
+  // A failed load only ever updated the graph card's own caption (and with
+  // a stale claim of a fallback retry that this function doesn't actually
+  // perform). Every other panel — KPI strip, Onboard, Cost — was left on
+  // its static "Loading..." placeholder with no indication anything had
+  // gone wrong. Surface the same failure everywhere a load-dependent panel
+  // is visible, so a real outage doesn't look like a hung page (same fix
+  // already verified in the personal-graphify source repo).
+  const msg = 'Graph data failed to load: '+esc(e.message);
+  document.getElementById('graphMeta').textContent = msg;
+  const kpi = document.getElementById('kpi');
+  if(kpi) kpi.innerHTML = `<div style="grid-column:1/-1"><span class="muted">${msg}</span></div>`;
+  const onboardOut = document.getElementById('onboardOut');
+  if(onboardOut) onboardOut.innerHTML = `<span class="muted">${msg}</span>`;
+  const costOut = document.getElementById('costOut');
+  if(costOut) costOut.innerHTML = `<span class="muted">${msg}</span>`;
+  console.error(e);
+});
 </script>
 </body>
 </html>
