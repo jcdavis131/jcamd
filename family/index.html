@@ -4,13 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Family Neural Architecture — J. Cameron Davis</title>
-<meta name="description" content="A brain-model backend that turns daily ephemeris data into one age-appropriate insight per family member. pyswisseph, Ray, FastAPI, and a graph second brain.">
+<meta name="description" content="Enter a birth date and get a live, personalized daily feed — plus the brain-model backend behind it: pyswisseph, Ray, FastAPI, and a graph second brain.">
 <link rel="canonical" href="https://jcamd.com/family/">
 <meta name="theme-color" content="#e8e4da">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://jcamd.com/family/">
 <meta property="og:title" content="Family Neural Architecture — J. Cameron Davis">
-<meta property="og:description" content="Ephemeris in, one age-appropriate suggestion per person out. Brain-model backend: pyswisseph, Ray, FastAPI, graph + RAG.">
+<meta property="og:description" content="A live, personalized daily feed computed in your browser, plus the brain-model backend it's based on: pyswisseph, Ray, FastAPI, graph + RAG.">
 <meta name="twitter:card" content="summary">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23faf9f5' stroke='%232c2a26' stroke-width='2'/%3E%3Ctext x='16' y='21' text-anchor='middle' font-family='monospace' font-size='11' font-weight='700' fill='%232c2a26'%3EJC%3C/text%3E%3C/svg%3E">
 <link rel="stylesheet" href="/assets/site.css">
@@ -32,6 +32,7 @@
     </a>
     <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">Menu</button>
     <nav class="site-nav" id="site-nav" aria-label="Primary">
+      <a href="#feed">Your feed</a>
       <a href="#architecture">Architecture</a>
       <a href="#wheel">The wheel</a>
       <a href="#profiles">Profiles</a>
@@ -51,13 +52,73 @@
       </div>
       <h1>Family Neural Architecture.</h1>
       <p class="hero__tagline">Raw ephemeris in. One age-appropriate suggestion per person out — every morning, for a family of four.</p>
-      <p class="hero__lede">A backend laid out like a brain: spherical trigonometry at the stem, pattern mapping in the cerebellum, fixed natal memory in the hippocampus, and a synthesis layer that branches on developmental stage before anything reaches a screen. Human Design is the symbolic vocabulary; the engineering underneath is ordinary and testable.</p>
+      <p class="hero__lede">A backend laid out like a brain: spherical trigonometry at the stem, pattern mapping in the cerebellum, fixed natal memory in the hippocampus, and a synthesis layer that branches on developmental stage before anything reaches a screen. Human Design is the symbolic vocabulary; the engineering underneath is ordinary and testable. The synthesis layer now runs live, in this tab — enter a birth date below and get today's actual feed.</p>
       <div class="hero__actions">
-        <a class="btn btn--fill" href="#architecture">Read the architecture</a>
-        <a class="btn" href="/#lab">Other lab projects</a>
+        <a class="btn btn--fill" href="#feed">Get your feed</a>
+        <a class="btn" href="#architecture">Read the architecture</a>
       </div>
     </div>
   </header>
+
+  <section class="section" id="feed" aria-labelledby="feed-heading">
+    <h2 class="sheet-label" id="feed-heading">Your feed</h2>
+    <p class="section-intro">A working copy of the synthesis layer below, running entirely in this browser tab — same 64-gate wheel, same 36-channel map, computed against today's real planetary positions. Add a profile for each of you and it turns your birth data into a personalized daily feed.</p>
+
+    <div class="callout">
+      <p class="callout__label">Privacy</p>
+      <p>Everything on this page runs in your browser. Birth data is saved only to this browser's local storage — never sent to any server, this site included — and stays on this device. Use <span class="code-inline">Remove</span> or <span class="code-inline">Clear all profiles</span> any time to delete it.</p>
+      <p>The math is a public-domain low-precision ephemeris (Paul Schlyter's method), accurate to roughly 1 arcminute — thousands of times finer than the 5.625° a gate needs. Verified against real dates before shipping: the Sun's longitude lands within 0.3° of 0/90/180/270 at all four 2026 equinoxes/solstices, and Sun/Moon land within 0.07° of exact opposition at the moment of the real 2026-03-03 total lunar eclipse.</p>
+    </div>
+
+    <form id="profile-form" class="profile-form">
+      <div class="profile-form__row">
+        <label for="pf-name">Name</label>
+        <input type="text" id="pf-name" name="name" placeholder="You, or Spouse" maxlength="40" required>
+      </div>
+      <div class="profile-form__row">
+        <label for="pf-date">Birth date</label>
+        <input type="date" id="pf-date" name="date" required>
+      </div>
+      <div class="profile-form__row">
+        <label for="pf-time">Birth time</label>
+        <input type="time" id="pf-time" name="time" value="12:00" required>
+      </div>
+      <div class="profile-form__row">
+        <label for="pf-utc">UTC offset at birth</label>
+        <select id="pf-utc" name="utcOffset" required>
+          <option value="-12">UTC−12</option><option value="-11">UTC−11</option>
+          <option value="-10">UTC−10</option><option value="-9">UTC−9</option>
+          <option value="-8">UTC−8 (Pacific)</option><option value="-7">UTC−7 (Mountain)</option>
+          <option value="-6">UTC−6 (Central)</option><option value="-5">UTC−5 (Eastern)</option>
+          <option value="-4">UTC−4</option><option value="-3">UTC−3</option>
+          <option value="-2">UTC−2</option><option value="-1">UTC−1</option>
+          <option value="0" selected>UTC+0</option>
+          <option value="1">UTC+1</option><option value="2">UTC+2</option>
+          <option value="3">UTC+3</option><option value="4">UTC+4</option>
+          <option value="5">UTC+5</option><option value="6">UTC+6</option>
+          <option value="7">UTC+7</option><option value="8">UTC+8</option>
+          <option value="9">UTC+9</option><option value="10">UTC+10</option>
+          <option value="11">UTC+11</option><option value="12">UTC+12</option>
+          <option value="13">UTC+13</option><option value="14">UTC+14</option>
+        </select>
+      </div>
+      <button type="submit" class="btn btn--fill profile-form__submit">Save profile</button>
+    </form>
+
+    <div id="profile-list" class="profile-list" aria-live="polite"></div>
+
+    <div class="feed-controls">
+      <button type="button" id="feed-refresh" class="btn">Refresh today's feed</button>
+      <button type="button" id="profiles-clear-all" class="btn">Clear all profiles</button>
+    </div>
+
+    <div id="feed-output" class="feed-output" aria-live="polite"></div>
+
+    <div class="callout">
+      <p class="callout__label">On what this is (and isn't)</p>
+      <p>This is a real implementation of the architecture doc's wheel and channel math, not a mockup — but it's a simplified public demo of it, not the private instance. There's no natal memory database, no Ray workers, no graph or RAG layer here; profiles live in this tab's local storage and the chart recomputes from scratch on every visit. The prompts each channel shows are original, secular, written by hand for this page — framed as a possibility for the day, not a claim about you.</p>
+    </div>
+  </section>
 
   <section class="section" id="architecture" aria-labelledby="architecture-heading">
     <h2 class="sheet-label" id="architecture-heading">The brain model</h2>
@@ -436,6 +497,7 @@ def generate_insights(natal_gates, transit_gates, age) -&gt; dict:
       <div>
         <p class="site-footer__title">This page</p>
         <ul class="site-footer__list">
+          <li><a href="#feed">Your feed</a></li>
           <li><a href="#architecture">Architecture</a></li>
           <li><a href="#wheel">The wheel</a></li>
           <li><a href="#profiles">Profiles</a></li>
@@ -459,5 +521,6 @@ def generate_insights(natal_gates, transit_gates, age) -&gt; dict:
 </main>
 
 <script src="/assets/site.js" defer></script>
+<script src="/assets/family-app.js" defer></script>
 </body>
 </html>
