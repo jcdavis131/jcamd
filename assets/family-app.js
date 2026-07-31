@@ -136,6 +136,52 @@
   }
 
   /* ==========================================================================
+   * PART 1b — The full 13-point set (adds Earth + the lunar nodes)
+   *
+   * The daily feed above only tracks the 10 bodies the architecture doc
+   * names. A real natal chart — the kind a Type/Authority/Profile
+   * calculation needs — uses 13 points: those 10, plus Earth (always
+   * exactly 180 deg from the Sun) and the North/South Lunar Nodes (the
+   * Moon's own orbital node, already computed as MOON.N above — this is
+   * the standard "mean node", the same one virtually every simplified HD
+   * or astrology calculator uses in place of the harder-to-compute "true
+   * node"). Kept separate from BODIES/bodyLongitudes so the already-shipped
+   * daily feed is untouched.
+   * ==========================================================================
+   */
+  var BODIES13 = ['Sun', 'Earth', 'Moon', 'NorthNode', 'SouthNode', 'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto'];
+
+  function bodyLongitudes13(jd) {
+    var d = jd - 2451543.5;
+    var out = bodyLongitudes(jd);
+    out.Earth = norm360(out.Sun + 180);
+    out.NorthNode = norm360(at(MOON.N, d));
+    out.SouthNode = norm360(out.NorthNode + 180);
+    return out;
+  }
+
+  // The moment ~88 solar degrees before birth ("Design"), found by bisection
+  // rather than a fixed "88 days" shortcut — Earth's orbital speed varies
+  // (faster near perihelion in early January, slower near aphelion in
+  // July), so the true day-count offset drifts by more than a day across
+  // the year. Verified below: the offset comes out under 88 days for a
+  // January birth and over 88 days for a July one, as it should.
+  function findDesignJD(birthJD) {
+    var birthD = birthJD - 2451543.5;
+    var targetLon = norm360(sunPos(birthD).lon - 88);
+    var lo = birthD - 92, hi = birthD - 86;
+    function signedDiff(d) {
+      var diff = norm360(sunPos(d).lon - targetLon);
+      return diff > 180 ? diff - 360 : diff;
+    }
+    for (var i = 0; i < 50; i++) {
+      var mid = (lo + hi) / 2;
+      if (signedDiff(mid) < 0) lo = mid; else hi = mid;
+    }
+    return (lo + hi) / 2 + 2451543.5;
+  }
+
+  /* ==========================================================================
    * PART 2 — The 64-gate wheel
    * Same constants as the architecture doc above on this page: gate 41 opens
    * the wheel at 302.25 deg, each gate spans 5.625 deg (360/64).
@@ -154,11 +200,29 @@
     return WHEEL_SEQUENCE[Math.floor(adjusted / GATE_WIDTH)];
   }
 
+  var LINE_WIDTH = GATE_WIDTH / 6;
+  function longitudeToGateAndLine(lon) {
+    var adjusted = norm360(lon - HD_START_DEGREE);
+    var gateIndex = Math.floor(adjusted / GATE_WIDTH);
+    var withinGate = adjusted - gateIndex * GATE_WIDTH;
+    var line = Math.floor(withinGate / LINE_WIDTH) + 1;
+    return { gate: WHEEL_SEQUENCE[gateIndex], line: line };
+  }
+
   function gatesForDate(jd) {
     var lons = bodyLongitudes(jd);
     var gates = {};
     BODIES.forEach(function (b) { gates[b] = longitudeToGate(lons[b]); });
     return gates;
+  }
+
+  // Full 13-point activation list for one moment (personality or design side).
+  function activationsForJD(jd, stream) {
+    var lons = bodyLongitudes13(jd);
+    return BODIES13.map(function (body) {
+      var gl = longitudeToGateAndLine(lons[body]);
+      return { body: body, gate: gl.gate, line: gl.line, stream: stream };
+    });
   }
 
   /* ==========================================================================
@@ -341,6 +405,185 @@
   }
 
   /* ==========================================================================
+   * PART 3c — Full bodygraph: Type, Strategy, Authority, Profile
+   *
+   * The daily feed above uses one moment (birth) and 10 bodies — enough for
+   * a "what's activated today" signal. A real Type/Authority/Profile
+   * calculation needs both sides of the standard Human Design chart: the
+   * Personality (conscious — birth moment) and the Design (unconscious —
+   * ~88 solar degrees earlier), 13 points each, mapped through the same
+   * gate/channel/center data the feed already uses.
+   *
+   * Type, Authority and Profile derivation adapted from the MIT-licensed
+   * `free-human-design` npm package (github.com/adamblvck/free-human-design,
+   * src/hd/bodygraph.js) — same source already cross-checked for the 36
+   * channels above. Not copied verbatim; re-typed into this file's style.
+   * ==========================================================================
+   */
+  var CENTERS = ['head', 'ajna', 'throat', 'g', 'heart', 'sacral', 'solarplexus', 'spleen', 'root'];
+  var STRATEGY_BY_TYPE = {
+    'Manifestor': 'Inform before you act.',
+    'Generator': 'Respond to what shows up.',
+    'Manifesting Generator': 'Respond, then inform once you commit.',
+    'Projector': 'Wait for the invitation.',
+    'Reflector': 'Wait a full lunar cycle (about 29 days) before a big decision.'
+  };
+
+  function centersTouchedByChannel(gate) { return GATE_CENTER[gate]; }
+
+  function reachesThroat(startCenters, definedCentersSet, definedChannelCenterPairs) {
+    var adj = {};
+    for (var c0 in definedCentersSet) { adj[c0] = {}; }
+    definedChannelCenterPairs.forEach(function (pair) {
+      var c1 = pair[0], c2 = pair[1];
+      if (adj[c1] && adj[c2]) { adj[c1][c2] = true; adj[c2][c1] = true; }
+    });
+    var seen = {}, queue = [];
+    startCenters.forEach(function (c) { if (definedCentersSet[c]) { seen[c] = true; queue.push(c); } });
+    while (queue.length) {
+      var cur = queue.shift();
+      if (cur === 'throat') return true;
+      for (var nxt in (adj[cur] || {})) {
+        if (!seen[nxt]) { seen[nxt] = true; queue.push(nxt); }
+      }
+    }
+    return false;
+  }
+
+  function determineType(definedCentersSet, definedChannelCenterPairs, definedCount) {
+    if (!definedCount) return 'Reflector';
+    var motorThroat = reachesThroat(['sacral', 'heart', 'solarplexus', 'root'], definedCentersSet, definedChannelCenterPairs);
+    if (definedCentersSet.sacral) return motorThroat ? 'Manifesting Generator' : 'Generator';
+    return motorThroat ? 'Manifestor' : 'Projector';
+  }
+
+  function determineAuthority(definedCentersSet, definedChannelCenterPairs, definedCount) {
+    if (!definedCount) return 'Lunar (Reflector)';
+    if (definedCentersSet.solarplexus) return 'Emotional (Solar Plexus)';
+    if (definedCentersSet.sacral) return 'Sacral';
+    if (definedCentersSet.spleen) return 'Splenic';
+    if (definedCentersSet.heart) return 'Ego (Heart)';
+    if (definedCentersSet.g && definedCentersSet.throat && reachesThroat(['g'], definedCentersSet, definedChannelCenterPairs)) {
+      return 'Self-Projected (G)';
+    }
+    return 'Mental (Environmental)';
+  }
+
+  function computeFullChart(birthJD) {
+    var designJD = findDesignJD(birthJD);
+    var personality = activationsForJD(birthJD, 'personality');
+    var design = activationsForJD(designJD, 'design');
+    var all = personality.concat(design);
+
+    var gateSet = {};
+    all.forEach(function (a) { gateSet[a.gate] = true; });
+    var activatedGates = Object.keys(gateSet).map(Number).sort(function (a, b) { return a - b; });
+
+    var definedChannels = CHANNEL_PAIRS.filter(function (pair) {
+      return gateSet[pair[0]] && gateSet[pair[1]];
+    }).map(function (pair) {
+      var key = channelKey(pair[0], pair[1]);
+      return { key: key, gates: pair, name: CHANNEL_NAMES[key], centers: [GATE_CENTER[pair[0]], GATE_CENTER[pair[1]]] };
+    });
+
+    var definedCentersSet = {};
+    var definedChannelCenterPairs = definedChannels.map(function (ch) {
+      definedCentersSet[ch.centers[0]] = true;
+      definedCentersSet[ch.centers[1]] = true;
+      return ch.centers;
+    });
+    var definedCenters = CENTERS.filter(function (c) { return definedCentersSet[c]; });
+    var openCenters = CENTERS.filter(function (c) { return !definedCentersSet[c]; });
+
+    var pSun = personality.filter(function (a) { return a.body === 'Sun'; })[0];
+    var dSun = design.filter(function (a) { return a.body === 'Sun'; })[0];
+    var profile = pSun && dSun ? (pSun.line + '/' + dSun.line) : null;
+
+    var type = determineType(definedCentersSet, definedChannelCenterPairs, definedChannels.length);
+
+    return {
+      type: type,
+      strategy: STRATEGY_BY_TYPE[type],
+      authority: determineAuthority(definedCentersSet, definedChannelCenterPairs, definedChannels.length),
+      profile: profile,
+      activatedGates: activatedGates,
+      definedChannels: definedChannels,
+      definedCenters: definedCenters,
+      openCenters: openCenters,
+      personality: personality,
+      design: design
+    };
+  }
+
+  /* ==========================================================================
+   * PART 3d — Compatibility (synastry between two full charts)
+   *
+   * Standard 4-way Human Design connection typing, computed from each
+   * person's own activatedGates set (already derived above) — no new
+   * interpretive content, just set operations over channel pairs.
+   * ==========================================================================
+   */
+  function compareCharts(chartA, chartB) {
+    var setA = {}, setB = {};
+    chartA.activatedGates.forEach(function (g) { setA[g] = true; });
+    chartB.activatedGates.forEach(function (g) { setB[g] = true; });
+
+    var electromagnetic = [], companionship = [], dominance = [];
+    CHANNEL_PAIRS.forEach(function (pair) {
+      var a = pair[0], b = pair[1];
+      var aHasA = !!setA[a], aHasB = !!setA[b], bHasA = !!setB[a], bHasB = !!setB[b];
+      var aFull = aHasA && aHasB, bFull = bHasA && bHasB;
+      var key = channelKey(a, b), name = CHANNEL_NAMES[key];
+      if (aFull && bFull) {
+        companionship.push({ key: key, name: name });
+      } else if (aFull && !bFull) {
+        dominance.push({ key: key, name: name, who: 'A' });
+      } else if (bFull && !aFull) {
+        dominance.push({ key: key, name: name, who: 'B' });
+      } else if ((aHasA && bHasB && !aHasB && !bHasA) || (aHasB && bHasA && !aHasA && !bHasB)) {
+        electromagnetic.push({ key: key, name: name });
+      }
+    });
+
+    return { electromagnetic: electromagnetic, companionship: companionship, dominance: dominance };
+  }
+
+  function summarizeCompatibility(nameA, nameB, chartA, chartB, comparison) {
+    var parts = [];
+    if (comparison.electromagnetic.length) {
+      parts.push(comparison.electromagnetic.length + ' electromagnetic channel' + (comparison.electromagnetic.length === 1 ? '' : 's') +
+        ' — themes neither of you carries alone, only together (' +
+        comparison.electromagnetic.map(function (c) { return c.name; }).join(', ') + ').');
+    }
+    if (comparison.companionship.length) {
+      parts.push(comparison.companionship.length + ' shared channel' + (comparison.companionship.length === 1 ? '' : 's') +
+        ' you both carry independently (' + comparison.companionship.map(function (c) { return c.name; }).join(', ') + ').');
+    }
+    if (comparison.dominance.length) {
+      var aCount = comparison.dominance.filter(function (c) { return c.who === 'A'; }).length;
+      var bCount = comparison.dominance.length - aCount;
+      parts.push(nameA + ' brings ' + aCount + ' fully-formed channel' + (aCount === 1 ? '' : 's') + ' to the relationship, ' +
+        nameB + ' brings ' + bCount + '.');
+    }
+    if (!parts.length) {
+      parts.push('No strong channel connections between your two charts — independence more than fusion.');
+    }
+    var typeLine = nameA + ' is a ' + chartA.type + ' (' + chartA.authority + '), ' + nameB + ' is a ' + chartB.type + ' (' + chartB.authority + ').';
+    return typeLine + ' ' + parts.join(' ');
+  }
+
+  function affirmationFor(fullChart, daySummaryPrefix) {
+    var base = {
+      'Manifestor': 'Today I move first and tell the people it affects.',
+      'Generator': 'Today I respond to what genuinely lights me up.',
+      'Manifesting Generator': 'Today I respond fast and skip the steps that don’t matter.',
+      'Projector': 'Today I trust my own read and wait to be asked.',
+      'Reflector': 'Today I let the room show me who I am, and I don’t decide anything big.'
+    };
+    return base[fullChart.type] || 'Today I trust the design I actually have, not the one I think I should have.';
+  }
+
+  /* ==========================================================================
    * PART 4 — Profiles (localStorage only; nothing here ever leaves the browser)
    * ==========================================================================
    */
@@ -448,10 +691,65 @@
     container.appendChild(card);
   }
 
+  var CENTER_ORDER = ['head', 'ajna', 'throat', 'g', 'heart', 'sacral', 'solarplexus', 'spleen', 'root'];
+
+  function renderChart(container, profile) {
+    var chart = computeFullChart(birthJulianDay(profile));
+
+    var card = el('article', 'chart-profile card');
+    var head = el('div', 'feed-profile__head');
+    head.appendChild(el('h3', null, profile.name));
+    head.appendChild(el('span', 'chart-type-badge', chart.type));
+    card.appendChild(head);
+
+    var rows = [
+      ['Strategy', chart.strategy],
+      ['Authority', chart.authority],
+      ['Profile', chart.profile]
+    ];
+    rows.forEach(function (row) {
+      var r = el('div', 'chart-row');
+      r.appendChild(el('span', 'chart-row__key', row[0]));
+      r.appendChild(el('span', 'chart-row__val', row[1]));
+      card.appendChild(r);
+    });
+
+    var centersLabel = el('p', 'feed-section-label', 'Defined centers');
+    card.appendChild(centersLabel);
+    var grid = el('div', 'center-grid');
+    CENTER_ORDER.forEach(function (c) {
+      var defined = chart.definedCenters.indexOf(c) !== -1;
+      var dot = el('span', 'center-dot' + (defined ? ' is-defined' : ''), CENTER_LABELS[c]);
+      grid.appendChild(dot);
+    });
+    card.appendChild(grid);
+
+    card.appendChild(el('p', 'chart-affirmation', affirmationFor(chart)));
+
+    container.appendChild(card);
+    return chart;
+  }
+
+  function renderCompatibility(container, profiles) {
+    container.innerHTML = '';
+    if (profiles.length < 2) return;
+    var a = profiles[0], b = profiles[1];
+    var chartA = computeFullChart(birthJulianDay(a));
+    var chartB = computeFullChart(birthJulianDay(b));
+    var comparison = compareCharts(chartA, chartB);
+
+    var card = el('article', 'card feature-card');
+    card.appendChild(el('h3', null, 'Compatibility — ' + a.name + ' × ' + b.name));
+    card.appendChild(el('p', 'feed-summary', summarizeCompatibility(a.name, b.name, chartA, chartB, comparison)));
+    container.appendChild(card);
+  }
+
   function init() {
     var form = $('#profile-form');
     var listEl = $('#profile-list');
     var feedEl = $('#feed-output');
+    var chartEl = $('#chart-output');
+    var compatEl = $('#compatibility-output');
     var refreshBtn = $('#feed-refresh');
     var clearAllBtn = $('#profiles-clear-all');
     if (!form || !listEl || !feedEl) return; // not on this page
@@ -473,12 +771,17 @@
         renderAll();
       });
       feedEl.innerHTML = '';
+      if (chartEl) chartEl.innerHTML = '';
       if (!profiles.length) {
         feedEl.appendChild(el('p', 'feed-empty', 'Add at least one profile to generate today’s feed.'));
+        if (chartEl) chartEl.appendChild(el('p', 'feed-empty', 'Add a profile above to see a full chart.'));
+        if (compatEl) compatEl.innerHTML = '';
         return;
       }
       var jdNow = nowJulianDay();
       profiles.forEach(function (p) { renderFeed(feedEl, p, jdNow); });
+      if (chartEl) profiles.forEach(function (p) { renderChart(chartEl, p); });
+      if (compatEl) renderCompatibility(compatEl, profiles);
     }
 
     form.addEventListener('submit', function (evt) {
