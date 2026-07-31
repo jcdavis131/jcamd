@@ -221,8 +221,18 @@
     var lons = bodyLongitudes13(jd);
     return BODIES13.map(function (body) {
       var gl = longitudeToGateAndLine(lons[body]);
-      return { body: body, gate: gl.gate, line: gl.line, stream: stream };
+      return { body: body, gate: gl.gate, line: gl.line, lon: lons[body], stream: stream };
     });
+  }
+
+  // Tropical zodiac — the same ecliptic longitude already computed above,
+  // just divided at 0 deg (the equinox point) into 12 equal 30 deg signs
+  // instead of at 302.25 deg into 64 gates. No new astronomy, no new
+  // precision risk.
+  var ZODIAC_SIGNS = ['Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo',
+    'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'];
+  function longitudeToSign(lon) {
+    return ZODIAC_SIGNS[Math.floor(norm360(lon) / 30)];
   }
 
   /* ==========================================================================
@@ -421,6 +431,24 @@
    * ==========================================================================
    */
   var CENTERS = ['head', 'ajna', 'throat', 'g', 'heart', 'sacral', 'solarplexus', 'spleen', 'root'];
+
+  // Informal Human Design center <-> yogic chakra bridge. Not canon in
+  // either system, and not settled across sources: Human Design has 9
+  // centers, the classical system has 7, so two centers genuinely have no
+  // single agreed match — marked null here rather than guessed. The other
+  // six are near-universal pairings (several share the literal name).
+  var CHAKRA_BRIDGE = {
+    head: 'Crown (Sahasrara)',
+    ajna: 'Third Eye (Ajna) — same name in both systems by design',
+    throat: 'Throat (Vishuddha)',
+    g: null,
+    heart: null,
+    sacral: 'Sacral (Svadhisthana)',
+    solarplexus: 'Solar Plexus (Manipura)',
+    spleen: null,
+    root: 'Root (Muladhara)'
+  };
+
   var STRATEGY_BY_TYPE = {
     'Manifestor': 'Inform before you act.',
     'Generator': 'Respond to what shows up.',
@@ -723,6 +751,37 @@
       grid.appendChild(dot);
     });
     card.appendChild(grid);
+
+    var sunSign = chart.personality.filter(function (a) { return a.body === 'Sun'; })[0];
+    var moonSign = chart.personality.filter(function (a) { return a.body === 'Moon'; })[0];
+    var astroLabel = el('p', 'feed-section-label', 'Astrology (tropical, at birth)');
+    card.appendChild(astroLabel);
+    var astroRow = el('div', 'chart-row');
+    astroRow.appendChild(el('span', 'chart-row__key', 'Sun / Moon'));
+    astroRow.appendChild(el('span', 'chart-row__val', longitudeToSign(sunSign.lon) + ' Sun, ' + longitudeToSign(moonSign.lon) + ' Moon'));
+    card.appendChild(astroRow);
+    var otherPlanets = chart.personality.filter(function (a) {
+      return ['Sun', 'Moon', 'Earth', 'NorthNode', 'SouthNode'].indexOf(a.body) === -1;
+    });
+    var planetsLine = otherPlanets.map(function (a) { return a.body + ' in ' + longitudeToSign(a.lon); }).join(', ');
+    var planetsRow = el('div', 'chart-row');
+    planetsRow.appendChild(el('span', 'chart-row__key', 'Planets'));
+    planetsRow.appendChild(el('span', 'chart-row__val', planetsLine));
+    card.appendChild(planetsRow);
+
+    var chakraDefined = chart.definedCenters.filter(function (c) { return CHAKRA_BRIDGE[c]; });
+    if (chakraDefined.length) {
+      var chakraLabel = el('p', 'feed-section-label', 'Chakra bridge (informal)');
+      card.appendChild(chakraLabel);
+      var chakraNote = el('p', 'feed-item__meta feed-item__meta--standalone', 'Not canon in either system — Human Design has 9 centers, the classical chakra system has 7, so this is only a common informal cross-reference for the centers where one exists.');
+      card.appendChild(chakraNote);
+      chakraDefined.forEach(function (c) {
+        var row = el('div', 'chart-row');
+        row.appendChild(el('span', 'chart-row__key', CENTER_LABELS[c]));
+        row.appendChild(el('span', 'chart-row__val', CHAKRA_BRIDGE[c]));
+        card.appendChild(row);
+      });
+    }
 
     card.appendChild(el('p', 'chart-affirmation', affirmationFor(chart)));
 
