@@ -1021,9 +1021,23 @@
         return;
       }
       var jdNow = nowJulianDay();
-      profiles.forEach(function (p) { renderFeed(feedEl, p, jdNow); });
-      if (chartEl) profiles.forEach(function (p) { renderChart(chartEl, p); });
-      if (compatEl) renderCompatibility(compatEl, profiles);
+      // Each profile renders independently — one malformed/corrupted stored
+      // profile (e.g. from a future schema change) shouldn't take down the
+      // feed for every other profile too.
+      profiles.forEach(function (p) {
+        try { renderFeed(feedEl, p, jdNow); }
+        catch (err) { feedEl.appendChild(el('p', 'feed-empty', 'Couldn’t compute a feed for "' + (p && p.name) + '" — try removing and re-adding that profile.')); }
+      });
+      if (chartEl) {
+        profiles.forEach(function (p) {
+          try { renderChart(chartEl, p); }
+          catch (err) { chartEl.appendChild(el('p', 'feed-empty', 'Couldn’t compute a chart for "' + (p && p.name) + '" — try removing and re-adding that profile.')); }
+        });
+      }
+      if (compatEl) {
+        try { renderCompatibility(compatEl, profiles); }
+        catch (err) { compatEl.innerHTML = ''; }
+      }
     }
 
     form.addEventListener('submit', function (evt) {
