@@ -8,7 +8,7 @@ Personal consulting site for J. Cameron Davis (workforce intelligence). Static H
 | `family/index.html` | Family Neural Architecture — architecture write-up plus a live, client-side personalized feed |
 | `assets/site.css` | Drafting-board UI |
 | `assets/family.css` | Components used only by `/family/` (code blocks, callouts, wheel figure, profile form, feed cards) |
-| `assets/family-app.js` | `/family/`'s feed engine — client-side ephemeris, 64-gate wheel, 36-channel map, profile storage. No dependencies, no backend; birth data lives only in the browser's `localStorage` |
+| `assets/family-app.js` | `/family/`'s engine — client-side ephemeris, 64-gate wheel, 36-channel map, full Personality/Design bodygraph (Type, Strategy, Authority, Profile, defined centers), relationship compatibility, profile storage. No dependencies, no backend; birth data lives only in the browser's `localStorage` |
 | `assets/site.js` | Nav scroll-spy, mobile menu |
 | `assets/github.js` | GitHub profile, activity, repos |
 

@@ -33,6 +33,7 @@
     <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">Menu</button>
     <nav class="site-nav" id="site-nav" aria-label="Primary">
       <a href="#feed">Your feed</a>
+      <a href="#chart">Full chart</a>
       <a href="#architecture">Architecture</a>
       <a href="#wheel">The wheel</a>
       <a href="#profiles">Profiles</a>
@@ -117,6 +118,57 @@
     <div class="callout">
       <p class="callout__label">On what this is (and isn't)</p>
       <p>This is a real implementation of the architecture doc's wheel and channel math, not a mockup — but it's a simplified public demo of it, not the private instance. There's no natal memory database, no Ray workers, no graph or RAG layer here; profiles live in this tab's local storage and the chart recomputes from scratch on every visit. The prompts each channel shows are original, secular, written by hand for this page — framed as a possibility for the day, not a claim about you.</p>
+    </div>
+  </section>
+
+  <section class="section" id="chart" aria-labelledby="chart-heading">
+    <h2 class="sheet-label" id="chart-heading">Full chart</h2>
+    <p class="section-intro">The feed above uses one moment and 10 bodies — enough for a daily signal. A full chart uses two: <strong>Personality</strong> (conscious, the exact birth moment) and <strong>Design</strong> (unconscious, the moment the Sun was exactly 88° of ecliptic arc earlier — solved numerically here, not approximated as a flat "88 days", since Earth's orbital speed varies enough across the year to shift that by several days). Together, 13 points each side reveal Type, Strategy, Authority, Profile, and which of the 9 centers are defined — drawn below as an actual bodygraph, not just a list.</p>
+
+    <div id="chart-output" class="chart-output" aria-live="polite">
+      <p class="feed-empty">Add a profile above to see a full chart.</p>
+    </div>
+
+    <div id="compatibility-output" class="compatibility-output" aria-live="polite"></div>
+
+    <h3 class="sheet-label section-heading--spaced">Glossary</h3>
+    <div class="spec-row">
+      <span class="spec-row__key">Type</span>
+      <span class="spec-row__val">One of five energy strategies — Manifestor, Generator, Manifesting Generator, Projector, or Reflector — derived from which centers are defined and whether a motor center (Sacral, Heart, Solar Plexus, or Root) has a defined channel reaching the Throat.</span>
+    </div>
+    <div class="spec-row">
+      <span class="spec-row__key">Strategy</span>
+      <span class="spec-row__val">A fixed, one-line rule of thumb attached to Type — not computed per person, just looked up.</span>
+    </div>
+    <div class="spec-row">
+      <span class="spec-row__key">Authority</span>
+      <span class="spec-row__val">Which defined center gets first say in a decision, checked in a fixed priority order: Solar Plexus, then Sacral, then Spleen, then Heart, then a G-to-Throat connection, then "Mental" if only awareness centers are defined, then Lunar for Reflectors.</span>
+    </div>
+    <div class="spec-row">
+      <span class="spec-row__key">Profile</span>
+      <span class="spec-row__val">Two numbers 1–6, e.g. "2/4" — the line of your Personality Sun gate over the line of your Design Sun gate. Each gate spans 6 lines of 0.9375° apiece.</span>
+    </div>
+    <div class="spec-row">
+      <span class="spec-row__key">Defined centers</span>
+      <span class="spec-row__val">A center counts as defined only when a full channel — both its gates — is activated somewhere across your 26 possible activations (13 Personality + 13 Design). A single gate alone never defines a center.</span>
+    </div>
+    <div class="spec-row">
+      <span class="spec-row__key">Bodygraph</span>
+      <span class="spec-row__val">The 9-center diagram — shapes filled where defined, all 36 possible channels drawn faint with the active ones bold on top. Tap a shape or line for its name. An original layout built only from the same verified gate/center/channel data as the rest of this page, not traced from any app's artwork.</span>
+    </div>
+    <div class="spec-row">
+      <span class="spec-row__key">Zodiac signs</span>
+      <span class="spec-row__val">The standard tropical zodiac — the same ecliptic longitude the gate wheel uses, just cut into 12 equal 30° signs starting at the equinox point instead of 64 gates starting at 302.25°. No new astronomy, no new margin of error.</span>
+    </div>
+    <div class="spec-row">
+      <span class="spec-row__key">Chakra bridge</span>
+      <span class="spec-row__val">An informal cross-reference some practitioners draw between Human Design's 9 centers and the classical 7-chakra system — not canon in either system. Six centers have a near-universal pairing (several share the literal name); three don't, since 9 doesn't divide evenly into 7, and those are marked as having no single agreed match rather than guessed.</span>
+    </div>
+
+    <h3 class="sheet-label section-heading--spaced">Scope</h3>
+    <div class="callout">
+      <p class="callout__label">What's deliberately not here</p>
+      <p>Full Type/Authority/Profile computation, relationship compatibility, tropical Sun/Moon/planet signs, an informal chakra cross-reference, and this glossary cover what a typical paid Human Design app's chart, relationship, and astrology screens do. Three things are still deliberately left out: a conversational AI assistant (needs a real backend and an ongoing LLM bill this static site doesn't have), a Rising sign / house system (needs your birth <em>location</em>, not just date and time — more personal data than this chart currently asks for), and any account, subscription, or payment system (this is a private family tool, not a product).</p>
     </div>
   </section>
 
@@ -498,6 +550,7 @@ def generate_insights(natal_gates, transit_gates, age) -&gt; dict:
         <p class="site-footer__title">This page</p>
         <ul class="site-footer__list">
           <li><a href="#feed">Your feed</a></li>
+          <li><a href="#chart">Full chart</a></li>
           <li><a href="#architecture">Architecture</a></li>
           <li><a href="#wheel">The wheel</a></li>
           <li><a href="#profiles">Profiles</a></li>
