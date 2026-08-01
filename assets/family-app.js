@@ -721,13 +721,173 @@
 
   var CENTER_ORDER = ['head', 'ajna', 'throat', 'g', 'heart', 'sacral', 'solarplexus', 'spleen', 'root'];
 
+  /* ==========================================================================
+   * PART 6 — The bodygraph diagram
+   *
+   * The one visual every Human Design app has and this page didn't: the 9
+   * centers as shapes, all 36 possible channels drawn faint in the
+   * background, the person's (or the pair's) actual activations drawn
+   * bold on top. This is an original layout and rendering — not traced
+   * from any app's or the official Jovian Archive artwork — built only
+   * from the already-verified GATE_CENTER / CHANNEL_PAIRS data, so the
+   * topology (which shape connects to which) is exactly as correct as
+   * the rest of the chart, even though the exact pixel layout is my own.
+   * ==========================================================================
+   */
+  var CENTER_POS = {
+    head:        { x: 160, y: 34,  shape: 'tri-up' },
+    ajna:        { x: 160, y: 102, shape: 'tri-down' },
+    throat:      { x: 160, y: 174, shape: 'square' },
+    g:           { x: 160, y: 256, shape: 'diamond' },
+    heart:       { x: 240, y: 222, shape: 'tri-left' },
+    spleen:      { x: 78,  y: 336, shape: 'tri-right' },
+    sacral:      { x: 160, y: 336, shape: 'square' },
+    solarplexus: { x: 242, y: 336, shape: 'tri-left' },
+    root:        { x: 160, y: 416, shape: 'square' }
+  };
+
+  function centerShapePoints(pos) {
+    var x = pos.x, y = pos.y;
+    if (pos.shape === 'square') return null; // rendered as <rect>
+    if (pos.shape === 'diamond') return [x, y - 22, x + 22, y, x, y + 22, x - 22, y].join(',');
+    if (pos.shape === 'tri-up') return [x - 20, y + 16, x + 20, y + 16, x, y - 18].join(',');
+    if (pos.shape === 'tri-down') return [x - 20, y - 16, x + 20, y - 16, x, y + 18].join(',');
+    if (pos.shape === 'tri-left') return [x + 18, y - 20, x + 18, y + 20, x - 18, y].join(',');
+    if (pos.shape === 'tri-right') return [x - 18, y - 20, x - 18, y + 20, x + 18, y].join(',');
+    return '';
+  }
+
+  // Every channel's center-pair, with an offset index among channels that
+  // share the same pair (several do — e.g. three different channels all
+  // connect g and throat) so their lines fan out instead of overlapping.
+  var CHANNEL_GEOMETRY = (function () {
+    var byPairCount = {};
+    return CHANNEL_PAIRS.map(function (pair) {
+      var key = channelKey(pair[0], pair[1]);
+      var centers = [GATE_CENTER[pair[0]], GATE_CENTER[pair[1]]].sort();
+      var pairKey = centers[0] + '-' + centers[1];
+      var idx = byPairCount[pairKey] = (byPairCount[pairKey] || 0);
+      byPairCount[pairKey]++;
+      return { key: key, centers: centers, pairKey: pairKey, idxInPair: idx };
+    }).map(function (g) {
+      g.countInPair = byPairCount[g.pairKey];
+      return g;
+    });
+  })();
+
+  function bodygraphSVG(definedCentersA, activeChannelsA, definedCentersB, activeChannelsB) {
+    var dual = !!definedCentersB;
+    var lines = CHANNEL_GEOMETRY.map(function (g) {
+      var p1 = CENTER_POS[g.centers[0]], p2 = CENTER_POS[g.centers[1]];
+      var dx = p2.x - p1.x, dy = p2.y - p1.y, len = Math.sqrt(dx * dx + dy * dy) || 1;
+      var px = -dy / len, py = dx / len;
+      var spread = 12;
+      var offset = (g.idxInPair - (g.countInPair - 1) / 2) * spread;
+      var x1 = p1.x + px * offset, y1 = p1.y + py * offset;
+      var x2 = p2.x + px * offset, y2 = p2.y + py * offset;
+
+      var aActive = activeChannelsA && activeChannelsA[g.key];
+      var bActive = dual && activeChannelsB[g.key];
+      var cls = 'bg-channel';
+      if (dual) {
+        if (aActive && bActive) cls += ' is-both';
+        else if (aActive) cls += ' is-a';
+        else if (bActive) cls += ' is-b';
+      } else if (aActive) {
+        cls += ' is-active';
+      }
+      var coords = ' x1="' + x1.toFixed(1) + '" y1="' + y1.toFixed(1) + '" x2="' + x2.toFixed(1) + '" y2="' + y2.toFixed(1) + '"';
+      // A wide, invisible line drawn under the thin visible one, purely so
+      // the tap/click target isn't limited to a 1-3px-wide stroke.
+      var hitLine = '<line class="bg-channel-hit" data-channel="' + g.key + '"' + coords + '></line>';
+      var visLine = '<line class="' + cls + '" data-channel="' + g.key + '"' + coords + '></line>';
+      return hitLine + visLine;
+    }).join('');
+
+    var shapes = CENTER_ORDER.map(function (c) {
+      var pos = CENTER_POS[c];
+      var aDef = definedCentersA[c];
+      var bDef = dual && definedCentersB[c];
+      var cls = 'bg-center';
+      if (dual) {
+        if (aDef && bDef) cls += ' is-both';
+        else if (aDef) cls += ' is-a';
+        else if (bDef) cls += ' is-b';
+      } else if (aDef) {
+        cls += ' is-defined';
+      }
+      var shapeMarkup;
+      if (pos.shape === 'square') {
+        shapeMarkup = '<rect class="' + cls + '" data-center="' + c + '" x="' + (pos.x - 20) + '" y="' + (pos.y - 20) + '" width="40" height="40"></rect>';
+      } else {
+        shapeMarkup = '<polygon class="' + cls + '" data-center="' + c + '" points="' + centerShapePoints(pos) + '"></polygon>';
+      }
+      return shapeMarkup;
+    }).join('');
+
+    var title = dual ? 'Bodygraph overlay' : 'Bodygraph';
+    return '<svg class="bodygraph" viewBox="0 0 320 460" role="img" aria-label="' + title + ': 9 centers, filled where defined, connected by channel lines highlighted where active.">' +
+      '<title>' + title + '</title>' + lines + shapes + '</svg>';
+  }
+
+  function wireBodygraphCaption(wrapper, chart, chartB) {
+    var caption = wrapper.querySelector('.bg-caption');
+    if (!caption) return;
+    wrapper.querySelector('svg').addEventListener('click', function (evt) {
+      var t = evt.target;
+      if (t.dataset && t.dataset.center) {
+        var c = t.dataset.center;
+        var aDef = chart.definedCenters.indexOf(c) !== -1;
+        var text = CENTER_LABELS[c] + ': ' + (aDef ? 'defined' : 'open') + (chartB ? ' for ' + wrapper.dataset.nameA : '');
+        if (chartB) {
+          var bDef = chartB.definedCenters.indexOf(c) !== -1;
+          text += '; ' + (bDef ? 'defined' : 'open') + ' for ' + wrapper.dataset.nameB;
+        }
+        caption.textContent = text;
+      } else if (t.dataset && t.dataset.channel) {
+        var key = t.dataset.channel;
+        var name = CHANNEL_NAMES[key] || key;
+        caption.textContent = key + ' ' + name + (CHANNEL_PROMPTS[key] ? ' — ' + CHANNEL_PROMPTS[key] : '');
+      }
+    });
+  }
+
+  // A small ring showing X of 9 centers defined — the same dashed-circle
+  // arc trick as the wheel diagram earlier on the page (circumference
+  // 2*pi*26 = 163.36, so each of the 9 centers is one 18.15-unit arc).
+  function definitionRingSVG(definedCount) {
+    var r = 26, circumference = 2 * Math.PI * r;
+    var filled = circumference * (definedCount / 9);
+    return '<svg class="def-ring" viewBox="0 0 64 64" role="img" aria-label="' + definedCount + ' of 9 centers defined">' +
+      '<circle cx="32" cy="32" r="' + r + '" class="def-ring__track"></circle>' +
+      '<circle cx="32" cy="32" r="' + r + '" class="def-ring__fill" stroke-dasharray="' + filled.toFixed(1) + ' ' + circumference.toFixed(1) + '" transform="rotate(-90 32 32)"></circle>' +
+      '<text x="32" y="37" text-anchor="middle" class="def-ring__text">' + definedCount + '/9</text>' +
+      '</svg>';
+  }
+
+  function channelSetFor(chart) {
+    var set = {};
+    chart.definedChannels.forEach(function (ch) { set[ch.key] = true; });
+    return set;
+  }
+  function centerSetFor(chart) {
+    var set = {};
+    chart.definedCenters.forEach(function (c) { set[c] = true; });
+    return set;
+  }
+
   function renderChart(container, profile) {
     var chart = computeFullChart(birthJulianDay(profile));
 
     var card = el('article', 'chart-profile card');
     var head = el('div', 'feed-profile__head');
     head.appendChild(el('h3', null, profile.name));
-    head.appendChild(el('span', 'chart-type-badge', chart.type));
+    var badgeWrap = el('div', 'chart-badge-wrap');
+    var ringWrap = el('div', 'def-ring-wrap');
+    ringWrap.innerHTML = definitionRingSVG(chart.definedCenters.length);
+    badgeWrap.appendChild(ringWrap);
+    badgeWrap.appendChild(el('span', 'chart-type-badge', chart.type));
+    head.appendChild(badgeWrap);
     card.appendChild(head);
 
     var rows = [
@@ -741,6 +901,16 @@
       r.appendChild(el('span', 'chart-row__val', row[1]));
       card.appendChild(r);
     });
+
+    var bgLabel = el('p', 'feed-section-label', 'Bodygraph — tap a center or channel');
+    card.appendChild(bgLabel);
+    var bgWrap = el('div', 'bodygraph-wrap');
+    bgWrap.dataset.nameA = profile.name;
+    bgWrap.innerHTML = bodygraphSVG(centerSetFor(chart), channelSetFor(chart));
+    var bgCaption = el('p', 'bg-caption', 'Filled shapes are defined centers; bold lines are your active channels.');
+    bgWrap.appendChild(bgCaption);
+    card.appendChild(bgWrap);
+    wireBodygraphCaption(bgWrap, chart);
 
     var centersLabel = el('p', 'feed-section-label', 'Defined centers');
     card.appendChild(centersLabel);
@@ -800,6 +970,19 @@
     var card = el('article', 'card feature-card');
     card.appendChild(el('h3', null, 'Compatibility — ' + a.name + ' × ' + b.name));
     card.appendChild(el('p', 'feed-summary', summarizeCompatibility(a.name, b.name, chartA, chartB, comparison)));
+
+    var legend = el('p', 'feed-item__meta feed-item__meta--standalone',
+      a.name + ' only · ' + b.name + ' only · both — tap a shape or line for detail');
+    card.appendChild(legend);
+    var bgWrap = el('div', 'bodygraph-wrap bodygraph-wrap--dual');
+    bgWrap.dataset.nameA = a.name;
+    bgWrap.dataset.nameB = b.name;
+    bgWrap.innerHTML = bodygraphSVG(centerSetFor(chartA), channelSetFor(chartA), centerSetFor(chartB), channelSetFor(chartB));
+    var bgCaption = el('p', 'bg-caption', 'Tap a center or channel to see who has it.');
+    bgWrap.appendChild(bgCaption);
+    card.appendChild(bgWrap);
+    wireBodygraphCaption(bgWrap, chartA, chartB);
+
     container.appendChild(card);
   }
 
