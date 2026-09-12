@@ -1,6 +1,6 @@
 # jcamd.com
 
-Personal portfolio for Cam Davis — builder of AI products in Austin,
+Personal portfolio for JC Davis — builder of AI products in Austin,
 Texas. Static HTML/CSS, no build step, served by the Vercel project `jcamd`.
 
 | Path | Role |
