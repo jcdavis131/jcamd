@@ -3,125 +3,172 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Inside the Machines — CPU vs GPU vs DPU, Exploded | JC Davis</title>
-<meta name="description" content="An interactive exploded-diagram deep dive into the physical makeup of a CPU, a GPU, and a DPU: package, substrate, dies, caches, memory, interconnect — explained at four levels, from ELI5 to expert.">
+<title>CPU vs GPU vs DPU — Exploded in 3D | JC Davis</title>
+<meta name="description" content="Three processors exploded in interactive 3D: EPYC 9654, H100, BlueField-3. Every block labeled, every difference explained — ELI5 to expert.">
 <link rel="canonical" href="https://jcamd.com/chips/">
 <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
-<meta name="theme-color" content="#171410">
+<meta name="theme-color" content="#14110d">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="JC Davis">
-<meta property="og:title" content="Inside the Machines — CPU vs GPU vs DPU, Exploded">
-<meta property="og:description" content="Three processors, exploded layer by layer: what a CPU, GPU, and DPU are physically made of, and why they differ. ELI5 to expert.">
+<meta property="og:title" content="CPU vs GPU vs DPU — Exploded in 3D">
+<meta property="og:description" content="Three chips, exploded layer by layer in 3D. Hover every block, compare every component class, understand why they differ.">
 <meta property="og:url" content="https://jcamd.com/chips/">
 <meta name="twitter:card" content="summary_large_image">
 <style>
 :root{
-  --bg:#171410; --bg2:#1e1a14; --ink:#f2ede2; --muted:#a89b85;
-  --line:rgba(242,237,226,.14); --accent:#d08a5a; --accent-deep:#b26a3c;
-  --cpu:#e08a4c; --gpu:#58b0a6; --dpu:#7aa0d8; --card:#201b14; --radius:14px;
+  --bg:#14110d; --bg2:#1b1712; --ink:#f2ede2; --muted:#a89b85;
+  --line:rgba(242,237,226,.14); --accent:#d08a5a;
+  --cpu:#e08a4c; --gpu:#58b0a6; --dpu:#7aa0d8;
+  --card:#1e1913; --radius:14px;
 }
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
 body{margin:0;background:var(--bg);color:var(--ink);
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,"Helvetica Neue",Arial,sans-serif;
-  -webkit-font-smoothing:antialiased;line-height:1.65;font-size:16px}
-.wrap{max-width:1060px;margin:0 auto;padding:0 22px}
-.wrap.narrow{max-width:760px}
+  -webkit-font-smoothing:antialiased;line-height:1.6;font-size:16px}
+.wrap{max-width:1180px;margin:0 auto;padding:0 22px}
 /* 40px sticky nav */
-.top{position:sticky;top:0;z-index:60;background:rgba(23,20,16,.92);
+.top{position:sticky;top:0;z-index:80;background:rgba(20,17,13,.94);
   backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
-.top-in{display:flex;align-items:center;justify-content:space-between;min-height:40px;padding:8px 22px;max-width:1060px;margin:0 auto}
+.top-in{display:flex;align-items:center;justify-content:space-between;min-height:40px;padding:8px 22px;max-width:1280px;margin:0 auto}
 .brand{font-family:Georgia,"Times New Roman",serif;font-weight:bold;color:var(--ink);text-decoration:none;font-size:1rem}
 .top nav{display:flex;gap:18px;flex-wrap:wrap}
 .top nav a{color:var(--muted);text-decoration:none;font-size:.85rem}
 .top nav a:hover,.top nav a.on{color:var(--ink)}
-/* hero */
-.hero{padding:64px 0 40px;border-bottom:1px solid var(--line);
-  background-image:radial-gradient(ellipse 70% 55% at 50% -8%,rgba(208,138,90,.14),transparent),
-  radial-gradient(rgba(242,237,226,.05) 1px,transparent 1px);background-size:auto,26px 26px}
-.kicker{color:var(--accent);text-transform:uppercase;letter-spacing:.18em;font-size:.75rem;margin:0 0 12px}
-h1{font-family:Georgia,"Times New Roman",serif;font-weight:normal;font-size:clamp(2rem,5vw,3.2rem);line-height:1.15;margin:0 0 16px}
-.lede{color:var(--muted);font-size:1.08rem;max-width:640px;margin:0}
-/* level switcher */
-.levels{position:sticky;top:41px;z-index:55;background:rgba(23,20,16,.94);border-bottom:1px solid var(--line)}
-.levels-in{display:flex;gap:8px;align-items:center;max-width:1060px;margin:0 auto;padding:10px 22px;flex-wrap:wrap}
-.levels .lbl{color:var(--muted);font-size:.8rem;margin-right:4px}
-.lbtn{border:1px solid var(--line);background:transparent;color:var(--muted);
-  border-radius:999px;padding:6px 14px;font-size:.83rem;cursor:pointer}
-.lbtn:hover{color:var(--ink);border-color:var(--accent)}
-.lbtn.on{background:var(--accent);border-color:var(--accent);color:#171410;font-weight:600}
-/* sections */
-.section{padding:56px 0;border-bottom:1px solid var(--line)}
-h2{font-family:Georgia,"Times New Roman",serif;font-weight:normal;font-size:clamp(1.5rem,3.4vw,2.1rem);margin:0 0 8px}
-.sub{color:var(--muted);margin:0 0 28px;max-width:680px}
-/* 3D stage */
-.stage{position:relative;background:#12100c;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
-#scene{width:100%;height:480px;display:block;touch-action:pan-y}
-.stage-hud{position:absolute;top:10px;left:12px;display:flex;gap:8px;flex-wrap:wrap}
-.chipbtn{border:1px solid var(--line);background:rgba(23,20,16,.85);color:var(--muted);
-  border-radius:999px;padding:5px 12px;font-size:.78rem;cursor:pointer}
-.chipbtn.on{color:#171410;font-weight:700;border-color:transparent}
-.chipbtn[data-focus="all"].on{background:var(--ink)}
-.chipbtn[data-focus="cpu"].on{background:var(--cpu)}
-.chipbtn[data-focus="gpu"].on{background:var(--gpu)}
-.chipbtn[data-focus="dpu"].on{background:var(--dpu)}
-.stage-foot{display:flex;gap:18px;align-items:center;padding:14px 16px;flex-wrap:wrap;border-top:1px solid var(--line);background:var(--bg2)}
-.stage-foot label{font-size:.85rem;color:var(--muted)}
-input[type=range]{flex:1;min-width:160px;accent-color:var(--accent)}
-.explode-val{font-variant-numeric:tabular-nums;color:var(--accent);font-size:.9rem;min-width:44px}
-.hint{font-size:.8rem;color:var(--muted)}
-#anno{margin-top:16px;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;min-height:120px}
-#anno h3{margin:0 0 6px;font-size:1.05rem}
-#anno .tag{display:inline-block;font-size:.7rem;text-transform:uppercase;letter-spacing:.12em;
-  padding:3px 10px;border-radius:999px;margin-right:8px;vertical-align:middle}
-#anno .tag.cpu{background:rgba(224,138,76,.18);color:var(--cpu)}
-#anno .tag.gpu{background:rgba(88,176,166,.18);color:var(--gpu)}
-#anno .tag.dpu{background:rgba(122,160,216,.18);color:var(--dpu)}
-#anno p{margin:8px 0 0;color:var(--ink)}
-#anno .spec{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-#anno .spec span{font-size:.78rem;border:1px solid var(--line);border-radius:8px;padding:4px 10px;color:var(--muted)}
-.parts{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-top:14px}
-.partbtn{text-align:left;background:var(--card);border:1px solid var(--line);border-radius:10px;
-  padding:10px 12px;color:var(--ink);cursor:pointer;font-size:.83rem}
-.partbtn:hover{border-color:var(--accent)}
-.partbtn .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:8px}
-/* chip cards */
-.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-@media(max-width:820px){.cards{grid-template-columns:1fr}}
-.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px;position:relative;overflow:hidden}
-.card::before{content:"";position:absolute;top:0;left:0;right:0;height:4px}
-.card.cpu::before{background:var(--cpu)} .card.gpu::before{background:var(--gpu)} .card.dpu::before{background:var(--dpu)}
-.card h3{font-family:Georgia,serif;font-weight:normal;font-size:1.35rem;margin:0 0 2px}
-.card .model{color:var(--muted);font-size:.85rem;margin:0 0 12px}
-.card .lvltext{min-height:132px}
-.specs{list-style:none;margin:14px 0 0;padding:14px 0 0;border-top:1px solid var(--line);font-size:.84rem;color:var(--muted)}
-.specs li{margin:6px 0}
-.specs b{color:var(--ink);font-weight:600}
-/* anatomy layers */
-.layers{counter-reset:lay;display:grid;gap:12px}
-.layer{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px 16px 66px;position:relative}
-.layer::before{counter-increment:lay;content:counter(lay);position:absolute;left:18px;top:16px;
-  width:32px;height:32px;border-radius:50%;background:rgba(208,138,90,.15);color:var(--accent);
-  display:flex;align-items:center;justify-content:center;font-weight:700}
-.layer h4{margin:0 0 4px;font-size:1rem}
-.layer p{margin:4px 0;font-size:.92rem;color:var(--muted)}
-.layer p b{color:var(--ink)}
-/* comparison table */
+
+/* ============ HERO STAGE: the visualization is the page ============ */
+.stage-hero{position:relative;height:calc(100svh - 41px);min-height:620px;background:#0e0c09;overflow:hidden}
+#scene{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab}
+#scene:active{cursor:grabbing}
+#labels{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:5}
+.label{position:absolute;transform:translate(-50%,-130%);white-space:nowrap;
+  font-size:11px;letter-spacing:.02em;color:var(--ink);
+  background:rgba(20,17,13,.78);border:1px solid var(--line);
+  padding:3px 9px 3px 7px;border-radius:999px;backdrop-filter:blur(4px);
+  transition:opacity .25s}
+.label .dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:6px;vertical-align:1px}
+.label::after{content:"";position:absolute;left:50%;top:100%;width:1px;height:14px;
+  background:linear-gradient(rgba(242,237,226,.5),transparent)}
+.label.dim{opacity:0!important}
+/* minimal overlay headline */
+.ovl-title{position:absolute;top:18px;left:22px;z-index:10;pointer-events:none;max-width:min(420px,72vw)}
+.ovl-title .kicker{color:var(--accent);text-transform:uppercase;letter-spacing:.18em;font-size:.7rem;margin:0 0 6px}
+.ovl-title h1{font-family:Georgia,serif;font-weight:normal;font-size:clamp(1.3rem,2.6vw,1.9rem);line-height:1.2;margin:0 0 6px;
+  text-shadow:0 2px 14px rgba(0,0,0,.7)}
+.ovl-title p{margin:0;font-size:.82rem;color:var(--muted);text-shadow:0 1px 10px rgba(0,0,0,.8)}
+/* top-right control cluster */
+.ovl-ctrl{position:absolute;top:18px;right:22px;z-index:10;display:flex;flex-direction:column;gap:8px;align-items:flex-end}
+.seg{display:flex;gap:6px;background:rgba(20,17,13,.78);border:1px solid var(--line);
+  border-radius:999px;padding:5px;backdrop-filter:blur(6px);flex-wrap:wrap;justify-content:flex-end}
+.seg .cap{font-size:.68rem;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);align-self:center;padding:0 4px 0 8px}
+.pill{border:1px solid transparent;background:transparent;color:var(--muted);
+  border-radius:999px;padding:5px 12px;font-size:.78rem;cursor:pointer;white-space:nowrap}
+.pill:hover{color:var(--ink)}
+.pill.on{background:var(--accent);color:#14110d;font-weight:700}
+.pill[data-focus="cpu"].on{background:var(--cpu)}
+.pill[data-focus="gpu"].on{background:var(--gpu)}
+.pill[data-focus="dpu"].on{background:var(--dpu)}
+.pill[data-focus="all"].on{background:var(--ink)}
+/* hover tooltip */
+#tip{position:absolute;z-index:20;pointer-events:none;display:none;max-width:250px;
+  background:rgba(20,17,13,.94);border:1px solid var(--line);border-radius:10px;
+  padding:8px 12px;font-size:.8rem;backdrop-filter:blur(6px)}
+#tip b{display:block;font-size:.85rem;margin-bottom:2px}
+#tip .tag{font-size:.65rem;text-transform:uppercase;letter-spacing:.1em}
+/* pinned detail card — overlays stage, never displaces it */
+#pin{position:absolute;z-index:15;right:22px;bottom:158px;width:min(340px,calc(100vw - 44px));
+  background:rgba(30,25,19,.96);border:1px solid var(--line);border-radius:var(--radius);
+  padding:18px 20px;backdrop-filter:blur(10px);display:none;box-shadow:0 18px 50px rgba(0,0,0,.5)}
+#pin.show{display:block}
+#pin h3{margin:0 0 4px;font-size:1.02rem}
+#pin .tag{display:inline-block;font-size:.66rem;text-transform:uppercase;letter-spacing:.12em;
+  padding:3px 10px;border-radius:999px;margin:0 6px 8px 0}
+#pin .tag.cpu{background:rgba(224,138,76,.2);color:var(--cpu)}
+#pin .tag.gpu{background:rgba(88,176,166,.2);color:var(--gpu)}
+#pin .tag.dpu{background:rgba(122,160,216,.2);color:var(--dpu)}
+#pin .tag.cls{background:rgba(242,237,226,.1);color:var(--muted)}
+#pin p{margin:6px 0;font-size:.9rem}
+#pin .specs{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+#pin .specs span{font-size:.74rem;border:1px solid var(--line);border-radius:8px;padding:3px 9px;color:var(--muted)}
+#pin .close{position:absolute;top:8px;right:12px;background:none;border:none;color:var(--muted);
+  font-size:1.1rem;cursor:pointer}
+/* bottom dock: explode + diff-class picker */
+.ovl-dock{position:absolute;left:0;right:0;bottom:0;z-index:10;
+  background:linear-gradient(transparent,rgba(14,12,9,.92) 30%);
+  padding:26px 22px 14px}
+.dock-in{max-width:1280px;margin:0 auto}
+.explode-row{display:flex;gap:14px;align-items:center;margin-bottom:10px}
+.explode-row label{font-size:.78rem;color:var(--muted);white-space:nowrap}
+.explode-row input[type=range]{flex:1;accent-color:var(--accent)}
+.explode-val{font-variant-numeric:tabular-nums;color:var(--accent);font-size:.85rem;min-width:42px;text-align:right}
+.diff-row{display:flex;gap:8px;align-items:center;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.diff-row::-webkit-scrollbar{display:none}
+.diff-row .cap{font-size:.68rem;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);
+  white-space:nowrap;padding-left:2px}
+.dpill{flex:0 0 auto;border:1px solid var(--line);background:rgba(20,17,13,.7);color:var(--muted);
+  border-radius:999px;padding:7px 15px;font-size:.8rem;cursor:pointer;backdrop-filter:blur(6px)}
+.dpill:hover{color:var(--ink);border-color:var(--accent)}
+.dpill.on{background:var(--ink);color:#14110d;font-weight:700;border-color:var(--ink)}
+.hint{font-size:.74rem;color:var(--muted);margin-top:8px}
+/* gl fallback */
+#gl-fallback{display:none;position:absolute;inset:0;z-index:30;align-items:center;justify-content:center;
+  text-align:center;padding:40px;color:var(--muted)}
+
+/* ============ below-stage panels ============ */
+.section{padding:60px 0;border-top:1px solid var(--line)}
+h2{font-family:Georgia,serif;font-weight:normal;font-size:clamp(1.5rem,3.4vw,2.1rem);margin:0 0 8px}
+.sub{color:var(--muted);margin:0 0 28px;max-width:720px}
+#diff-sec{display:none}
+#diff-sec.show{display:block}
+.diff-what{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:20px 24px;margin-bottom:18px}
+.diff-what h3{margin:0 0 6px;font-size:1.15rem}
+.diff-what p{margin:0;color:var(--muted);font-size:.94rem;max-width:820px}
+.diff-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+@media(max-width:860px){.diff-grid{grid-template-columns:1fr}}
+.dcard{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:22px;position:relative;overflow:hidden}
+.dcard::before{content:"";position:absolute;top:0;left:0;right:0;height:4px}
+.dcard.cpu::before{background:var(--cpu)}
+.dcard.gpu::before{background:var(--gpu)}
+.dcard.dpu::before{background:var(--dpu)}
+.dcard h4{margin:0 0 2px;font-size:1.1rem}
+.dcard .model{color:var(--muted);font-size:.8rem;margin:0 0 12px}
+.dcard .fld{margin:10px 0;font-size:.9rem}
+.dcard .fld b{display:block;font-size:.68rem;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:3px}
+.dcard .absent{border:1px dashed var(--line);border-radius:10px;padding:12px;font-size:.88rem;color:var(--muted)}
+/* glance table */
 .tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--radius)}
-table{border-collapse:collapse;width:100%;font-size:.87rem;min-width:640px}
+table{border-collapse:collapse;width:100%;font-size:.87rem;min-width:680px}
 th,td{text-align:left;padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:top}
-thead th{background:var(--bg2);font-size:.8rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+thead th{background:var(--bg2);font-size:.76rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
 tbody tr:last-child th,tbody tr:last-child td{border-bottom:none}
-tbody th{font-weight:600;width:200px}
-td .has{color:#9dc08b} td .lacks{color:#d07a7a} td .why{color:var(--muted);font-size:.8rem}
+tbody th{font-weight:600;width:170px}
+td .c{font-weight:600} td .why{display:block;color:var(--muted);font-size:.78rem;margin-top:3px}
 /* provenance */
 .prov{font-size:.83rem;color:var(--muted);background:var(--bg2);border:1px solid var(--line);
   border-radius:var(--radius);padding:18px 20px}
 .prov a{color:var(--accent)}
-footer.site{padding:40px 0 64px;color:var(--muted);font-size:.85rem}
+.prov ul{margin:8px 0;padding-left:20px}
+.prov li{margin:5px 0}
+footer.site{padding:34px 0 44px;color:var(--muted);font-size:.85rem;border-top:1px solid var(--line)}
 footer.site a{color:var(--accent);text-decoration:none}
-.fallback{display:none;padding:40px;text-align:center;color:var(--muted)}
-@media(max-width:640px){#scene{height:360px}.top nav{gap:12px}.section{padding:40px 0}}
+@media(max-width:700px){
+  .stage-hero{min-height:560px}
+  .ovl-title{top:8px;left:12px;right:12px;max-width:none}
+  .ovl-title .kicker{display:none}
+  .ovl-title h1{font-size:1.05rem;margin:0}
+  .ovl-title p{display:none}
+  .ovl-ctrl{top:44px;left:0;right:0;bottom:auto;flex-direction:row;overflow-x:auto;
+    align-items:center;justify-content:flex-start;padding:6px 12px;gap:6px;
+    background:linear-gradient(rgba(14,12,9,.88),transparent)}
+  .seg{flex:0 0 auto;padding:3px}
+  .seg .cap{display:none}
+  .pill{padding:4px 10px;font-size:.72rem}
+  #pin{right:12px;left:12px;width:auto;bottom:178px;max-height:38%;overflow:auto}
+  .ovl-dock{padding:16px 12px 8px}
+  .hint{display:none}
+}
 </style>
 </head>
 <body>
@@ -130,211 +177,149 @@ footer.site a{color:var(--accent);text-decoration:none}
     <a class="brand" href="/">JC Davis</a>
     <nav>
       <a href="/">Home</a>
-      <a href="#models">3D models</a>
-      <a href="#profiles">Profiles</a>
-      <a href="#anatomy">Anatomy</a>
-      <a href="#compare">Compare</a>
-      <a href="#provenance">Sources</a>
+      <a href="/chips/" class="on">Chips, Exploded</a>
     </nav>
   </div>
 </header>
 
 <main>
-<section class="hero">
-  <div class="wrap">
-    <p class="kicker">Interactive deep dive</p>
-    <h1>Inside the Machines: CPU vs GPU vs DPU, Exploded</h1>
-    <p class="lede">Three processors, pulled apart layer by layer in 3D. Same silicon technology, wildly different physical makeup — because each one is built to win a different race. Drag the explode slider, tap any part, and switch the explanation depth from ELI5 to expert.</p>
-  </div>
-</section>
+<!-- ================= THE STAGE ================= -->
+<section class="stage-hero" id="stage-hero" aria-label="Interactive 3D exploded view of a CPU, GPU and DPU">
+  <canvas id="scene"></canvas>
+  <div id="labels"></div>
 
-<div class="levels">
-  <div class="levels-in">
-    <span class="lbl">Explain it like I'm…</span>
-    <button class="lbtn" data-lvl="eli5">5 years old</button>
-    <button class="lbtn" data-lvl="fifteen">15 years old</button>
-    <button class="lbtn on" data-lvl="pro">A professional</button>
-    <button class="lbtn" data-lvl="expert">An expert</button>
+  <div class="ovl-title">
+    <p class="kicker">Exploded in 3D</p>
+    <h1>CPU · GPU · DPU, taken apart</h1>
+    <p>Drag to orbit. Hover any block. Click to pin it. Compare component classes below.</p>
   </div>
-</div>
 
-<section class="section" id="models">
-  <div class="wrap">
-    <h2>Three packages, side by side, exploded</h2>
-    <p class="sub">Stylized schematic models (not to scale). <b style="color:var(--cpu)">CPU</b> = AMD EPYC 9654 “Genoa” (2022) · <b style="color:var(--gpu)">GPU</b> = NVIDIA H100 SXM5 “GH100” (2022) · <b style="color:var(--dpu)">DPU</b> = NVIDIA BlueField-3 (2022). Drag to orbit, scroll the slider to explode, tap any block to learn what it does.</p>
-    <div class="stage">
-      <div class="stage-hud">
-        <button class="chipbtn on" data-focus="all">All three</button>
-        <button class="chipbtn" data-focus="cpu">CPU</button>
-        <button class="chipbtn" data-focus="gpu">GPU</button>
-        <button class="chipbtn" data-focus="dpu">DPU</button>
-      </div>
-      <canvas id="scene"></canvas>
-      <div class="fallback" id="gl-fallback"><p>This 3D view needs WebGL. The written deep dive below covers every part in full.</p></div>
-      <div class="stage-foot">
+  <div class="ovl-ctrl">
+    <div class="seg" role="group" aria-label="Explanation depth">
+      <span class="cap">Explain</span>
+      <button class="pill lbtn" data-lvl="eli5">ELI5</button>
+      <button class="pill lbtn" data-lvl="fifteen">15</button>
+      <button class="pill lbtn on" data-lvl="pro">Pro</button>
+      <button class="pill lbtn" data-lvl="expert">Expert</button>
+    </div>
+    <div class="seg" role="group" aria-label="Chip focus">
+      <span class="cap">View</span>
+      <button class="pill" data-focus="all">All three</button>
+      <button class="pill" data-focus="cpu">CPU</button>
+      <button class="pill" data-focus="gpu">GPU</button>
+      <button class="pill" data-focus="dpu">DPU</button>
+    </div>
+    <div class="seg" role="group" aria-label="Labels">
+      <button class="pill on" id="label-toggle">Labels</button>
+    </div>
+  </div>
+
+  <div id="tip"></div>
+
+  <aside id="pin" aria-live="polite">
+    <button class="close" id="pin-close" aria-label="Close detail card">×</button>
+    <div id="pin-tags"></div>
+    <h3 id="pin-name"></h3>
+    <p id="pin-desc"></p>
+    <div class="specs" id="pin-specs"></div>
+  </aside>
+
+  <div class="ovl-dock">
+    <div class="dock-in">
+      <div class="explode-row">
         <label for="explode">Explode</label>
-        <input type="range" id="explode" min="0" max="100" value="55" aria-label="Explode amount">
-        <span class="explode-val" id="explode-val">55%</span>
-        <span class="hint">Drag the model to orbit · tap a part for details</span>
+        <input type="range" id="explode" min="0" max="100" value="62" aria-label="Explode amount">
+        <span class="explode-val" id="explode-val">62%</span>
       </div>
+      <div class="diff-row" role="group" aria-label="Component class comparison">
+        <span class="cap">Compare:</span>
+        <button class="dpill" data-dclass="">✕ Clear</button>
+        <button class="dpill" data-dclass="compute">⚙ Compute cores</button>
+        <button class="dpill" data-dclass="cache">🗄 Cache hierarchy</button>
+        <button class="dpill" data-dclass="memory">🧠 Memory system</button>
+        <button class="dpill" data-dclass="interconnect">🔗 Interconnect</button>
+        <button class="dpill" data-dclass="network">🌐 Network I/O</button>
+        <button class="dpill" data-dclass="accel">🚀 Accelerators</button>
+        <button class="dpill" data-dclass="package">📦 Package</button>
+      </div>
+      <p class="hint">Tip: pick a component class to spotlight it on all three chips at once — the cards below explain how each chip builds it, and <em>why</em> they differ.</p>
     </div>
-    <div id="anno">
-      <h3><span class="tag gpu">GPU</span>GH100 compute die</h3>
-      <p class="lvltext" id="anno-text"></p>
-      <div class="spec" id="anno-spec"></div>
-    </div>
-    <div class="parts" id="parts-legend" aria-label="Jump to a part"></div>
+  </div>
+
+  <div id="gl-fallback">
+    <p>WebGL isn't available in this browser, so the 3D stage can't render.<br>The comparison cards and spec tables below still work.</p>
   </div>
 </section>
 
-<section class="section" id="profiles">
+<!-- ================= DIFF CARDS ================= -->
+<section class="section" id="diff-sec">
   <div class="wrap">
-    <h2>Meet the three machines</h2>
-    <p class="sub">Same underlying technology — transistors etched into silicon. Completely different bodies, because each serves a different master.</p>
-    <div class="cards">
-      <article class="card cpu">
-        <h3>The CPU</h3>
-        <p class="model">AMD EPYC 9654 “Genoa” · 2022 · server processor</p>
-        <p class="lvltext" data-eli5="The CPU is the boss of the computer. It is one very, very smart worker who can do ANY job — math, decisions, remembering things — one careful step at a time. It is the best at jobs that need thinking and changing plans quickly."
-          data-fifteen="A CPU is a generalist: a small number of extremely capable cores (96 here) that each handle complex, branching, unpredictable work. It runs the operating system and coordinates everything else — nothing moves without the CPU's say-so."
-          data-pro="The EPYC 9654 is a latency-optimized general-purpose processor: 96 out-of-order x86 cores across 12 chiplets, backed by 384 MB of L3 cache and 12 DDR5 channels. It minimizes the time to finish any single task, runs the OS, and orchestrates the GPU and DPU."
-          data-expert="Genoa is a chiplet MCM: twelve 5 nm Zen 4 CCDs (8 cores each, 2×4-core CCX, 32 MB L3 per CCD, 1 MB L2 per core) surrounding one 6 nm server I/O die on an organic substrate, LGA-6096. Deep OoO, aggressive branch prediction, AVX-512 with 256-bit datapath, 3rd-gen Infinity Fabric. Peak throughput is modest (~10 TFLOPS FP64) but single-thread latency and cache capacity dominate."></p>
-        <ul class="specs">
-          <li><b>96</b> cores / 192 threads · 12 chiplets + 1 I/O die</li>
-          <li><b>384 MB</b> L3 cache · 96 MB L2 · 12× DDR5</li>
-          <li>Socket <b>SP5 (LGA-6096)</b> · up to <b>400 W</b></li>
-          <li>≈13B transistors <i>(est.)</i></li>
-        </ul>
-      </article>
-      <article class="card gpu">
-        <h3>The GPU</h3>
-        <p class="model">NVIDIA H100 SXM5 “GH100” · 2022 · AI accelerator</p>
-        <p class="lvltext" data-eli5="The GPU is a giant team of 16,000 simple workers who all do the SAME easy job at the SAME time — like coloring one huge picture together. One job alone is slow, but together they finish mountains of math faster than anyone."
-          data-fifteen="A GPU trades single-thread speed for raw parallelism: 132 streaming multiprocessors, each with 128 simple cores, all executing the same instruction on different data (SIMT). It is built for throughput — AI training, simulations — where one slow thread is fine because 16,896 run at once."
-          data-pro="The H100 is a throughput monster: one 814 mm² monolithic die with 132 SMs (16,896 FP32 CUDA cores), 528 4th-gen Tensor Cores, 50 MB L2, and 80 GB of on-package HBM3 at ~3 TB/s. NVLink (900 GB/s) ties GPUs together; the CPU feeds it work and it never touches the OS."
-          data-expert="GH100: 80B transistors on TSMC 4N, 144 SMs on die (132 enabled in SXM5), 128 FP32 + 64 FP64 CUDA cores and 4 Tensor Cores per SM, 50 MB L2, 6144-bit HBM3 interface (5120-bit in product), Transformer Engine with FP8, DPX instructions, MIG partitioning. CoWoS 2.5D packaging fuses die + six HBM3 stacks on a silicon interposer. Memory bandwidth, not latency, is the design axis."></p>
-        <ul class="specs">
-          <li><b>132</b> SMs · <b>16,896</b> CUDA cores · <b>528</b> Tensor Cores</li>
-          <li><b>50 MB</b> L2 · <b>80 GB HBM3</b> @ ~3 TB/s</li>
-          <li>NVLink <b>900 GB/s</b> · <b>700 W</b> · TSMC 4N</li>
-          <li><b>80B</b> transistors · <b>814 mm²</b> die</li>
-        </ul>
-      </article>
-      <article class="card dpu">
-        <h3>The DPU</h3>
-        <p class="model">NVIDIA BlueField-3 · 2022 · data processing unit</p>
-        <p class="lvltext" data-eli5="The DPU is the helper who stands at the front door. It answers the phones (the network), checks IDs (security), and carries boxes to the warehouse (storage) — so the boss (CPU) never has to stop thinking to do chores."
-          data-fifteen="A DPU is a computer whose job is the infrastructure: networking, storage, and security, offloaded from the CPU. 16 Arm cores plus fixed-function accelerators handle packets, encryption, and virtualization so host cores spend 100% of their time on the actual application."
-          data-pro="BlueField-3 is a data-center-on-a-chip: 16 Arm Cortex-A78 cores, a 16-core Data Path Accelerator for packet I/O, and hardware engines for crypto (IPsec/TLS), NVMe-oF, RDMA, and virtual switching — behind a 400 Gb/s ConnectX-7-class NIC, with PCIe Gen5 ×32 and up to 64 GB DDR5."
-          data-expert="BlueField-3: 22B transistors; three blocks — (1) networking: ConnectX-7 SmartNIC pipeline with security/storage accelerators, up to 400 Gb/s; (2) programmable compute: 16× Armv8.2 A78 on a coherent mesh plus 16 hyperthreaded DPA cores (VLIW-ish, I/O-tuned); (3) PCIe switch (endpoint + root complex, 32× Gen5). Runs the DOCA stack as an independent computer — a 'computer in front of the computer' that owns the network/storage/security tax."></p>
-        <ul class="specs">
-          <li><b>16×</b> Arm Cortex-A78 · <b>16×</b> DPA cores</li>
-          <li><b>400 Gb/s</b> networking · PCIe Gen5 ×32</li>
-          <li>Up to <b>64 GB DDR5</b> · 42 SPECrate2017_int</li>
-          <li><b>22B</b> transistors</li>
-        </ul>
-      </article>
+    <p class="kicker" style="color:var(--accent);text-transform:uppercase;letter-spacing:.18em;font-size:.7rem;margin:0 0 6px">Component diff</p>
+    <h2 id="diff-title">Compare</h2>
+    <div class="diff-what"><h3>What it is</h3><p id="diff-what"></p></div>
+    <div class="diff-grid">
+      <div class="dcard cpu"><h4>CPU</h4><p class="model">AMD EPYC 9654 “Genoa”</p><div id="diff-cpu"></div></div>
+      <div class="dcard gpu"><h4>GPU</h4><p class="model">NVIDIA H100 SXM5 “GH100”</p><div id="diff-gpu"></div></div>
+      <div class="dcard dpu"><h4>DPU</h4><p class="model">NVIDIA BlueField-3</p><div id="diff-dpu"></div></div>
     </div>
   </div>
 </section>
 
-<section class="section" id="anatomy">
-  <div class="wrap narrow">
-    <h2>Layer by layer: what you're looking at</h2>
-    <p class="sub">Every chip in the 3D view is the same seven-layer sandwich, top to bottom. What changes is what each layer is <i>for</i>.</p>
-    <div class="layers">
-      <div class="layer"><h4>Heat spreader / lid</h4>
-        <p class="lvltext" data-eli5="The metal hat on top. It spreads heat out flat so the cooler on top can carry it away. On the CPU it's nickel-plated copper; the GPU's is a big vapor-chamber plate because it makes 700 watts of heat."
-          data-fifteen="The integrated heat spreader (IHS) is a nickel-plated copper lid that evens out heat from hot spots on the die and gives the cooler a flat surface. Bigger, hotter chips need bigger lids — the H100's plate has to shed 700 W."
-          data-pro="IHS: nickel-plated copper, soldered or TIM-bonded to the die. Spreads heat laterally to match cooler cold-plates and protects fragile silicon. H100 uses a large vapor-chamber cold plate; Genoa uses a stamped IHS over 13 dies; BlueField-3 uses a simple finned heatsink."
-          data-expert="IHS thermal stack: die → TIM (solder on Genoa IHS, typically polymer TIM on H100) → Ni-plated Cu lid → thermal interface to cold plate. Vapor-chamber lids on H100 handle ~700 W at ~0.1 °C/W; BlueField-3's modest TDP allows a stamped fin sink with no active cold plate."></p></div>
-      <div class="layer"><h4>Thermal paste layer</h4>
-        <p class="lvltext" data-eli5="A super-thin smear of special goo (or melted metal) between the brain and the hat. Air is a terrible heat-carrier, so this goo fills every tiny gap."
-          data-fifteen="Thermal interface material (TIM): fills microscopic air gaps between die and lid. High-end chips use indium solder; others use polymer paste. A bad TIM layer can add several degrees and throttle the chip."
-          data-pro="TIM: solder (In-based) or polymer, ~20–50 µm. Thermal resistance of this interface is a first-order limiter of sustained clocks; delidded measurements routinely show 5–15 °C deltas between solder and paste."
-          data-expert="TIM1: In solder (Genoa) vs polymer TIM (H100). Bond-line thickness, void fraction, and pump-out under thermal cycling dominate long-term thermal resistance; solder's ~80 W/m·K vs paste's ~5–12 W/m·K is why delidding matters."></p></div>
-      <div class="layer"><h4>The silicon die(s)</h4>
-        <p class="lvltext" data-eli5="The actual brain — a tiny shiny square where all the thinking happens. The CPU has 13 little brains working together; the GPU has one GIANT brain; the DPU has one medium brain with helper gadgets built in."
-          data-fifteen="The die is the etched silicon containing the transistors. CPU: 12 small compute chiplets + 1 I/O die. GPU: one huge 814 mm² monolithic die. DPU: one SoC die that mixes Arm cores with network, crypto, and storage accelerators."
-          data-pro="Die strategy encodes the tradeoff: Genoa disaggregates into 12× 5 nm CCDs + 6 nm sIOD for yield and binning; GH100 is a reticle-limit monolithic 4N die because SM-to-SM bandwidth can't tolerate chiplet hops; BlueField-3 is a single mixed-signal SoC where integration, not raw compute, is the win."
-          data-expert="Genoa CCD ≈ 8 Zen 4 cores + 32 MB L3 on N5, ~70 mm² class; sIOD on N6 carries 12 DDR5 PHYs, 128× PCIe Gen5 SERDES, 3rd-gen IF. GH100: 80B transistors, 144 SMs (8 GPCs × 9 TPCs × 2 SMs), full-die 814 mm² — at the reticle limit, hence no chiplet option. BlueField-3: 22B-transistor SoC, ConnectX-7 pipeline + A78 cluster + DPA on one die."></p></div>
-      <div class="layer"><h4>Interposer (GPU only)</h4>
-        <p class="lvltext" data-eli5="Only the GPU has this: a super-thin silicon plate under the brain that acts like a million tiny bridges, connecting the big brain to its six memory neighbors at lightning speed."
-          data-fifteen="The H100's die and its six HBM3 memory stacks sit on a silicon interposer (TSMC CoWoS) — microscopic wires in silicon, far denser than a circuit board, delivering ~3 TB/s between compute and memory."
-          data-pro="CoWoS 2.5D: GH100 + 6× HBM3 stacks on a silicon interposer with ~10k+ micro-bump connections. This is what makes 3 TB/s memory bandwidth physically possible — no PCB trace could carry that many signals that fast."
-          data-expert="TSMC CoWoS-S: passive Si interposer, ~2 µm line/space RDL, micro-bump pitch ~45 µm, ~10⁴+ die-to-die connections. Enables the 5120-bit (product) HBM3 interface at ~3 TB/s. Yield risk concentrates here — one bad HBM stack scraps the whole module, hence known-good-die testing."></p></div>
-      <div class="layer"><h4>Package substrate</h4>
-        <p class="lvltext" data-eli5="The green (or black) plate the brains sit on. It's a mini circuit board with thousands of hidden wires, fanning the brain's tiny connections out to the bigger pins below."
-          data-fifteen="An organic (fiberglass-like) substrate: a miniature multi-layer PCB that routes thousands of signals from dense die bumps out to the package pins, and carries power planes that feed the chip's enormous current."
-          data-pro="ABF build-up substrate, 10+ layers: escapes ~10k C4 bumps to BGA/LGA, distributes 700 W-class current with minimal IR drop, and hosts decoupling capacitors. On Genoa it also carries the CCD↔sIOD Infinity Fabric links."
-          data-expert="Ajinomoto build-up film substrate; microvia HDI; power delivery network designed for >500 A transients (H100); embedded/land-side decoupling caps; CTE-matched to manage warpage across the 60×75 mm SP5 footprint and the H100's CoWoS stack."></p></div>
-      <div class="layer"><h4>Pins / pads / balls</h4>
-        <p class="lvltext" data-eli5="The feet that plug the chip into the computer. The CPU has 6,096 golden pads it sits on; the GPU plugs into a special slot; the DPU solders on with hundreds of tiny metal balls."
-          data-fifteen="The electrical + mechanical interface: LGA pads (CPU sits on 6,096 socket contacts), SXM edge connector (GPU module), BGA solder balls (DPU). Every power, ground, and signal line passes through here."
-          data-pro="SP5 LGA-6096 for Genoa (land grid array, socketed); H100 SXM5 mezzanine connector (board-to-board, 700 W capable); BlueField-3 BGA on its own card with a PCIe edge connector to the host. Pin count is driven by power delivery and memory channels, not logic."
-          data-expert="LGA-6096: ~6k contacts, split between power/ground (~60%) and signal. SXM5: high-density mezzanine with integrated power blades for 700 W. Card-edge PCIe x16 for BlueField-3 (x32 lanes internally via its PCIe switch). Contact resistance and insertion force scale with current — power pins dominate the count."></p></div>
-      <div class="layer"><h4>Transistors (the bottom of the rabbit hole)</h4>
-        <p class="lvltext" data-eli5="Zoom in a million times and the brain is made of billions of teeny-tiny light switches. CPU ≈ 13 billion, DPU ≈ 22 billion, GPU ≈ 80 billion switches — each smaller than a virus."
-          data-fifteen="Everything above is built from transistors — electronic switches ~tens of nanometers across. More transistors = more parallel workers or bigger caches. The GPU has ~6× the CPU's count because its job needs thousands of workers doing math at once."
-          data-pro="FinFET transistors (N5/N4/N6-class): CPU ≈13B (est.), DPU 22B, GPU 80B. Transistor budget allocation reveals purpose — GPU spends it on SM arrays and Tensor Cores; CPU spends it on cache (384 MB L3 is mostly SRAM transistors) and OoO machinery; DPU spends it on the NIC pipeline and accelerators."
-          data-expert="TSMC N4/N5 FinFET; SRAM bitcells (~0.02 µm² class) dominate area — Genoa's 480 MB total cache is the majority of its transistor budget. GH100's 80B transistors at 814 mm² ≈ 98 MTr/mm². BlueField-3's 22B transistors are dominated by the ConnectX-7 packet pipeline, crypto engines, and Arm cluster — control logic, not datapath FLOPS."></p></div>
-    </div>
-  </div>
-</section>
-
-<section class="section" id="compare">
+<!-- ================= AT A GLANCE ================= -->
+<section class="section">
   <div class="wrap">
-    <h2>Side-by-side: what each has, what each lacks, and why</h2>
-    <p class="sub">The physical differences aren't accidents — each missing piece is a deliberate trade. Tap the level switcher above to change the depth of the whole page.</p>
+    <h2>At a glance</h2>
+    <p class="sub">The same seven component classes, one row each. The pattern: every chip spends its transistor budget on the thing its job demands most.</p>
     <div class="tablewrap">
-    <table>
-      <thead><tr><th>Physical component</th><th>CPU (Genoa)</th><th>GPU (H100)</th><th>DPU (BlueField-3)</th></tr></thead>
-      <tbody>
-      <tr><th>Primary compute units</th>
-        <td><span class="has">✔</span> 96 big out-of-order cores — few, brilliant, branchy</td>
-        <td><span class="has">✔</span> 132 SMs / 16,896 simple cores — an army doing the same op</td>
-        <td><span class="has">✔</span> 16 Arm A78 cores — modest, for control-plane software</td></tr>
-      <tr><th>Matrix / AI accelerators</th>
-        <td><span class="lacks">✘</span> none dedicated <span class="why">— AVX-512 covers vectors; die budget goes to cache + OoO logic</span></td>
-        <td><span class="has">✔</span> 528 Tensor Cores + Transformer Engine — the whole point of the chip</td>
-        <td><span class="lacks">✘</span> none <span class="why">— 1.5 TOPS is incidental; it steers data, doesn't train on it</span></td></tr>
-      <tr><th>Packet / crypto / storage engines</th>
-        <td><span class="lacks">✘</span> none <span class="why">— handling packets in software wastes precious general-purpose cores</span></td>
-        <td><span class="lacks">✘</span> none <span class="why">— every mm² is for FLOPS; networking lives on the DPU next door</span></td>
-        <td><span class="has">✔</span> the whole point — RDMA, NVMe-oF, IPsec/TLS, virtual switching in hardware</td></tr>
-      <tr><th>Cache hierarchy</th>
-        <td><span class="has">✔</span> huge — 96 MB L2 + 384 MB L3 <span class="why">to hide memory latency for unpredictable code</span></td>
-        <td><span class="has">✔</span> 50 MB L2 only, no L3 <span class="why">— thousands of threads hide latency; SRAM budget → more SMs</span></td>
-        <td><span class="has">✔</span> small coherent caches on a mesh <span class="why">— control-plane code, not number-crunching</span></td></tr>
-      <tr><th>Memory system</th>
-        <td><span class="has">✔</span> 12× DDR5 channels, DIMMs off-package <span class="why">— terabytes of capacity, modest bandwidth</span></td>
-        <td><span class="has">✔</span> 80 GB HBM3 on-package <span class="why">— ~3 TB/s bandwidth, capacity capped by stack count</span></td>
-        <td><span class="has">✔</span> up to 64 GB DDR5 on-card <span class="why">— packet buffers and OS, not datasets</span></td></tr>
-      <tr><th>Chip-to-chip interconnect</th>
-        <td><span class="has">✔</span> Infinity Fabric + 128× PCIe Gen5 <span class="why">— talks to everything: RAM, GPUs, DPUs, disks</span></td>
-        <td><span class="has">✔</span> NVLink 900 GB/s <span class="why">— GPUs gossip with GPUs at memory speed; CPU link is secondary</span></td>
-        <td><span class="has">✔</span> 400 Gb/s Ethernet/InfiniBand <span class="why">— the DPU <i>is</i> the network endpoint for the server</span></td></tr>
-      <tr><th>Package style</th>
-        <td><span class="has">✔</span> 13-chiplet MCM, socketed LGA-6096 <span class="why">— yield: small dies, mix-and-match, replaceable</span></td>
-        <td><span class="has">✔</span> one giant monolithic die + HBM on silicon interposer <span class="why">— SM-to-SM bandwidth forbids chiplet hops</span></td>
-        <td><span class="has">✔</span> single SoC + heatsink on a card <span class="why">— integration beats raw speed; it must be cheap per server</span></td></tr>
-      <tr><th>Runs an OS / apps</th>
-        <td><span class="has">✔</span> yes — the OS lives here</td>
-        <td><span class="lacks">✘</span> no <span class="why">— it runs kernels the CPU launches; no OS, no interrupts</span></td>
-        <td><span class="has">✔</span> yes — its own Linux (DOCA) <span class="why">— it's an independent computer in front of the computer</span></td></tr>
-      </tbody>
-    </table>
+      <table>
+        <thead><tr><th>Component class</th><th>CPU — EPYC 9654</th><th>GPU — H100</th><th>DPU — BlueField-3</th></tr></thead>
+        <tbody>
+          <tr><th>⚙ Compute cores</th>
+            <td><span class="c">96× Zen 4</span><span class="why">general-purpose, branchy code</span></td>
+            <td><span class="c">132 SMs · 16,896 CUDA</span><span class="why">massively parallel math</span></td>
+            <td><span class="c">16× Arm A78 + 16 DPA</span><span class="why">control plane + packet I/O</span></td></tr>
+          <tr><th>🗄 Cache hierarchy</th>
+            <td><span class="c">96 MB L2 + 384 MB L3</span><span class="why">hide DRAM latency for random access</span></td>
+            <td><span class="c">50 MB shared L2</span><span class="why">rendezvous for 132 SMs, streaming data</span></td>
+            <td><span class="c">modest L2/L3 on mesh</span><span class="why">packets stream through, not cached</span></td></tr>
+          <tr><th>🧠 Memory system</th>
+            <td><span class="c">12-ch DDR5, 461 GB/s</span><span class="why">huge capacity (TBs), moderate speed</span></td>
+            <td><span class="c">5× HBM3, 3.35 TB/s</span><span class="why">bandwidth at all costs; 80 GB is enough</span></td>
+            <td><span class="c">1 DDR5 ctrl, 16–32 GB</span><span class="why">just a control plane; packets bypass RAM</span></td></tr>
+          <tr><th>🔗 Interconnect</th>
+            <td><span class="c">Infinity Fabric via sIOD</span><span class="why">glue 12 chiplets into one CPU</span></td>
+            <td><span class="c">CoWoS interposer + NVLink 900 GB/s</span><span class="why">feed SMs; scale to 256 GPUs</span></td>
+            <td><span class="c">PCIe Gen5 switch (32 lanes)</span><span class="why">own devices on the bus, bypass host</span></td></tr>
+          <tr><th>🌐 Network I/O</th>
+            <td><span class="c">— none on die</span><span class="why">that's the DPU's job</span></td>
+            <td><span class="c">— none on die</span><span class="why">NVLink is GPU-to-GPU, not network</span></td>
+            <td><span class="c">ConnectX-7 · 400 GbE</span><span class="why">the whole point of the chip</span></td></tr>
+          <tr><th>🚀 Accelerators</th>
+            <td><span class="c">AVX-512 in-core</span><span class="why">vector math, no extra blocks</span></td>
+            <td><span class="c">528 4th-gen Tensor Cores</span><span class="why">the chip IS the accelerator</span></td>
+            <td><span class="c">crypto · RegEx · NVMe-oF</span><span class="why">infrastructure tax, in fixed logic</span></td></tr>
+          <tr><th>📦 Package</th>
+            <td><span class="c">LGA-6096, socketed</span><span class="why">field-replaceable server CPU</span></td>
+            <td><span class="c">SXM5 mezzanine, 700 W</span><span class="why">power + NVLink no slot can carry</span></td>
+            <td><span class="c">BGA card, air-cooled</span><span class="why">cheap, permanent, one per server</span></td></tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </section>
 
-<section class="section" id="provenance">
-  <div class="wrap narrow">
-    <h2>Provenance &amp; honesty notes</h2>
+<!-- ================= PROVENANCE ================= -->
+<section class="section">
+  <div class="wrap" style="max-width:820px">
+    <h2>Provenance</h2>
+    <p class="sub">Models are schematic — block sizes show hierarchy, not exact floorplans. Every headline number was verified against vendor or press sources, Sep 2026; anything estimated is labeled as an estimate.</p>
     <div class="prov">
-      <p><b>Chips shown:</b> AMD EPYC 9654 “Genoa” (Zen 4, launched Nov 2022) · NVIDIA H100 SXM5 “GH100” (Hopper, announced Mar 2022) · NVIDIA BlueField-3 DPU (announced Apr 2021, shipping 2022).</p>
-      <p><b>Key figures verified Sep 2026:</b> GH100 — 80B transistors, 814 mm², TSMC 4N, 144 SMs on die (132 in H100 SXM5 product), 16,896 FP32 CUDA cores, 50 MB L2, 80 GB HBM3, NVLink 900 GB/s (<a href="https://www.techpowerup.com/294503/nvidia-hopper-whitepaper-reveals-key-specs-of-monstrous-compute-processor">TechPowerUp</a>, <a href="https://www.techpowerup.com/293177/nvidia-h100-is-a-compute-monster-with-80-billion-transistors-new-compute-units-and-hbm3-memory">TechPowerUp</a>). BlueField-3 — 22B transistors, 16× Arm Cortex-A78, 16 DPA cores, 400 Gb/s, PCIe Gen5 ×32, ≤64 GB DDR5, 42 SPECrate2017_int (<a href="https://developer.nvidia.com/blog/power-the-next-wave-of-applications-with-nvidia-bluefield-3-dpus">NVIDIA technical blog</a>, <a href="https://www.tomshardware.com/news/nvidia-unveils-bluefield-3-and-bluefield-4-dpus">Tom's Hardware</a>). EPYC Genoa — 96 cores/192 threads, 12× 5 nm CCDs + 6 nm sIOD, 384 MB L3, 12× DDR5, 128 PCIe Gen5 lanes, SP5 LGA-6096 (<a href="https://www.techpowerup.com/300936/amd-launches-4th-gen-epyc-genoa-zen-4-server-processors-100-performance-uplift-for-50-more-cores">TechPowerUp</a>).</p>
-      <p><b>Estimates, labeled as such:</b> Genoa transistor count (≈13B — AMD never published a figure); BlueField-3 process node (7nm-class — NVIDIA undisclosed). The 3D models are stylized schematics, not to scale and not die shots.</p>
+      <ul>
+        <li><b>AMD EPYC 9654 “Genoa”</b> — 96C/192T Zen 4 (12 CCDs × 8 cores), 1 MB L2/core, 32 MB L3/CCD (384 MB), 5 nm CCDs + 6 nm 397 mm² sIOD, 12-ch DDR5-4800 (460.8 GB/s), 128× PCIe Gen5, SP5 LGA-6096, 360 W. <a href="https://www.techpowerup.com/cpu-specs/epyc-9654.c2933">TechPowerUp specs</a>; CCD/CCX layout via <a href="https://www.tomshardware.com/news/amds-epyc-bergamo-and-zen-4c-detailed-same-as-zen-4-but-denser">Tom's Hardware</a>.</li>
+        <li><b>NVIDIA H100 SXM5 “GH100”</b> — full die 144 SMs (132 enabled), 128 CUDA + 4 Tensor cores/SM, 50 MB L2, 5 active HBM3 stacks of 6 on package, 5120-bit, 80 GB, ~3.35 TB/s, 80B transistors, 814 mm² TSMC 4N, 4th-gen NVLink 900 GB/s, 700 W. <a href="https://www.techpowerup.com/gpu-specs/h100-sxm5-80-gb.c3900">TechPowerUp specs</a>; <a href="https://www.tweaktown.com/news/88080/nvidia-hopper-h100-gpu-detailed-tsmc-4nm-hbm3-vram-80b-transistors/index.html">TweakTown</a>; <a href="https://www.hwcooling.net/en/nvidias-new-fastest-ai-gpu-h200-with-141gb-of-hbm3e-memory/">HWCooling (5-of-6 stacks)</a>.</li>
+        <li><b>NVIDIA BlueField-3</b> — 22B transistors, 16× Arm A78 v8.2 on coherent mesh, ConnectX-7 400 GbE/NDR, 4× crypto acceleration, 16 DPA packet cores, PCIe Gen5 switch, 1 DDR5 controller (16/32 GB on-card), inline IPsec/TLS, RegEx, NVMe-oF offload. <a href="https://developer.nvidia.com/blog/power-the-next-wave-of-applications-with-nvidia-bluefield-3-dpus">NVIDIA technical blog</a>; <a href="https://docs.nvidia.com/networking/display/bf3dpu/introduction">NVIDIA docs</a>.</li>
+        <li>Exploded-stack geometry, pad counts, and internal block placement are <em>estimates</em> for illustration — vendors don't publish package CAD.</li>
+      </ul>
     </div>
   </div>
 </section>
@@ -342,181 +327,402 @@ footer.site a{color:var(--accent);text-decoration:none}
 
 <footer class="site">
   <div class="wrap">
-    <p><a href="/">← JC Davis</a> · An interactive explainer. Models are schematic; specs verified against vendor/press sources, Sep 2026.</p>
+    <p><a href="/">← JC Davis</a> · CPU vs GPU vs DPU, exploded. Schematic models; specs verified Sep 2026.</p>
   </div>
 </footer>
-
 <script src="./assets/three.min.js"></script>
 <script>
-/* ---------- explanation depth ---------- */
+/* ================= explanation depth ================= */
 var LEVEL = 'pro';
-var LVL = ['eli5','fifteen','pro','expert'];
-function applyLevel(){
-  document.querySelectorAll('.lvltext').forEach(function(el){
-    var t = el.getAttribute('data-'+LEVEL);
-    if (t !== null) el.textContent = t;
-  });
+function setLevel(l){
+  LEVEL = l;
   document.querySelectorAll('.lbtn').forEach(function(b){
     b.classList.toggle('on', b.getAttribute('data-lvl') === LEVEL);
   });
-  renderAnno();
+  renderPin(); renderDiff();
 }
 document.querySelectorAll('.lbtn').forEach(function(b){
-  b.addEventListener('click', function(){ LEVEL = b.getAttribute('data-lvl'); applyLevel(); });
+  b.addEventListener('click', function(){ setLevel(b.getAttribute('data-lvl')); });
 });
 
-/* ---------- part encyclopedia (4 depths each) ---------- */
+/* ================= part encyclopedia: 26 parts × 4 depths =================
+   class keys: compute, cache, memory, interconnect, network, accel, package  */
+var CLS_NAME = {compute:'Compute cores', cache:'Cache hierarchy', memory:'Memory system',
+  interconnect:'Interconnect', network:'Network I/O', accel:'Accelerators', package:'Package'};
 var PARTS = {
-  /* CPU */
-  ihs: {chip:'cpu', name:'CPU heat spreader (IHS)', spec:['Nickel-plated copper','Covers 12 CCDs + sIOD','Soldered TIM'],
-    eli5:'The shiny metal hat on top of the CPU. It spreads the heat out flat so the big cooler sitting on it can carry the heat away.',
-    fifteen:'The integrated heat spreader: nickel-plated copper, soldered to the dies. It evens out hot spots from 13 separate dies and protects the fragile silicon underneath.',
-    pro:'Genoa IHS: Ni-plated Cu, indium-solder TIM1 to the CCDs/sIOD. Spreads heat from 13 dies across the SP5 cold plate and absorbs mechanical load from the socket retention mechanism.',
-    expert:'IHS stack: die → In solder (~80 W/m·K) → Ni-plated Cu lid → TIM2 → cold plate. Dominant thermal path for 400 W TDP; solder avoids pump-out over thermal cycling vs polymer TIM.'},
-  tim: {chip:'cpu', name:'Thermal interface (TIM)', spec:['Indium solder','~20–50 µm','Fills micro-gaps'],
-    eli5:'A super-thin layer of special melted metal between the brain and the hat. Air blocks heat, so this fills every tiny gap.',
-    fifteen:'Thermal interface material: fills microscopic air gaps between die and lid. Server chips use indium solder instead of paste for lower thermal resistance.',
-    pro:'TIM1: indium solder, ~20–50 µm bond line. Thermal resistance here is a first-order limiter of sustained boost clocks; solder runs several °C cooler than polymer paste.',
-    expert:'In-solder TIM1: ~80 W/m·K, void fraction and CTE fatigue dominate long-term Rth. Bond-line thickness control across 13 dies is the packaging challenge.'},
-  ccd: {chip:'cpu', name:'Compute chiplets (12× CCD)', spec:['8× Zen 4 cores each','32 MB L3 per CCD','5 nm TSMC'],
-    eli5:'Twelve tiny brains that do the actual thinking — 8 smart workers on each, 96 in total. They are small on purpose: small squares are cheaper to make without mistakes.',
-    fifteen:'Twelve Core Complex Dies, each with 8 Zen 4 cores and 32 MB of L3 cache, built on TSMC 5 nm. Small dies mean high manufacturing yield — a defect ruins one small chiplet, not a giant die.',
-    pro:'12× N5 CCDs (2× 4-core CCX, 1 MB L2/core, 32 MB L3/CCD) surrounding the sIOD, linked by Infinity Fabric. Chiplet disaggregation: bin and mix CCDs, reuse the I/O die across SKUs.',
-    expert:'Zen 4 CCD ≈ 8 cores, 32 MB L3, AVX-512 w/ 256-bit datapath, ~70 mm² class on N5. IFOP links to sIOD at ~3rd-gen IF bandwidth. 12 CCDs = 96C/192T; Genoa-X stacks 3D V-Cache TSVs on the same CCD for 1152 MB L3.'},
-  iod: {chip:'cpu', name:'Server I/O die (sIOD)', spec:['12× DDR5 channels','128× PCIe Gen5','6 nm · Infinity Fabric hub'],
-    eli5:'The big square in the middle that is the post office. It carries messages between the 12 thinking-chiplets, the memory sticks, and everything plugged into the computer.',
-    fifteen:'The central I/O die: no compute cores, just the memory controllers (12 DDR5 channels), PCIe lanes, and the Infinity Fabric switch connecting all 12 CCDs together.',
-    pro:'6 nm sIOD: 12 DDR5 controllers (24 sub-channels), 128× PCIe Gen5 + CXL SERDES, 3rd-gen Infinity Fabric hub. All CCD traffic and all off-socket I/O funnels through it — it is the latency tax of the chiplet design.',
-    expert:'sIOD on N6 (mature node for analog/PHY): dual 80-lane configurable SERDES, IFOP to 12 CCDs, GMI/xGMI inter-socket, SEV-SNP secure processor. CCD→CCD latency traverses IF through the sIOD — NUMA effects are real and measurable.'},
-  substrate: {chip:'cpu', name:'Package substrate', spec:['Organic ABF build-up','~10k die bumps','Power planes'],
-    eli5:'The green plate everything sits on — a tiny circuit board with thousands of hidden wires connecting the brains to the golden feet below.',
-    fifteen:'A miniature multi-layer PCB that fans thousands of dense die connections out to the package pads, and carries the thick copper power planes feeding hundreds of amps.',
-    pro:'ABF organic substrate: escapes ~10k C4 bumps from 13 dies to LGA-6096 lands, distributes 400 W-class current with controlled IR drop, hosts land-side decoupling caps.',
-    expert:'HDI build-up substrate; microvia stack; PDN designed for high di/dt transients; CTE matching vs the 13-die MCM to control warpage across the 60×75 mm SP5 footprint.'},
-  pads: {chip:'cpu', name:'LGA-6096 pads', spec:['6,096 contacts','Socketed, replaceable','~60% are power/ground'],
-    eli5:'The 6,096 golden feet on the bottom. The CPU just sits on matching springy pins in its socket — no legs to bend, and you can swap it out.',
-    fifteen:'Land grid array: 6,096 flat gold pads press against spring pins in the SP5 socket. Most pads carry power and ground — feeding the chip is what takes the most pins, not signals.',
-    pro:'LGA-6096: socketed interface, ~60% of contacts are power/ground. Pin count is driven by current delivery (400 W) and 12 memory channels, not logic signals.',
-    expert:'LGA contact resistance, wipe, and insertion force scale with current; power/ground pad ratio minimizes loop inductance for the PDN. Socketed = field-replaceable, at the cost of contact reliability vs soldered BGA.'},
-  /* GPU */
-  pcb: {chip:'gpu', name:'SXM5 module board', spec:['Mezzanine, not PCIe card','700 W power delivery','30+ VRM phases'],
-    eli5:'The dark board the GPU lives on. Unlike a graphics card that plugs into a slot, this one bolts flat onto the motherboard so it can drink 700 watts of power.',
-    fifteen:'The SXM5 module: a mezzanine board (not a PCIe card) with 30+ power phases and a high-density board-to-board connector — the only way to feed 700 W and 900 GB/s NVLink.',
-    pro:'PG520-class SXM5 board: 30+ VRM phases, board-to-board mezzanine connector carrying power blades + NVLink + PCIe Gen5. Form factor exists because no PCIe slot can deliver 700 W or NVLink bandwidth.',
-    expert:'SXM5: ~700 W via integrated power blades, 4th-gen NVLink (900 GB/s) escape, PCIe Gen5 x16 to host. Board PDN must handle >500 A with tight transient response for Tensor Core bursts.'},
-  nvlink: {chip:'gpu', name:'NVLink edge fingers', spec:['4th-gen NVLink','900 GB/s','GPU-to-GPU direct'],
-    eli5:'The golden teeth on the board edge — super-fast bridges so neighboring GPUs can share work directly without asking the CPU for help.',
-    fifteen:'NVLink: a direct GPU-to-GPU interconnect at 900 GB/s — roughly 7× PCIe Gen5. GPUs in a server gossip at near-memory speed to split up giant AI models.',
-    pro:'4th-gen NVLink: 900 GB/s bidirectional, cache-coherent-ish GPU fabric. Lets 8× H100s act as one memory pool for model-parallel training; host PCIe is demoted to a side channel.',
-    expert:'NVLink 4.0: 18 links × 50 GB/s, NVSwitch fabrics scale to 256 GPUs. Enables tensor/pipeline parallelism with all-reduce at fabric speed — the physical reason DGX/HGX topologies exist.'},
-  interposer: {chip:'gpu', name:'Silicon interposer (CoWoS)', spec:['TSMC CoWoS 2.5D','~10k micro-bumps','Enables 3 TB/s'],
-    eli5:'A paper-thin silicon plate under the big brain, covered in millions of invisible bridges connecting the brain to its six memory neighbors.',
-    fifteen:'TSMC CoWoS: the compute die and six HBM3 stacks sit on a silicon interposer whose microscopic wiring (~10k connections) carries ~3 TB/s — no circuit board could do this.',
-    pro:'CoWoS-S 2.5D: passive Si interposer, ~45 µm micro-bump pitch, RDL at ~2 µm line/space. This is the physical enabler of the 5120-bit HBM3 interface — bandwidth no organic substrate can route.',
-    expert:'Interposer yield dominates module cost: one defective HBM stack or bad micro-bump scraps the whole CoWoS assembly, hence extensive known-good-die test. Interposer is passive — all active logic is in GH100.'},
-  gh100: {chip:'gpu', name:'GH100 compute die', spec:['80B transistors','814 mm² · TSMC 4N','144 SMs on die'],
-    eli5:'The giant brain — the biggest single thinking-square ever made for AI. Inside are 144 neighborhoods (SMs), each with 128 tiny workers, all doing math together.',
-    fifteen:'One 814 mm² monolithic die: 144 Streaming Multiprocessors × 128 CUDA cores = 18,432 cores, plus 576 Tensor Cores and a 50 MB L2 cache. Monolithic because SM-to-SM bandwidth can’t tolerate chiplet hops.',
-    pro:'GH100: 80B transistors on TSMC 4N, 8 GPCs × 9 TPCs × 2 SMs, 128 FP32 + 64 FP64 + 4 Tensor Cores per SM, Transformer Engine (FP8), DPX instructions, MIG. H100 SXM5 ships 132 SMs / 16,896 cores enabled.',
-    expert:'Reticle-limit monolithic design (~814 mm²) — chiplet partitioning was rejected because the all-to-all SM/L2 crossbar needs single-die latency. 4th-gen Tensor Cores do 4:2 structured sparsity; FP8 Transformer Engine with per-tensor scaling. 50 MB L2 is the shared rendezvous for all SMs.'},
-  hbm: {chip:'gpu', name:'HBM3 stacks (6×)', spec:['80 GB total','~3 TB/s','Stacked DRAM dies'],
-    eli5:'Six little towers of memory standing right next to the brain — like keeping your crayons in your pockets instead of across the room. Super close = super fast.',
-    fifteen:'High Bandwidth Memory: DRAM dies stacked vertically with through-silicon vias, sitting millimeters from the compute die. 80 GB at ~3 TB/s — ~10× the bandwidth of normal RAM, at the cost of capacity.',
-    pro:'6× HBM3 stacks (5-hi/8-hi class), 5120-bit interface in product, ~3 TB/s, ECC. Stacked TSV DRAM trades capacity and cost for bandwidth — the design axis AI training demands.',
-    expert:'HBM3: 1024-bit per stack, ~6.4 Gbps/pin class, TSV-stacked DRAM with on-die ECC + sideband. Thermal coupling to GH100 through the interposer is a packaging constraint; stacks are the capacity ceiling (141 GB on H200 via taller stacks).'},
-  lid: {chip:'gpu', name:'Vapor-chamber lid', spec:['Copper vapor chamber','Sheds 700 W','Cold-plate interface'],
-    eli5:'The big copper hat on the GPU. The GPU makes as much heat as a hair dryer, so this hat has special liquid inside that spreads heat super evenly.',
-    fifteen:'A copper vapor-chamber plate: sealed liquid evaporates at hot spots and condenses at cool edges, spreading 700 W evenly to the liquid cold plate bolted on top.',
-    pro:'Vapor-chamber IHS: two-phase heat spreading handles ~700 W at low thermal resistance. The lid is also the mechanical datum for the cold plate — flatness is spec’d in microns.',
-    expert:'Vapor chamber: sintered wick, water charge, ~0.05–0.1 °C/W spreading resistance. Required because GH100’s ~700 W over 814 mm² would overwhelm solid copper spreading; TIM1 here is typically polymer, not solder.'},
-  /* DPU */
-  dpcb: {chip:'dpu', name:'DPU card board', spec:['PCIe card form factor','Own power + clock','QSFP ports'],
-    eli5:'The DPU’s own little circuit board. It plugs into the server like any card, but it carries its own computer — it doesn’t need the big CPU to think.',
-    fifteen:'The BlueField-3 card: PCIe edge connector to the host, QSFP cages for 400 Gb/s network cables, its own power regulation and DDR5 slots — a complete computer on a card.',
-    pro:'BF3 card: PCIe Gen5 edge to host (its embedded switch can act as endpoint or root complex), QSFP56/DD ports for 400G, on-card DDR5, independent power/clock domains — it boots and runs before the host does.',
-    expert:'Card can enumerate as PCIe endpoint or root complex — it can own other devices (e.g., a GPU) over a PCIe bridge without host involvement. Independent BMC-less boot; DOCA runtime provisions it out-of-band.'},
-  bga: {chip:'dpu', name:'BGA solder balls', spec:['Soldered, not socketed','~1k+ balls','Permanent mount'],
-    eli5:'Hundreds of tiny metal balls melted under the chip, gluing it to its board forever. Cheaper and tougher than a socket — this chip never needs swapping.',
-    fifteen:'Ball grid array: the SoC is soldered to its card with a grid of tiny solder balls. Permanent and cheap — fine for a chip that ships inside every server and never gets upgraded alone.',
-    pro:'BGA: soldered package, ~1k+ balls. Lower cost and better shock/vibration reliability than LGA; the tradeoff is no field replacement — the card is the FRU, not the chip.',
-    expert:'BGA ball pitch ~0.8–1.0 mm class; underfill optional. CTE mismatch between SoC substrate and card is managed by ball alloy and pad design; rework is possible but economically the card is replaced as a unit.'},
-  soc: {chip:'dpu', name:'BlueField-3 SoC die', spec:['22B transistors','16× Arm A78 + 16 DPA','ConnectX-7 pipeline on-die'],
-    eli5:'The DPU’s brain — medium-sized, but with built-in helper gadgets: a super-fast mailroom (network), a lock-and-key shop (security), and a warehouse crew (storage), all on one square.',
-    fifteen:'One SoC mixing three blocks: a ConnectX-7-class networking pipeline, 16 Arm A78 cores on a coherent mesh, and 16 DPA packet-processing cores — plus crypto, NVMe, and virtualization accelerators.',
-    pro:'22B-transistor SoC: (1) networking — ConnectX-7 SmartNIC pipeline, 400 Gb/s; (2) compute — 16× Armv8.2 A78 + 16 hyperthreaded DPA cores; (3) PCIe switch (endpoint/root complex). Runs DOCA Linux independently of the host.',
-    expert:'Three-block architecture: NIC pipeline with inline crypto (IPsec/TLS), RDMA, NVMe-oF target/initiator offloads; A78 cluster for control plane (42 SPECrate2017_int); DPA — 16-way multithreaded VLIW-ish cores for I/O-bound data-path code (virtio emulation, congestion control). The “infrastructure tax” moves off host cores entirely.'},
-  heatsink: {chip:'dpu', name:'Finned heatsink', spec:['Stamped aluminum','Passive or airflow-cooled','No cold plate needed'],
-    eli5:'The metal comb on top that lets heat escape into the air. The DPU sips power compared to its big brothers, so a simple comb is plenty.',
-    fifteen:'A stamped finned heatsink: the DPU’s power budget is a fraction of a CPU or GPU, so server airflow over fins is enough — no liquid cooling, no vapor chamber.',
-    pro:'Finned Al heatsink, cooled by chassis airflow. Power envelope (~75–150 W class) permits passive card-level cooling — a deliberate TCO choice: one DPU per server must be cheap to cool.',
-    expert:'Thermal design point keeps junction temps in spec under worst-case chassis airflow; no TIM2/cold-plate stack. Low cooling cost is part of the DPU value prop — offload must not add a liquid-cooling burden per node.'}
+/* ---------------- CPU ---------------- */
+'cpu-ihs':{chip:'cpu',cls:['package'],name:'Nickel heat spreader (IHS)',
+ spec:['Ni-plated copper','Indium-solder TIM1','SP5 cold-plate datum'],
+ eli5:'The shiny metal hat on the CPU. It spreads heat flat so the big cooler on top can carry it away, and it protects 13 fragile silicon dies underneath.',
+ fifteen:'The integrated heat spreader: nickel-plated copper, soldered to all 13 dies. It evens out hot spots from the chiplets and takes the clamping force of the socket.',
+ pro:'Ni-plated Cu lid, indium-solder TIM1 to CCDs/sIOD. Spreads up to 400 W across the SP5 cold plate; also the mechanical datum the retention mechanism torques against.',
+ expert:'IHS stack: die → In solder (~80 W/m·K) → Ni-plated Cu → TIM2 → cold plate. Solder avoids pump-out over thermal cycling; bond-line uniformity across 13 dies is the packaging challenge.'},
+'cpu-tim':{chip:'cpu',cls:['package'],name:'Thermal interface (TIM1)',
+ spec:['Indium solder','~20–50 µm bond line','Fills micro-gaps'],
+ eli5:'A super-thin layer of melted metal between the brains and the hat. Air blocks heat, so this fills every tiny gap.',
+ fifteen:'Thermal interface material: server chips use indium solder instead of paste — lower thermal resistance, survives years of heat cycles.',
+ pro:'TIM1: indium solder, ~20–50 µm. Its thermal resistance is a first-order limiter of sustained boost clocks across the package.',
+ expert:'In-solder TIM1 (~80 W/m·K); void fraction and CTE fatigue dominate long-term Rth. Thickness control across 13 dies at SP5 scale is non-trivial.'},
+'cpu-ccd':{chip:'cpu',cls:['compute','cache','accel'],name:'12× CCD chiplets — compute',
+ spec:['8× Zen 4 cores each','1 MB L2 / core','32 MB L3 / CCD · 384 MB total'],
+ eli5:'Twelve tiny brains doing the actual thinking — 8 workers on each, 96 total. They are small on purpose: small squares are cheaper to make without mistakes.',
+ fifteen:'Twelve Core Complex Dies, 8 Zen 4 cores each, on TSMC 5 nm. Small dies = high yield: a defect ruins one small chiplet, not a giant die. Each CCD carries its own 32 MB of L3.',
+ pro:'12× N5 CCDs (2× 4-core CCX, 1 MB L2/core, 32 MB L3/CCD) around the sIOD, linked by Infinity Fabric. Chiplet disaggregation lets AMD bin/mix CCDs and reuse the I/O die across SKUs.',
+ expert:'Zen 4 “Persephone” CCD, ~72 mm² on N5: 8 cores, AVX-512 w/ 256-bit datapath, 32 MB L3. IFOP links to sIOD. 12 CCDs = 96C/192T; Genoa-X stacks 3D V-Cache TSVs on this same CCD for 1152 MB L3.'},
+'cpu-iod':{chip:'cpu',cls:['memory','interconnect'],name:'Server I/O die (sIOD)',
+ spec:['12× DDR5 channels','128× PCIe Gen5','Infinity Fabric hub'],
+ eli5:'The big square in the middle — the post office. It carries messages between the 12 thinking-chiplets, the memory sticks, and everything plugged into the computer.',
+ fifteen:'No compute cores — just the 12 DDR5 memory controllers, PCIe lanes, and the Infinity Fabric switch tying all 12 CCDs together.',
+ pro:'6 nm sIOD: 12 DDR5 controllers (460.8 GB/s), 128× PCIe Gen5 + CXL SERDES, 3rd-gen Infinity Fabric hub. All CCD traffic and all off-socket I/O funnels through it — the latency tax of the chiplet design.',
+ expert:'sIOD on N6 (mature node for analog/PHY): configurable SERDES, IFOP to 12 CCDs, GMI/xGMI inter-socket, SEV-SNP secure processor. CCD→CCD traffic traverses IF through the sIOD — NUMA effects are real and measurable.'},
+'cpu-substrate':{chip:'cpu',cls:['package'],name:'Organic package substrate',
+ spec:['ABF build-up PCB','Escapes 13 dies to LGA','Power planes + caps'],
+ eli5:'The plate everything sits on — a tiny circuit board with thousands of hidden wires connecting the brains to the golden feet below.',
+ fifteen:'A miniature multi-layer PCB fanning thousands of dense die connections out to the package pads, with thick copper planes feeding hundreds of amps.',
+ pro:'ABF organic substrate: escapes ~10k C4 bumps from 13 dies to LGA-6096 lands, distributes 400 W-class current with controlled IR drop, hosts land-side decoupling.',
+ expert:'HDI build-up; microvia stack; PDN designed for high di/dt; CTE matching vs the 13-die MCM controls warpage across the 60×75 mm SP5 footprint.'},
+'cpu-pads':{chip:'cpu',cls:['package'],name:'LGA-6096 lands',
+ spec:['6,096 contacts','Socketed · field-replaceable','~60% power/ground'],
+ eli5:'The 6,096 golden feet on the bottom. The CPU just sits on springy pins in its socket — you can swap it out, no legs to bend.',
+ fifteen:'Land grid array: flat gold pads press against spring pins in the SP5 socket. Most pads carry power and ground — feeding the chip takes more pins than signals do.',
+ pro:'LGA-6096: socketed interface. Pin count is driven by current delivery (400 W) and 12 memory channels, not logic signals.',
+ expert:'Contact resistance and insertion force scale with current; power/ground ratio minimizes PDN loop inductance. Socketed = field-replaceable, at a cost in contact reliability vs soldered BGA.'},
+/* ---------------- GPU ---------------- */
+'gpu-lid':{chip:'gpu',cls:['package'],name:'Vapor-chamber lid',
+ spec:['Copper vapor chamber','Sheds 700 W','Cold-plate interface'],
+ eli5:'The big copper hat on the GPU. It makes as much heat as a hair dryer, so special liquid inside the hat spreads the heat super evenly.',
+ fifteen:'A sealed copper plate with liquid that evaporates at hot spots and condenses at cool edges — spreading 700 W evenly to the liquid cold plate bolted on top.',
+ pro:'Two-phase heat spreading for ~700 W at low thermal resistance; the lid is also the mechanical datum for the cold plate (flatness spec’d in microns).',
+ expert:'Sintered-wick vapor chamber, ~0.05–0.1 °C/W spreading resistance. Required because 700 W over 814 mm² overwhelms solid copper; TIM1 here is typically polymer, not solder.'},
+'gpu-gpc':{chip:'gpu',cls:['compute','accel'],name:'GH100 die — SM clusters',
+ spec:['144 SMs on die · 132 enabled','128 CUDA + 4 Tensor / SM','16,896 CUDA cores active'],
+ eli5:'The giant brain cut into 144 neighborhoods. Each neighborhood has 128 tiny workers doing math side by side, plus 4 super-fast matrix helpers.',
+ fifteen:'One 814 mm² monolithic die: 8 GPCs × 9 TPCs × 2 SMs. Each SM packs 128 CUDA cores and 4 fourth-gen Tensor Cores — the matrix engines AI training lives on.',
+ pro:'GH100 on TSMC 4N: 80B transistors, 128 FP32 + 64 FP64 + 4 Tensor Cores per SM, Transformer Engine (FP8), DPX instructions, MIG. Monolithic because SM-to-SM bandwidth can’t tolerate chiplet hops.',
+ expert:'Reticle-limit monolithic (~814 mm²) — chiplet partitioning rejected because the all-to-all SM/L2 crossbar needs single-die latency. 4th-gen Tensor Cores do 4:2 structured sparsity; FP8 Transformer Engine with per-tensor scaling.'},
+'gpu-l2':{chip:'gpu',cls:['cache'],name:'50 MB L2 cache slices',
+ spec:['50 MB enabled (60 MB on die)','Shared by all 132 SMs','Partitioned slices'],
+ eli5:'The brain’s shared scratchpad. All 144 neighborhoods read and write here, so nobody has to walk all the way out to the memory towers.',
+ fifteen:'50 MB of L2 sliced around the die edge, shared by every SM — the rendezvous point where 132 multiprocessors exchange data without leaving the chip.',
+ pro:'Partitioned 50 MB L2 (60 MB physical) between SM fabric and HBM controllers; absorbs streaming reuse and coalesces HBM traffic. Sizing is a bandwidth filter, not a latency cache.',
+ expert:'L2 slices sit on the memory-controller crossbar; hit bandwidth is an order above HBM. L2 residency determines whether kernels are HBM-bound — the key tuning knob for LLM inference.'},
+'gpu-hbm':{chip:'gpu',cls:['memory'],name:'HBM3 stacks',
+ spec:['5 active of 6 on package','80 GB · ~3.35 TB/s','1024-bit per stack'],
+ eli5:'Six little towers of memory standing right next to the brain — like keeping crayons in your pockets instead of across the room. Super close = super fast.',
+ fifteen:'DRAM dies stacked vertically with through-silicon vias, millimeters from the compute die. 80 GB at ~3.35 TB/s — ~7× the bandwidth of DDR5, at a fraction of the capacity.',
+ pro:'HBM3, 1024-bit per stack, TSV-stacked DRAM with ECC. Five of six stacks enabled on H100 SXM5 (yield binning). Stacked memory trades capacity and cost for bandwidth — the axis AI training demands.',
+ expert:'~6.4 Gbps/pin class, on-die ECC + sideband; thermal coupling to GH100 through the interposer constrains stacks. Capacity ceiling is the stack height — H200 moved to taller HBM3e for 141 GB.'},
+'gpu-interposer':{chip:'gpu',cls:['interconnect','package'],name:'Silicon interposer (CoWoS)',
+ spec:['TSMC CoWoS 2.5D','~10k micro-bumps','Enables the 5120-bit bus'],
+ eli5:'A paper-thin silicon plate under the brain, covered in invisible bridges connecting it to its six memory neighbors.',
+ fifteen:'The compute die and HBM stacks sit on a silicon interposer whose microscopic wiring carries ~3.35 TB/s — no circuit board could route that.',
+ pro:'CoWoS-S 2.5D: passive Si interposer, ~45 µm micro-bump pitch, RDL at ~2 µm line/space. The physical enabler of the 5120-bit HBM3 interface.',
+ expert:'Interposer yield dominates module cost: one bad HBM stack or micro-bump scraps the whole CoWoS assembly — hence known-good-die test. Interposer is passive; all logic is in GH100.'},
+'gpu-nvlink':{chip:'gpu',cls:['interconnect'],name:'NVLink edge — 4th gen',
+ spec:['900 GB/s GPU-to-GPU','~7× PCIe Gen5','NVSwitch to 256 GPUs'],
+ eli5:'Golden teeth on the board edge — super-fast bridges so neighboring GPUs share work directly, without asking the CPU for help.',
+ fifteen:'Direct GPU-to-GPU interconnect at 900 GB/s. Eight H100s gossip at near-memory speed to split giant AI models between them.',
+ pro:'NVLink 4.0: 18 links, cache-coherent-ish GPU fabric. Lets 8× H100s act as one memory pool for model-parallel training; host PCIe is demoted to a side channel.',
+ expert:'NVSwitch fabrics scale to 256 GPUs; enables tensor/pipeline parallelism with all-reduce at fabric speed — the physical reason DGX/HGX topologies exist.'},
+'gpu-pcb':{chip:'gpu',cls:['package'],name:'SXM5 module board',
+ spec:['Mezzanine, not a PCIe card','30+ VRM phases','700 W delivery'],
+ eli5:'The dark board the GPU lives on. It bolts flat onto the motherboard instead of plugging into a slot, so it can drink 700 watts.',
+ fifteen:'A mezzanine board with 30+ power phases and a board-to-board connector — the only way to feed 700 W plus NVLink. No PCIe slot could do this.',
+ pro:'Mezzanine connector carries power blades + NVLink + PCIe Gen5. Form factor exists because no slot delivers 700 W or 900 GB/s fabric bandwidth.',
+ expert:'PDN must handle >500 A with tight transient response for Tensor Core bursts; power blades replace edge-connector current limits.'},
+'gpu-pads':{chip:'gpu',cls:['package'],name:'SXM5 connector pads',
+ spec:['Board-to-board mezzanine','Power blades + signals','Not user-serviceable'],
+ eli5:'The golden strips underneath that press into the motherboard — power and data flow through here.',
+ fifteen:'High-density mezzanine pads: fat power blades plus thousands of signal contacts for NVLink and PCIe. Installed by technicians, never swapped by users.',
+ pro:'Mezzanine interface: separates the GPU module (field-replaceable unit) from the HGX baseboard. Power blades carry the 700 W the signal pins never could.',
+ expert:'Contact system rated for high-mating-cycle service in DGX/HGX chassis; the module — not the die — is the service boundary.'},
+/* ---------------- DPU ---------------- */
+'dpu-hs':{chip:'dpu',cls:['package'],name:'Finned heatsink',
+ spec:['Stamped aluminum','Airflow-cooled','No liquid needed'],
+ eli5:'The metal comb on top that lets heat escape into the air. The DPU sips power next to its big brothers, so a simple comb is plenty.',
+ fifteen:'Stamped fins cooled by server airflow. The DPU’s power budget is a fraction of a CPU or GPU — no vapor chamber, no liquid.',
+ pro:'Finned Al heatsink on chassis airflow. Power envelope permits passive card-level cooling — a deliberate TCO choice: one DPU per server must be cheap to cool.',
+ expert:'No TIM2/cold-plate stack; junction temps held in spec under worst-case chassis airflow. Low cooling cost is part of the DPU value prop.'},
+'dpu-cores':{chip:'dpu',cls:['compute'],name:'16× Arm Cortex-A78',
+ spec:['Armv8.2 · 64-bit','Coherent mesh','Control-plane CPUs'],
+ eli5:'Sixteen small, efficient brains running the DPU’s own operating system — they boss the helper gadgets around and talk to the server.',
+ fifteen:'A cluster of 16 Arm A78 cores on a low-latency coherent mesh, running the DPU’s own Linux. They run control software; the heavy packet work is offloaded to fixed gadgets.',
+ pro:'16× Armv8.2 A78 on coherent mesh, optimized for control-plane. Runs DOCA Linux independently of the host — the DPU boots and provisions before the server does.',
+ expert:'A78 “Hercules” cores; mesh keeps core-to-accelerator latency low. Control/data-plane split: A78s handle exceptions and policy, DPA + fixed logic handle the fast path.'},
+'dpu-cache':{chip:'dpu',cls:['cache'],name:'Mesh L2/L3 cache',
+ spec:['Shared on coherent mesh','Packet descriptors','Modest vs CPU'],
+ eli5:'Small scratchpads near the Arm brains for their notes. Packets zoom past too fast to bother caching — they stream straight through.',
+ fifteen:'Cache on the coherent mesh for the Arm cores’ working data. Deliberately modest: network packets stream through accelerators, they’re not cached like CPU data.',
+ pro:'Mesh-shared cache hierarchy sized for control-plane working sets, not data-plane. Packet buffers live in DRAM/SRAM FIFOs — caching them would be pure overhead.',
+ expert:'Cache is a latency play for the A78s only; the data path is deliberately cache-bypassing (streaming DMA) to avoid polluting it with 400 Gb/s of transient packets.'},
+'dpu-dpa':{chip:'dpu',cls:['compute','accel'],name:'DPA — data-path accelerator',
+ spec:['16 hyperthreaded cores','Packet/I/O processing','Programmable'],
+ eli5:'Sixteen tiny helpers that only do mailroom jobs — sorting packets, stamping them, sending them on — over and over, super fast.',
+ fifteen:'A programmable packet processor: 16 hyperthreaded cores built for I/O-heavy, low-compute chores like device emulation and congestion control.',
+ pro:'DPA: 16-way multithreaded cores for I/O-bound data-path code (virtio emulation, custom protocols). Programmable, unlike the fixed-function blocks.',
+ expert:'VLIW-ish multithreaded cores hide memory latency by thread count — classic network-processor design. DOCA exposes them for user data-path programs.'},
+'dpu-net':{chip:'dpu',cls:['network'],name:'ConnectX-7 network block',
+ spec:['400 GbE / NDR','RDMA + RoCE','2× QSFP112 ports'],
+ eli5:'The super-fast mailroom — the DPU’s front door to the internet’s highways, handling 400 billion bits every second.',
+ fifteen:'A ConnectX-7-class SmartNIC pipeline on the die: 400 Gb/s Ethernet/InfiniBand with RDMA, so servers exchange data without bothering their CPUs.',
+ pro:'Integrated NIC pipeline: 400G via QSFP112, RDMA/RoCE, overlay offloads (VXLAN/NVGRE encap-decap in hardware). Line-rate with the Arm cores uninvolved.',
+ expert:'PAM4 112G SerDes; hardware congestion control (DCQCN); the NIC pipeline is the DPU’s raison d’être — everything else serves it.'},
+'dpu-crypto':{chip:'dpu',cls:['accel'],name:'Inline crypto accelerators',
+ spec:['IPsec / TLS inline','4× vs prior gen','Zero-copy encrypt'],
+ eli5:'A lock-and-key shop: it scrambles and unscrambles secret messages at full speed, so the little Arm brains never have to.',
+ fifteen:'Fixed-function encryption engines that apply IPsec/TLS to packets as they fly through — 4× the crypto throughput of the previous generation.',
+ pro:'Inline (bump-in-the-wire) crypto: packets are encrypted in the NIC pipeline at line rate, no CPU cycles, no extra memory copies.',
+ expert:'Inline vs lookaside: data never leaves the pipeline — the latency and throughput win over CPU AES-NI is an order of magnitude at 400G.'},
+'dpu-regex':{chip:'dpu',cls:['accel'],name:'RegEx engine',
+ spec:['Pattern matching in HW','DPI / IDS offload','Line-rate scan'],
+ eli5:'A super-fast word finder: it scans every passing message for sneaky patterns, like a spell-checker that never sleeps.',
+ fifteen:'A hardware pattern-matcher for deep packet inspection — firewalls and intrusion detection scan traffic at full speed without software.',
+ pro:'Fixed-function regular-expression engine for DPI/IDS: offloads string/pattern matching that would otherwise burn whole CPU cores.',
+ expert:'NFA/DFA in hardware; Morpheus telemetry and IDS workloads run here — the “AI cybersecurity” story is this block plus the A78s.'},
+'dpu-nvme':{chip:'dpu',cls:['accel'],name:'NVMe-oF offload',
+ spec:['NVMe over Fabrics','Target + initiator','Storage without CPU'],
+ eli5:'The warehouse crew: it fetches boxes (data) from far-away storage shelves without bothering the main computer.',
+ fifteen:'Hardware that speaks NVMe-over-Fabrics — the DPU serves remote storage to the host as if it were a local SSD, CPU uninvolved.',
+ pro:'NVMe-oF target/initiator offload: remote NVMe namespaces presented locally with RDMA transport, zero host-CPU involvement per I/O.',
+ expert:'Storage disaggregation primitive: with DPA + NVMe-oF, the DPU is a complete storage controller — the host sees a disk, the DPU does everything else.'},
+'dpu-pcie':{chip:'dpu',cls:['interconnect'],name:'PCIe Gen5 switch',
+ spec:['Up to 32 lanes Gen5','Endpoint or root complex','Owns devices on bus'],
+ eli5:'The traffic cop for the card’s plug: it can even boss other gadgets around on the computer’s highway, all by itself.',
+ fifteen:'An embedded PCIe switch that can act as endpoint — or as root complex, meaning the DPU can own other devices (like a GPU) without the host.',
+ pro:'PCIe Gen5 switch with endpoint/root-complex personalities. Root-complex mode lets the DPU enumerate and drive devices over a bridge — host-bypass I/O.',
+ expert:'This is the architectural power move: the DPU as PCIe root complex turns the server inside out — infrastructure owns the bus, the host is just a tenant.'},
+'dpu-dram':{chip:'dpu',cls:['memory'],name:'DDR5 memory controller',
+ spec:['1 controller on die','16–32 GB on-card DDR5','5200–5600 MT/s'],
+ eli5:'A modest bookshelf for the DPU’s own notes — nowhere near as big as the computer’s memory, because packets don’t sit around.',
+ fifteen:'One DDR5 controller feeding 16–32 GB of soldered on-card memory — plenty for an OS and control software, tiny next to a server’s terabytes.',
+ pro:'Single DRAM controller, 16/32 GB DDR5-5200/5600 soldered. Sized for control-plane + buffering; the data plane streams through, it doesn’t live here.',
+ expert:'Memory bandwidth ~5× BlueField-2 per NVIDIA; still an order below server DDR5 subsystems — by design, since bulk data bypasses DRAM via accelerators.'},
+'dpu-qsfp':{chip:'dpu',cls:['network'],name:'QSFP112 cages',
+ spec:['2× 400G ports','Hot-pluggable optics','Front of card'],
+ eli5:'The two chunky sockets where the fat network cables plug in — the DPU’s front doors.',
+ fifteen:'Two QSFP112 cages for 400 Gb/s optics or DACs — the physical ports facing the data-center network.',
+ pro:'2× QSFP112, each 400G (4× 112G PAM4). Port configurability: 1×400G, 2×200G, or 4×100G-class breakouts.',
+ expert:'Signal integrity at 112G PAM4 demands retimers and careful card routing; cages are the serviceable optical boundary.'},
+'dpu-card':{chip:'dpu',cls:['package'],name:'DPU card board',
+ spec:['PCIe card form factor','Own power + clock','Boots before host'],
+ eli5:'The DPU’s own little circuit board. It plugs into the server like any card, but it carries its own computer.',
+ fifteen:'PCIe card with its own power regulation, clocks, and memory — a complete computer on a card that boots independently of the host server.',
+ pro:'FHHL/HHHL card: independent power/clock domains, on-card DDR5, eMMC + SSD. Boots and runs DOCA Linux before the host — out-of-band provisionable.',
+ expert:'Independent BMC-less boot; DOCA runtime provisions thousands of DPUs out-of-band. The card — not the chip — is the field-replaceable unit.'},
+'dpu-bga':{chip:'dpu',cls:['package'],name:'BGA solder balls',
+ spec:['Soldered, not socketed','Permanent mount','~1k+ balls (est.)'],
+ eli5:'Hundreds of tiny metal balls melted under the chip, gluing it to its board forever. This chip never needs swapping.',
+ fifteen:'Ball grid array: the SoC is soldered to its card. Permanent and cheap — fine for a chip that ships inside every server.',
+ pro:'Soldered BGA, ~1k+ balls (est.). Lower cost and better shock reliability than LGA; the tradeoff is no field replacement — the card is the FRU.',
+ expert:'Ball pitch ~0.8–1.0 mm class (est.); CTE mismatch managed by alloy/pad design. Rework is possible but economically the card is replaced as a unit.'}
 };
-var PART_ORDER = ['ihs','tim','ccd','iod','substrate','pads','pcb','nvlink','interposer','gh100','hbm','lid','dpcb','bga','soc','heatsink'];
 var CHIP_OF = {cpu:'CPU', gpu:'GPU', dpu:'DPU'};
-var CHIP_CLASS = {cpu:'cpu', gpu:'gpu', dpu:'dpu'};
+var CHIP_MODEL = {cpu:'AMD EPYC 9654 “Genoa”', gpu:'NVIDIA H100 SXM5 “GH100”', dpu:'NVIDIA BlueField-3'};
 
-/* ---------- annotation panel ---------- */
-var annoEl = document.getElementById('anno');
-var annoText = document.getElementById('anno-text');
-var annoSpec = document.getElementById('anno-spec');
-var currentPart = 'gh100';
-function renderAnno(){
-  var p = PARTS[currentPart]; if (!p) return;
-  annoEl.querySelector('h3').innerHTML = '<span class="tag '+CHIP_CLASS[p.chip]+'">'+CHIP_OF[p.chip]+'</span>' + p.name;
-  annoText.textContent = p[LEVEL];
-  annoSpec.innerHTML = p.spec.map(function(s){ return '<span>'+s+'</span>'; }).join('');
+/* ================= component-diff dataset =================
+   per class: per level: {what, cpu:{how,why}, gpu:{how,why}, dpu:{how,why}}
+   absent: true → chip has no on-die block of this class */
+var DIFF = {
+compute:{
+ title:'⚙ Compute cores',
+ eli5:{what:'The workers that do the actual math. Every chip has workers — but totally different kinds, because they do totally different jobs.',
+  cpu:{how:'96 big, smart workers (Zen 4 cores). Each one can do any job: math, decisions, running programs.',why:'A CPU has to run any program ever written, so its workers are generalists — smart but few.'},
+  gpu:{how:'16,896 tiny workers (CUDA cores) grouped in 132 teams (SMs). Each team also has 4 super-fast matrix helpers.',why:'AI math is the same simple operation millions of times — tiny workers doing it together win.'},
+  dpu:{how:'16 medium workers (Arm A78) that boss things around, plus 16 tiny mailroom helpers (DPA cores).',why:'The DPU runs helper jobs and an operating system — it needs a few smart bosses, not an army.'}},
+ fifteen:{what:'The execution units. Count and capability trade off: a CPU has ~100 powerful cores, a GPU ~17k simple ones, a DPU 16 efficient ones plus packet cores.',
+  cpu:{how:'96 Zen 4 cores across 12 chiplets, each with branch prediction, out-of-order execution, and AVX-512 — built for unpredictable, branchy code.',why:'General-purpose computing means running anything: operating systems, databases, game logic. Cores must be flexible first, numerous second.'},
+  gpu:{how:'132 SMs × 128 CUDA cores, each SM executing the same instruction across 32 threads at once (SIMT). 528 Tensor Cores handle matrix math.',why:'AI/HPC workloads are massively parallel with regular structure. Thousands of simple cores beat dozens of complex ones on throughput per watt.'},
+  dpu:{how:'16 Arm A78 cores on a coherent mesh for control software, plus 16 hyperthreaded DPA cores for packet-speed chores.',why:'Infrastructure work splits into “think” (control plane → A78) and “shovel” (data plane → DPA + fixed logic). Neither needs a giant core count.'}},
+ pro:{what:'Execution-unit philosophy. CPU: latency-optimized, ILP-heavy cores. GPU: throughput-optimized SIMT arrays + matrix units. DPU: control-plane application cores + programmable data-path cores.',
+  cpu:{how:'96C/192T Zen 4: deep OoO, large branch predictors, 1 MB L2/core, AVX-512. ~14% IPC gain over Zen 3; tuned for single-thread latency and mixed workloads.',why:'The CPU is the system’s latency engine — OS, databases, and interactive code are branchy and unpredictable. Die area goes to making each thread fast.'},
+  gpu:{how:'132 SMs (of 144 on die), 128 FP32 + 64 FP64 + 4 Tensor Cores per SM; Transformer Engine with FP8. 16,896 CUDA cores active.',why:'Throughput is the product: training/inference is dense linear algebra with massive data parallelism. Area goes to ALUs, not branch predictors.'},
+  dpu:{how:'16× A78 v8.2 (control plane, DOCA Linux) + 16 DPA hyperthreaded cores (I/O-bound data-path: virtio, congestion control, custom protocols).',why:'The DPU offloads the “infrastructure tax.” Its compute exists to orchestrate fixed-function blocks and run control software — efficiency and determinism beat raw FLOPS.'}},
+ expert:{what:'Core microarchitecture reflects the workload’s parallelism profile: MIMD latency cores (CPU), SIMT throughput arrays with systolic matrix units (GPU), and a control/data-plane split with multithreaded packet cores (DPU).',
+  cpu:{how:'Zen 4 “Persephone”: wide dispatch OoO, 256-bit AVX-512 datapath, 32+32 KB L1, 1 MB L2; 12 CCDs on N5. SMT2 hides memory latency for server mixes.',why:'Amdahl + latency: server workloads are latency-sensitive and irregular. Transistor budget buys speculation, OoO windows, and cache — not more threads.'},
+  gpu:{how:'Hopper SM: 4 warp schedulers, 128 FP32 CUDA, 4 4th-gen Tensor Cores w/ 4:2 structured sparsity, 256 KB L1/SM; occupancy hides HBM latency.',why:'Roofline: AI kernels are compute- or bandwidth-bound with regular access. Budget buys FMA throughput and Tensor Cores; control logic is amortized over 32-thread warps.'},
+  dpu:{how:'A78 “Hercules” on low-latency coherent mesh; DPA: 16-way multithreaded VLIW-ish cores hiding latency via thread count — classic network-processor design.',why:'Packet processing is embarrassingly parallel but branch-light; multithreading (not speculation) hides DRAM/accelerator latency at minimal area. Control plane needs real application cores for DOCA/Linux.'}}},
+cache:{
+ title:'🗄 Cache hierarchy',
+ eli5:{what:'Tiny, super-fast memory each worker keeps nearby, so it doesn’t wait for the big slow memory. Bigger nearby memory = less waiting.',
+  cpu:{how:'Huge: every core has its own 1 MB notebook (L2), and each chiplet shares a 32 MB whiteboard (L3) — 384 MB total.',why:'CPU programs jump around randomly in memory, so big nearby caches save enormous waiting time.'},
+  gpu:{how:'One 50 MB whiteboard shared by all 132 teams. No big private notebooks — teams stream data through.',why:'GPU math marches through data in order, so a giant shared scratchpad beats big private caches.'},
+  dpu:{how:'Small caches just for the 16 Arm brains’ notes. Packets zoom past too fast to cache.',why:'Caching 400 Gb/s of passing packets would be pointless — they’re gone in microseconds. Stream, don’t store.'}},
+ fifteen:{what:'On-chip SRAM that hides DRAM latency. CPU: deep private hierarchy (big L2/L3). GPU: one wide shared L2. DPU: modest mesh caches for control cores only.',
+  cpu:{how:'96 MB of private L2 (1 MB/core) + 384 MB of shared L3 (32 MB/CCD). Deep hierarchy tuned for unpredictable access patterns.',why:'Random access + latency sensitivity → caches are the CPU’s most important performance feature after the cores themselves.'},
+  gpu:{how:'50 MB L2 sliced around the die, shared by all 132 SMs. Small per-SM L1 (256 KB); no L3.',why:'Streaming, coalesced access: the L2 is a bandwidth filter and SM rendezvous, not a latency hierarchy. Data reuse is explicit in software.'},
+  dpu:{how:'Modest L2/L3 on the coherent mesh, sized for the A78 control plane. Data path uses SRAM FIFOs and streaming DMA.',why:'Packets are transient — 400 Gb/s never sits still long enough to cache. SRAM budget goes to queues, not cache.'}},
+ pro:{what:'Cache as latency-hiding (CPU), bandwidth-filtering (GPU), or control-plane-only (DPU) — three different answers to “what does fast nearby memory do for you.”',
+  cpu:{how:'1 MB L2/core (96 MB) + 32 MB L3/CCD (384 MB), victim/inclusive policies per level. L3 is the CCD-to-CCD and CCD-to-DRAM shock absorber.',why:'Server working sets are large and irregular; miss penalty to DDR5 is ~100 ns. Cache capacity directly converts to throughput for databases, VMs, and HPC.'},
+  gpu:{how:'50 MB partitioned L2 on the XBAR between SMs and HBM controllers; 256 KB L1/SM (unified shared/L1). No L3 — capacity would starve SM area.',why:'Kernels are tuned for L2 residency; the L2’s job is coalescing HBM traffic and SM-to-SM exchange at TB/s. Hit bandwidth, not hit rate, is the metric.'},
+  dpu:{how:'Mesh-shared caches for A78 working sets; data-plane deliberately cache-bypassing via streaming DMA into descriptor rings.',why:'Caching 50 GB/s of transient packets pollutes cache for zero reuse. The DPU’s “cache” for packets is deep SRAM FIFOs — queues, not caches.'}},
+ expert:{what:'SRAM allocation follows reuse distance: CPU invests in deep hierarchies for temporal locality; GPU in a wide shared L2 for spatial/streaming reuse; DPU bypasses caches on the fast path entirely.',
+  cpu:{how:'Zen 4: 32+32 KB L1, 1 MB 8-way L2 (~14-cycle), 32 MB 16-way L3 per CCX (~46-cycle class). 3D V-Cache option (Genoa-X) triples L3 via TSV stacking.',why:'Memory wall: core throughput outruns DRAM by 100×. Each level’s size/latency is tuned so server miss curves knee at economical SRAM budgets.'},
+  gpu:{how:'L2 slices on the memory-controller crossbar; ~50 MB at multi-TB/s aggregate. L2 hit ~200 cycles vs HBM ~600+ — kernels are blocked for L2 tile residency.',why:'GPU performance = f(arithmetic intensity, L2/HBM residency). The L2 is the last software-visible knob before HBM — hence CUTLASS/Triton tiling targets it.'},
+  dpu:{how:'A78 cluster caches (512 KB–1 MB L2 class per cluster, shared L3); accelerators DMA straight to DRAM/SRAM, bypassing coherency where safe.',why:'Coherence traffic at 400 Gb/s would collapse a cache hierarchy. The DPU treats packet memory as I/O — non-coherent streaming DMA — and caches only what the CPUs compute on.'}}},
+memory:{
+ title:'🧠 Memory system',
+ eli5:{what:'The big memory where all the data lives. The CPU wants a giant warehouse; the GPU wants a firehose; the DPU barely needs any.',
+  cpu:{how:'Twelve roads to memory (DDR5 channels) carrying 461 GB/s — enough for terabytes of RAM.',why:'Servers juggle huge datasets and hundreds of programs — capacity matters more than raw speed.'},
+  gpu:{how:'Five super-close memory towers (HBM3) blasting 3.35 TB/s — about 7× faster than the CPU’s memory.',why:'AI training eats data insanely fast. Speed beats size: 80 GB is plenty if you can refill it instantly.'},
+  dpu:{how:'One small memory controller with 16–32 GB — like a laptop’s worth.',why:'The DPU is a helper, not the main computer. Packets fly through; they don’t move in.'}},
+ fifteen:{what:'Off-chip DRAM: capacity vs bandwidth. CPU: 12-channel DDR5 for terabytes. GPU: stacked HBM3 for terabytes-per-second. DPU: a single DDR5 channel for its OS.',
+  cpu:{how:'12 DDR5-4800 channels, 460.8 GB/s, ECC, up to terabytes per socket via DIMMs.',why:'In-memory databases, VMs, and HPC need capacity first; bandwidth second. DIMMs scale capacity cheaply.'},
+  gpu:{how:'5 active HBM3 stacks (6 on package), 5120-bit, 80 GB at ~3.35 TB/s with ECC.',why:'AI is bandwidth-bound: weights stream through SMs continuously. HBM trades capacity and cost for 7× the bandwidth of DDR5.'},
+  dpu:{how:'One DDR5 controller, 16–32 GB soldered on-card at 5200–5600 MT/s.',why:'Control plane + packet buffers only. Bulk data bypasses DRAM through accelerators — a big DIMM subsystem would be dead weight and power.'}},
+ pro:{what:'DRAM subsystem design axis: CPU optimizes GB-per-dollar (DIMM scale), GPU optimizes GB/s (stacked integration), DPU optimizes just-enough (soldered LPDDR-class footprint).',
+  cpu:{how:'12× DDR5-4800 (24 sub-channels) via sIOD, 460.8 GB/s, ECC, 2 DPC for up to 3 TB/socket-class capacity.',why:'Server TCO: DRAM is the most expensive part of the node. DIMM modularity lets operators buy capacity incrementally; the 12 channels feed 96 cores without starving them.'},
+  gpu:{how:'HBM3 on CoWoS interposer: 1024-bit/stack, ~6.4 Gbps/pin, on-die ECC. 5-of-6 stacks enabled (yield).',why:'Training is a streaming problem: batch × model bytes must arrive at TB/s. No DIMM interface reaches this — hence 2.5D integration, at 5–10× the $/GB of DDR5.'},
+  dpu:{how:'Single controller, soldered 16/32 GB DDR5-5200/5600, 128-bit + ECC. ~5× the memory bandwidth of BlueField-2.',why:'The DPU’s memory holds an OS, DOCA runtime, and descriptor rings — not datasets. Soldered = cheap, rugged, and enough; packets stream through SRAM, not DRAM.'}},
+ expert:{what:'Memory wall, three responses: scale capacity through DIMMs (CPU), scale bandwidth through 3D integration (GPU), or sidestep DRAM on the fast path (DPU).',
+  cpu:{how:'Genoa memory: 12 channels × DDR5-4800 = 460.8 GB/s; sIOD PHYs on N6; CXL 1.1+ for memory expansion/pooling.',why:'Bandwidth-per-core (~4.8 GB/s) is the binding constraint for HPC; capacity-per-dollar rules for cloud. CXL is the escape hatch for both.'},
+  gpu:{how:'HBM3: 5× 1024-bit × ~6.5 Gbps ≈ 3.35 TB/s; interposer escape is the limiter, not the DRAM. Thermal coupling bounds stack height.',why:'Roofline says LLM training/inference is memory-bound: bytes/FLOP is fixed by the model, so bandwidth IS performance. Hence H200’s taller HBM3e stacks for 4.8 TB/s.'},
+  dpu:{how:'One 128-bit DDR5 channel; accelerators use non-coherent streaming DMA, bypassing DRAM for line-rate data.',why:'At 400 Gb/s, touching DRAM per packet costs power and latency the DPU can’t afford. Architecture rule: DRAM is for state, SRAM FIFOs are for packets.'}}},
+interconnect:{
+ title:'🔗 Interconnect',
+ eli5:{what:'The roads between the pieces. Chips are made of many parts that must talk — the roads decide how fast.',
+  cpu:{how:'Invisible bridges (Infinity Fabric) connect the 12 chiplets through the middle post-office die.',why:'The CPU is built from 13 separate pieces — without fast bridges it would be 13 slow brains, not one fast one.'},
+  gpu:{how:'A silicon plate with microscopic wires (interposer) plus golden bridges to other GPUs (NVLink, 900 GB/s).',why:'One GPU isn’t enough for giant AI — they must share like one giant brain, and talk to memory at insane speed.'},
+  dpu:{how:'A traffic cop (PCIe switch) letting the DPU plug in — and even boss other gadgets around by itself.',why:'The DPU’s power is independence: it must reach the network, storage, and GPUs without asking the host CPU.'}},
+ fifteen:{what:'Die-to-die and chip-to-chip links. CPU: Infinity Fabric over an organic substrate. GPU: silicon interposer + NVLink fabric. DPU: PCIe Gen5 switch.',
+  cpu:{how:'Infinity Fabric (IFOP) links 12 CCDs to the central sIOD; inter-socket via xGMI. All on organic substrate.',why:'Chiplet economics demand a die-to-die link; IF over organic package keeps cost down at the price of latency vs on-die.'},
+  gpu:{how:'CoWoS silicon interposer (~10k micro-bumps) for die↔HBM at 3.35 TB/s; 4th-gen NVLink (900 GB/s) for GPU↔GPU, NVSwitch to 256 GPUs.',why:'Memory bandwidth no PCB can route → interposer. Model parallelism needs GPU-direct fabric → NVLink. Both are bandwidth-maximal by design.'},
+  dpu:{how:'Embedded PCIe Gen5 switch, up to 32 lanes; endpoint or root-complex personalities.',why:'The DPU must DMA to host memory, NIC queues, and storage — and as root complex it can own devices outright, making host bypass real.'}},
+ pro:{what:'Interconnect as the scaling story: CPU scales cores via fabric-over-substrate; GPU scales bandwidth via 2.5D + NVLink; DPU scales independence via PCIe switching.',
+  cpu:{how:'3rd-gen IF: IFOP die-to-die at package level, sIOD as the switch. CCD↔CCD traverses the sIOD — a NUMA hop with measurable latency.',why:'Chiplets trade latency for yield and SKU flexibility. The sIOD-centric topology is the cost: uniform latency was sacrificed for modularity.'},
+  gpu:{how:'Interposer: ~45 µm micro-bump pitch, 2 µm RDL — the 5120-bit HBM escape. NVLink 4.0: 18× 50 GB/s links, 900 GB/s bisection per GPU.',why:'Two different physics problems: HBM needs micron-scale wiring (→ silicon), GPU scale-out needs meters of copper (→ NVLink/NVSwitch). NVIDIA solved both, differently.'},
+  dpu:{how:'PCIe Gen5 switch IP on-die; configurable endpoint/root complex; SR-IOV-class virtualization in the NIC pipeline.',why:'Infrastructure offload is only real if the DPU can touch everything: host RAM, SSDs, GPUs. The switch + root-complex mode is what makes “data center on a chip” literal.'}},
+ expert:{what:'Interconnect topology is destiny: sIOD-star (CPU), interposer + switched fabric (GPU), PCIe-switched host-bypass (DPU).',
+  cpu:{how:'IFOP ~ per-link bandwidth in the tens of GB/s class; sIOD arbitration; GMI for 2P coherence. Latency: CCD→sIOD→CCD ≈ 2× local.',why:'Chiplet NUMA is the defining performance characteristic of EPYC — thread and memory placement (first-touch, pinning) measurably moves results.'},
+  gpu:{how:'CoWoS-S: passive interposer, micro-bump yield dominates cost; NVLink 4.0 with NVSwitch — 256-GPU all-reduce at fabric speed.',why:'All-reduce bandwidth sets training step time at scale; NVLink exists so interconnect never becomes the bottleneck before HBM does. DGX/HGX topologies are NVLink made physical.'},
+  dpu:{how:'32× PCIe Gen5 (128 GB/s); root-complex enumeration of downstream devices; DOCA drivers present virtual functions to the host.',why:'Root-complex mode inverts the server: the DPU owns the bus and the host becomes a tenant — the architectural basis for zero-trust, host-independent infrastructure.'}}},
+network:{
+ title:'🌐 Network I/O',
+ eli5:{what:'The front door to other computers. Only one of these three chips has a real front door — the other two borrow it.',
+  cpu:{how:'None on the chip! The CPU talks to the network through a separate card (like this DPU).',why:'CPUs are already huge and expensive — networking is a separate job, so it lives on a separate chip.'},
+  gpu:{how:'None either! GPUs talk to each other over NVLink, and to the world through the CPU or DPU.',why:'A GPU’s wires are all spent on memory and math — network cables would just get in the way.'},
+  dpu:{how:'A full 400 Gb/s mailroom built in (ConnectX-7): two cable sockets, RDMA, the works.',why:'Moving data IS the DPU’s job — the network isn’t a feature, it’s the whole point.'}},
+ fifteen:{what:'On-die networking. CPU: none — NICs are separate PCIe devices. GPU: none — NVLink is GPU-to-GPU, not Ethernet. DPU: a complete 400G SmartNIC on die.',
+  cpu:{how:'No MAC/PHY on die; networking arrives via PCIe NICs. 128 PCIe lanes exist partly to feed them.',why:'Die area is precious; a NIC is a whole separate subsystem (SerDes, MAC, offloads). Server CPUs leave it to add-in cards.'},
+  gpu:{how:'No Ethernet/InfiniBand on GH100. Inter-GPU traffic uses NVLink; host/world traffic goes through CPU or DPU.',why:'Every mm² of GH100 is compute or HBM interface. Network protocol processing would steal area from the thing GPUs are bought for.'},
+  dpu:{how:'ConnectX-7 pipeline: 400 GbE/NDR, RDMA/RoCE, overlay encap/decap, congestion control — at line rate, Arm cores uninvolved.',why:'The DPU is the network endpoint: offloading the host’s entire networking stack (virtual switching, encryption, storage protocols) is its economic justification.'}},
+ pro:{what:'Network as first-class citizen exists on exactly one die here. The CPU and GPU treat the network as someone else’s problem — the DPU treats it as the product.',
+  cpu:{how:'Zero on-die network IP. All NIC function is off-chip; the sIOD’s 128 PCIe lanes are the attachment point.',why:'Separation of concerns at data-center scale: NICs evolve on their own cadence (400G→800G) without respinning a 96-core CPU.'},
+  gpu:{how:'Zero on-die network IP. NVLink/NVSwitch is a GPU fabric, not a routable network — no Ethernet, no IP, no RDMA verbs to the outside world.',why:'Fabrics and networks solve different problems: NVLink is for tightly-coupled collective ops; Ethernet/IB is for the data center. Conflating them wastes die.'},
+  dpu:{how:'Full SmartNIC: 2× QSFP112 400G, PAM4 112G SerDes, RDMA, RoCE, DCQCN congestion control, hardware overlay offloads, 4 MACs.',why:'Hyperscalers measured the “infrastructure tax” at ~30% of server CPU — virtual switching, crypto, storage. The DPU reclaims it by owning the wire.'}},
+ expert:{what:'The DPU is what happens when the NIC eats the server: network, security, and storage pipelines collapse onto one SoC, and the host CPU is demoted to tenant.',
+  cpu:{how:'Historically: NIC on PCIe. The cost is CPU cycles per packet (kernel stack, interrupts) — the tax the DPU exists to abolish.',why:'At 400 Gb/s, software packet processing needs dozens of cores. The CPU doing networking is the most expensive possible way to move packets.'},
+  gpu:{how:'GPUs remain network-attached through the host/DPU: GPUDirect RDMA lets NICs DMA straight into HBM, bypassing the CPU — but the NIC is still external.',why:'GPUDirect is the compromise: keep the NIC off the compute die, but give it a direct path to HBM. The DPU is the natural home for that NIC.'},
+  dpu:{how:'ConnectX-7: integrated switch, inline IPsec/TLS, NVMe-oF, virtio acceleration; DOCA programs the whole pipeline.',why:'This is the endgame of SmartNIC evolution: the network endpoint becomes a programmable computer, and “the network” becomes software-defined infrastructure on the DPU.'}}},
+accel:{
+ title:'🚀 Accelerators',
+ eli5:{what:'Special helper gadgets that do one job super fast, so the main workers don’t have to. Each chip picked different helpers.',
+  cpu:{how:'Built-in math helpers (AVX-512) inside each core — no separate gadgets.',why:'The CPU does a bit of everything, so its helpers live inside the workers themselves.'},
+  gpu:{how:'528 matrix super-helpers (Tensor Cores) — the whole chip is basically one giant helper.',why:'AI is almost entirely one operation (matrix math), so the GPU is built around its helper.'},
+  dpu:{how:'Separate gadgets: lock-and-key shop (crypto), word-finder (RegEx), warehouse crew (NVMe storage).',why:'The DPU’s jobs — security, scanning, storage — are fixed chores, perfect for dedicated gadgets.'}},
+ fifteen:{what:'Fixed-function offload. CPU: SIMD in-core (AVX-512). GPU: Tensor Cores as the main event. DPU: a toolbox of infrastructure engines (crypto, RegEx, NVMe-oF).',
+  cpu:{how:'AVX-512 + VNNI/BF16 inside each Zen 4 core — vector math without leaving the core.',why:'CPUs accelerate common patterns in-place; separate blocks would complicate the programming model for modest gain.'},
+  gpu:{how:'528 4th-gen Tensor Cores (4/SM): matrix-multiply-accumulate in FP8/FP16/INT8 with 4:2 sparsity — the heart of AI training.',why:'GEMM dominates AI FLOPs; a dedicated systolic path beats CUDA cores by ~8×/area on matmul. The accelerator IS the product.'},
+  dpu:{how:'Inline IPsec/TLS crypto (4× gen-over-gen), RegEx/DPI engine, NVMe-oF target/initiator, DPA packet cores.',why:'Infrastructure chores are fixed, repetitive, and line-rate — ideal for fixed logic. Each engine reclaims CPU cores that hyperscalers were burning on “tax” work.'}},
+ pro:{what:'Accelerator strategy: CPU keeps it in-core and general; GPU bets the die on one domain (matmul); DPU fields a Swiss-army set of infrastructure engines.',
+  cpu:{how:'AVX-512 with 256-bit datapath (double-pumped 512), VNNI, BF16 — per core, no separate blocks.',why:'x86 must run legacy code; in-core SIMD preserves the programming model while lifting vector throughput ~2× for HPC/AI-adjacent code.'},
+  gpu:{how:'4th-gen Tensor Cores: FP8 Transformer Engine with per-tensor scaling, 4:2 structured sparsity, DPX instructions for dynamic programming.',why:'NVIDIA’s moat: every AI framework targets Tensor Cores. The SM is now a Tensor Core delivery vehicle with CUDA cores attached.'},
+  dpu:{how:'Inline crypto (bump-in-the-wire IPsec/TLS), RegEx for IDS/DPI, NVMe-oF offload, DPA for programmable data-path.',why:'Each engine maps to a hyperscaler tax line-item: encryption, security scanning, storage virtualization. Fixed logic = line-rate at milliwatts per Gb/s.'}},
+ expert:{what:'Accelerators as economic instruments: each block exists because its workload’s $/op on general cores exceeded the NRE of fixed logic.',
+  cpu:{how:'Zen 4 AVX-512: 256-bit physical datapath, 2-cycle 512-bit ops; VNNI-INT8, BF16 convert. Kept in-core to preserve x86’s unified memory/ISA model.',why:'AMD chose compatibility over a separate matrix block (unlike Intel AMX) — the bet that in-core vectors suffice for CPU-attached AI inference.'},
+  gpu:{how:'Tensor Core 4th gen: 256×256×? systolic MMA, FP8 E4M3/E5M2, sparsity 2:4 with metadata, Transformer Engine auto-scales precision per tensor.',why:'Matmul is >90% of training FLOPs; a dedicated datapath yields ~10× perf/area over SIMT. DPX hints at the next domain: dynamic programming.'},
+  dpu:{how:'Crypto: inline AES-GCM at 400G; RegEx: NFA/DFA in HW for Morpheus IDS; NVMe-oF: full target/initiator; DPA covers the programmable remainder.',why:'Amdahl for infrastructure: fixed chores → fixed logic at line rate; variable chores → DPA cores. The A78s only handle exceptions — the ideal division.'}}},
+package:{
+ title:'📦 Package',
+ eli5:{what:'The chip’s body: what it sits in, how it connects to the computer, and how its heat escapes. Three totally different bodies.',
+  cpu:{how:'A giant plate with 6,096 golden feet sitting in a socket — swappable, like a Lego brick.',why:'Server CPUs get replaced and upgraded, so they sit in sockets instead of being glued down.'},
+  gpu:{how:'A flat board (SXM5) bolted to the motherboard with golden bridges to 7 sibling GPUs.',why:'700 watts and 900 GB/s bridges don’t fit in any slot — the board exists because physics demanded it.'},
+  dpu:{how:'A plug-in card with a simple metal comb for cooling, soldered down permanently.',why:'One per server, cheap and permanent — it sips power, so a comb and airflow are enough.'}},
+ fifteen:{what:'Mechanical/electrical interface. CPU: socketed LGA-6096. GPU: SXM5 mezzanine module. DPU: soldered BGA on a PCIe card.',
+  cpu:{how:'FC-LGA6096: 6,096 lands on spring pins, nickel heat spreader, socketed for field replacement.',why:'Data centers swap CPUs; sockets make that possible. Pin count is driven by 400 W power delivery, not signals.'},
+  gpu:{how:'SXM5 mezzanine: board-to-board connector with power blades, vapor-chamber lid, 700 W, NVLink escape.',why:'No PCIe slot delivers 700 W or 900 GB/s fabric. The module is the price of that power and bandwidth.'},
+  dpu:{how:'BGA SoC soldered to a PCIe card, finned heatsink, QSFP cages, own power/clocks.',why:'Cost and reliability: soldered is cheaper and tougher than socketed, and a DPU never needs a solo upgrade — the card is the unit.'}},
+ pro:{what:'Package as product strategy: CPU = serviceable socket part; GPU = high-power module; DPU = disposable card.',
+  cpu:{how:'LGA-6096, In-solder TIM1, Ni IHS; ~60% of lands are power/ground. Socketed FRU.',why:'Enterprise serviceability + power delivery: 400 W through a socket needs thousands of power pins. The package is a power-delivery device that happens to hold a CPU.'},
+  gpu:{how:'SXM5: mezzanine power blades, 30+ VRM phases, vapor chamber, NVLink edge. Module is the FRU, not the die.',why:'700 W and 900 GB/s fabric escape can’t be socketed cheaply; the HGX baseboard + SXM module split is the service model.'},
+  dpu:{how:'BGA on FHHL/HHHL card, stamped-fin heatsink, 2× QSFP112, independent power/clock, on-card DDR5/eMMC/SSD.',why:'One DPU per node must be cheap to buy, cool, and replace. Soldered + air-cooled + card-FRU is the minimum-viable package.'}},
+ expert:{what:'Package co-design with power and thermals: the CPU package is a socketed power-delivery system, the GPU package a 700 W thermal/mechanical system, the DPU package a cost-optimized card.',
+  cpu:{how:'SP5: 6096-contact LGA, CTE-matched MCM substrate over 60×75 mm, land-side decoupling for di/dt; In TIM1.',why:'Warpage control across a 13-die MCM at socket scale is the packaging challenge; power/ground pin ratio minimizes PDN inductance for 400 W transients.'},
+  gpu:{how:'CoWoS module on SXM5: interposer yield dominates cost; vapor chamber + cold plate for 700 W; power blades for >500 A.',why:'The module exists at the intersection of three constraints: interposer assembly, 700 W thermals, and NVLink escape — no standard package serves all three.'},
+  dpu:{how:'BGA ~0.8–1.0 mm pitch class (est.), underfill optional; card-level PDN for a ~75–150 W-class envelope; QSFP112 signal integrity at 112G PAM4.',why:'Every packaging choice minimizes $/node: soldered BGA, stamped fins, shared card FRU. The DPU’s package is engineered for ubiquity, not performance.'}}}
+};
+
+/* ================= 3D exploded stage ================= */
+var currentPart = null, diffClass = null, labelsOn = true;
+function renderPin(){
+  var pin = document.getElementById('pin');
+  if (!currentPart || !PARTS[currentPart]) { pin.classList.remove('show'); return; }
+  var p = PARTS[currentPart];
+  var tags = '<span class="tag '+p.chip+'">'+CHIP_OF[p.chip]+'</span>' +
+    p.cls.map(function(c){ return '<span class="tag cls">'+CLS_NAME[c]+'</span>'; }).join('');
+  document.getElementById('pin-tags').innerHTML = tags;
+  document.getElementById('pin-name').textContent = p.name;
+  document.getElementById('pin-desc').textContent = p[LEVEL];
+  document.getElementById('pin-specs').innerHTML =
+    p.spec.map(function(s){ return '<span>'+s+'</span>'; }).join('');
+  pin.classList.add('show');
 }
-/* legend buttons */
-var legend = document.getElementById('parts-legend');
-PART_ORDER.forEach(function(id){
-  var p = PARTS[id];
-  var b = document.createElement('button');
-  b.className = 'partbtn'; b.setAttribute('data-part', id);
-  var dot = {cpu:'var(--cpu)',gpu:'var(--gpu)',dpu:'var(--dpu)'}[p.chip];
-  b.innerHTML = '<span class="dot" style="background:'+dot+'"></span>'+p.name;
-  b.addEventListener('click', function(){
-    currentPart = id; renderAnno(); pulsePart(id);
-    document.getElementById('anno').scrollIntoView({behavior:'smooth', block:'nearest'});
+document.getElementById('pin-close').addEventListener('click', function(){ currentPart = null; renderPin(); });
+function renderDiff(){
+  var sec = document.getElementById('diff-sec');
+  if (!diffClass || !DIFF[diffClass]) { sec.classList.remove('show'); return; }
+  var d = DIFF[diffClass][LEVEL];
+  document.getElementById('diff-title').textContent = DIFF[diffClass].title;
+  document.getElementById('diff-what').textContent = d.what;
+  ['cpu','gpu','dpu'].forEach(function(ch){
+    var el = document.getElementById('diff-'+ch), c = d[ch], html = '';
+    if (c.absent) {
+      html = '<div class="absent"><b>— absent on this die.</b><br>'+c.why+'</div>';
+    } else {
+      html = '<div class="fld"><b>How it is built</b>'+c.how+'</div>' +
+             '<div class="fld"><b>Why it differs</b>'+c.why+'</div>';
+    }
+    el.innerHTML = html;
   });
-  legend.appendChild(b);
+  sec.classList.add('show');
+}
+document.querySelectorAll('.dpill').forEach(function(b){
+  b.addEventListener('click', function(){
+    diffClass = b.getAttribute('data-dclass') || null;
+    document.querySelectorAll('.dpill').forEach(function(x){
+      x.classList.toggle('on', x === b && !!diffClass);
+    });
+    renderDiff();
+  });
 });
-applyLevel(); /* populate all level-aware text on first load */
+document.getElementById('label-toggle').addEventListener('click', function(){
+  labelsOn = !labelsOn;
+  this.classList.toggle('on', labelsOn);
+});
 
-/* ---------- 3D exploded scene ---------- */
 (function(){
   var canvas = document.getElementById('scene');
-  if (typeof THREE === 'undefined') {
-    canvas.style.display = 'none';
-    document.getElementById('gl-fallback').style.display = 'block';
-    window.pulsePart = function(){};
-    return;
-  }
+  var labelLayer = document.getElementById('labels');
+  var tip = document.getElementById('tip');
+  if (typeof THREE === 'undefined') { canvas.style.display='none';
+    document.getElementById('gl-fallback').style.display='flex'; return; }
   var renderer;
-  try {
-    renderer = new THREE.WebGLRenderer({canvas: canvas, antialias: true});
-  } catch(e) {
-    canvas.style.display = 'none';
-    document.getElementById('gl-fallback').style.display = 'block';
-    window.pulsePart = function(){};
-    return;
-  }
-  renderer.setClearColor(0x12100c, 1);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  try { renderer = new THREE.WebGLRenderer({canvas:canvas, antialias:true}); }
+  catch(e){ canvas.style.display='none';
+    document.getElementById('gl-fallback').style.display='flex'; return; }
+  renderer.setClearColor(0x0e0c09, 1);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1, 2));
 
   var scene = new THREE.Scene();
+  scene.fog = new THREE.Fog(0x0e0c09, 45, 95);
   var camera = new THREE.PerspectiveCamera(38, 1, 0.1, 200);
+  scene.add(new THREE.HemisphereLight(0xf2ede2, 0x14110d, 0.9));
+  var dir = new THREE.DirectionalLight(0xffffff, 1.0); dir.position.set(6,14,8); scene.add(dir);
+  var dir2 = new THREE.DirectionalLight(0xd08a5a, 0.35); dir2.position.set(-8,6,-6); scene.add(dir2);
+  var grid = new THREE.GridHelper(60, 60, 0x3a2f22, 0x201a12);
+  grid.position.y = -0.65; scene.add(grid);
 
-  scene.add(new THREE.HemisphereLight(0xf2ede2, 0x171410, 0.85));
-  var dir = new THREE.DirectionalLight(0xffffff, 0.9);
-  dir.position.set(6, 14, 8); scene.add(dir);
-  var dir2 = new THREE.DirectionalLight(0xd08a5a, 0.25);
-  dir2.position.set(-8, 6, -6); scene.add(dir2);
-  var grid = new THREE.GridHelper(34, 34, 0x3a2f22, 0x221c14);
-  grid.position.y = -0.6; scene.add(grid);
-
-  var layers = [];      // {obj, y0, e}
-  var clickables = [];  // meshes with userData.part
-  var partMeshes = {};  // partId -> [meshes]
+  var layers = [], clickables = [], partMats = {}, partMeshes = {}, labels = [];
+  var chipGroups = {};
 
   function reg(obj, partId, y0, e){
     obj.position.y = y0;
@@ -524,211 +730,376 @@ applyLevel(); /* populate all level-aware text on first load */
     layers.push(obj);
     obj.traverse(function(m){
       if (m.isMesh) {
-        if (partId && !m.userData.part) m.userData.part = partId;
-        if (m.userData.part) {
-          clickables.push(m);
-          (partMeshes[m.userData.part] = partMeshes[m.userData.part] || []).push(m);
+        clickables.push(m);
+        var pid = m.userData.part || partId;
+        if (pid) {
+          m.userData.part = pid;
+          (partMeshes[pid] = partMeshes[pid] || []).push(m);
+          var mt = m.material;
+          if (mt && partMats[pid] && partMats[pid].indexOf(mt) < 0) partMats[pid].push(mt);
+          else if (mt && !partMats[pid]) partMats[pid] = [mt];
         }
       }
     });
     return obj;
   }
-  function box(w,h,d,color,opts){
-    opts = opts || {};
-    var m = new THREE.Mesh(
-      new THREE.BoxGeometry(w,h,d),
-      new THREE.MeshStandardMaterial({
-        color: color, roughness: opts.rough !== undefined ? opts.rough : 0.6,
-        metalness: opts.metal || 0, transparent: !!opts.opacity,
-        opacity: opts.opacity || 1, emissive: opts.emiss || 0x000000,
-        emissiveIntensity: opts.ei || 1
-      })
-    );
+  function mat(color, o){
+    o = o || {};
+    var m = new THREE.MeshStandardMaterial({
+      color: color, roughness: o.rough !== undefined ? o.rough : 0.55,
+      metalness: o.metal || 0, transparent: true,
+      opacity: o.opacity !== undefined ? o.opacity : 1,
+      emissive: o.emiss || 0x000000, emissiveIntensity: o.ei !== undefined ? o.ei : 0.35
+    });
+    m.userData.top = m.opacity; m.userData.topei = m.emissiveIntensity;
     return m;
   }
-  function groupOf(){ return new THREE.Group(); }
+  function box(w,h,d,material){ return new THREE.Mesh(new THREE.BoxGeometry(w,h,d), material); }
+  function addLabel(partId, obj, text, off, chip){
+    var el = document.createElement('div');
+    el.className = 'label';
+    var dot = {cpu:'#e08a4c', gpu:'#58b0a6', dpu:'#7aa0d8'}[chip];
+    el.innerHTML = '<span class="dot" style="background:'+dot+'"></span>'+text;
+    labelLayer.appendChild(el);
+    labels.push({el:el, obj:obj, off:off||{x:0,y:0.9,z:0}, part:partId, chip:chip});
+  }
+  function chipBase(name, x, y){
+    var g = new THREE.Group(); g.position.set(x, y, 0); scene.add(g);
+    chipGroups[name] = g; return g;
+  }
+  function layoutChips(){
+    var w = canvas.clientWidth || 900;
+    if (w < 700) {
+      chipGroups.cpu.position.set(0, 3.5, 0);
+      chipGroups.gpu.position.set(0, -7.5, 0);
+      chipGroups.dpu.position.set(0, -18.5, 0);
+      return true;
+    }
+    chipGroups.cpu.position.set(-10, 0, 0);
+    chipGroups.gpu.position.set(0, 0, 0);
+    chipGroups.dpu.position.set(10, 0, 0);
+    return false;
+  }
 
-  var CX = -7.4, GX = 0, DX = 7.4;
-
-  /* ----- CPU stack ----- */
+  /* ---------------- CPU ---------------- */
   (function(){
-    var g = groupOf(); g.position.x = CX; scene.add(g);
-    // LGA pads (instanced)
-    var padGeo = new THREE.CylinderGeometry(0.055, 0.055, 0.07, 6);
-    var padMat = new THREE.MeshStandardMaterial({color: 0xc9a227, roughness: 0.35, metalness: 0.8});
-    var pads = new THREE.InstancedMesh(padGeo, padMat, 40*24);
-    var dummy = new THREE.Object3D(); var i = 0;
-    for (var r = 0; r < 24; r++) for (var c = 0; c < 40; c++) {
-      dummy.position.set(-2.2 + c*0.113, 0.04, -1.36 + r*0.118);
-      dummy.updateMatrix(); pads.setMatrixAt(i++, dummy.matrix);
+    var g = chipBase('cpu');
+    var mPad = mat(0xc9a227,{rough:0.35,metal:0.8});
+    var pads = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.05,0.05,0.07,6), mPad, 76*40);
+    var d = new THREE.Object3D(), i = 0;
+    for (var r=0;r<40;r++) for (var c=0;c<76;c++){
+      d.position.set(-2.2+c*0.059, 0.035, -1.18+r*0.06); d.updateMatrix();
+      pads.setMatrixAt(i++, d.matrix);
     }
     pads.instanceMatrix.needsUpdate = true;
-    g.add(reg(pads, 'pads', 0, 0));
-    // substrate
-    var sub = box(5, 0.35, 5, 0x1e4d2e, {rough: 0.7});
-    g.add(reg(sub, 'substrate', 0.4, 1.1));
-    // CCDs + IOD
-    var dies = groupOf();
-    var iod = box(2.0, 0.22, 2.0, 0x6b6f75, {rough: 0.5}); iod.position.set(0, 0, 0); dies.add(iod);
-    iod.userData.part = 'iod';
-    var ccdMat = new THREE.MeshStandardMaterial({color: 0xe08a4c, roughness: 0.45, emissive: 0x3a1c08, ei: 0.6});
-    var ccdGeo = new THREE.BoxGeometry(0.95, 0.24, 0.95);
-    var spots = [[-1.75,-1.75],[-0.6,-1.75],[0.6,-1.75],[1.75,-1.75],
-                 [-1.75,1.75],[-0.6,1.75],[0.6,1.75],[1.75,1.75],
-                 [-1.75,-0.55],[1.75,-0.55],[-1.75,0.55],[1.75,0.55]];
+    g.add(reg(pads, 'cpu-pads', 0, 0));
+    var sub = box(5.2,0.35,5.2, mat(0x1e4d2e,{rough:0.75}));
+    g.add(reg(sub, 'cpu-substrate', 0.42, 1.0));
+    var dies = new THREE.Group();
+    var iod = box(2.0,0.22,2.0, mat(0x6b6f75,{rough:0.5})); iod.userData.part='cpu-iod'; dies.add(iod);
+    var ccdM = mat(0xe08a4c,{rough:0.45, emiss:0x3a1c08, ei:0.6});
+    var ccdG = new THREE.BoxGeometry(0.95,0.24,0.95);
+    var spots=[[-1.78,-1.78],[-0.6,-1.78],[0.6,-1.78],[1.78,-1.78],
+               [-1.78,1.78],[-0.6,1.78],[0.6,1.78],[1.78,1.78],
+               [-1.78,-0.58],[1.78,-0.58],[-1.78,0.58],[1.78,0.58]];
+    var firstCcd = null;
     spots.forEach(function(s){
-      var m = new THREE.Mesh(ccdGeo, ccdMat); m.position.set(s[0], 0, s[1]);
-      m.userData.part = 'ccd'; dies.add(m);
+      var m = new THREE.Mesh(ccdG, ccdM); m.position.set(s[0],0,s[1]);
+      m.userData.part='ccd'; dies.add(m); if(!firstCcd) firstCcd=m;
     });
-    g.add(reg(dies, null, 0.75, 2.5));
-    // TIM
-    var tim = box(5, 0.08, 5, 0x8a8f96, {rough: 0.4, metal: 0.6, opacity: 0.55});
-    g.add(reg(tim, 'tim', 1.05, 3.7));
-    // IHS lid
-    var ihs = box(5.3, 0.6, 5.3, 0x9aa0a6, {rough: 0.3, metal: 0.9});
-    g.add(reg(ihs, 'ihs', 1.55, 5.1));
+    firstCcd.userData.part='cpu-ccd';
+    dies.traverse(function(m){ if(m.isMesh && m.userData.part==='ccd') m.userData.part='cpu-ccd'; });
+    g.add(reg(dies, null, 0.8, 2.3));
+    var tim = box(5.2,0.08,5.2, mat(0x8a8f96,{rough:0.4,metal:0.6,opacity:0.5}));
+    g.add(reg(tim, 'cpu-tim', 1.12, 3.4));
+    var ihs = box(5.5,0.6,5.5, mat(0x9aa0a6,{rough:0.3,metal:0.9}));
+    g.add(reg(ihs, 'cpu-ihs', 1.62, 4.9));
+    addLabel('cpu-ihs', ihs, 'Heat spreader', {x:0,y:0.75,z:0}, 'cpu');
+    addLabel('cpu-ccd', firstCcd, '12× CCD · 8 Zen 4 + 32 MB L3 each', {x:0,y:0.6,z:0}, 'cpu');
+    addLabel('cpu-iod', iod, 'sIOD · DDR5 + PCIe + Infinity Fabric', {x:0,y:0.55,z:0}, 'cpu');
+    addLabel('cpu-substrate', sub, 'Package substrate', {x:2.2,y:0.5,z:0}, 'cpu');
+    addLabel('cpu-pads', pads, 'LGA-6096', {x:-2.2,y:0.35,z:0}, 'cpu');
   })();
 
-  /* ----- GPU stack ----- */
+  /* ---------------- GPU ---------------- */
   (function(){
-    var g = groupOf(); g.position.x = GX; scene.add(g);
-    var pcb = groupOf();
-    var board = box(9, 0.2, 6, 0x14261a, {rough: 0.8}); pcb.add(board);
-    var nv = box(9, 0.1, 0.7, 0xc9a227, {rough: 0.35, metal: 0.7});
-    nv.position.set(0, 0.06, -2.6); nv.userData.part = 'nvlink'; pcb.add(nv);
-    g.add(reg(pcb, 'pcb', 0.15, 0));
-    var inter = box(6.6, 0.18, 4.6, 0x2a2f36, {rough: 0.4, metal: 0.3});
-    g.add(reg(inter, 'interposer', 0.55, 1.3));
-    var core = groupOf();
-    var die = box(3, 0.3, 3, 0x1f7a74, {rough: 0.35, emissive: 0x0d3a37, ei: 0.8});
-    die.userData.part = 'gh100'; core.add(die);
-    var hbmMat = new THREE.MeshStandardMaterial({color: 0xc8a86a, roughness: 0.5});
-    var hbmGeo = new THREE.BoxGeometry(1.1, 0.4, 2.0);
-    [[-2.35,-1.05],[-2.35,1.05],[2.35,-1.05],[2.35,1.05],[-2.35,0],[2.35,0]].forEach(function(s){
-      var m = new THREE.Mesh(hbmGeo, hbmMat); m.position.set(s[0], 0.02, s[1]);
-      m.userData.part = 'hbm'; core.add(m);
+    var g = chipBase('gpu');
+    var mPad = mat(0xc9a227,{rough:0.35,metal:0.7});
+    var pads = new THREE.InstancedMesh(new THREE.BoxGeometry(0.14,0.06,0.1), mPad, 60*8);
+    var d = new THREE.Object3D(), i = 0;
+    for (var r=0;r<8;r++) for (var c=0;c<60;c++){
+      d.position.set(-4.2+c*0.143, 0.03, -2.9+r*0.16); d.updateMatrix();
+      pads.setMatrixAt(i++, d.matrix);
+    }
+    pads.instanceMatrix.needsUpdate = true;
+    g.add(reg(pads, 'gpu-pads', 0, 0));
+    var pcbG = new THREE.Group();
+    var board = box(9.5,0.2,6.5, mat(0x14261a,{rough:0.8})); board.userData.part='gpu-pcb'; pcbG.add(board);
+    var nv = box(9.5,0.12,0.8, mat(0xc9a227,{rough:0.35,metal:0.7}));
+    nv.position.set(0,0.08,-2.85); nv.userData.part='gpu-nvlink'; pcbG.add(nv);
+    g.add(reg(pcbG, null, 0.25, 0.15));
+    var inter = box(7,0.18,5, mat(0x2a2f36,{rough:0.4,metal:0.3}));
+    g.add(reg(inter, 'gpu-interposer', 0.6, 1.25));
+    var core = new THREE.Group();
+    var gpcM = mat(0x1f7a74,{rough:0.35, emiss:0x0d3a37, ei:0.8});
+    var gpcG = new THREE.BoxGeometry(1.55,0.3,1.55);
+    var firstGpc = null;
+    for (var gr=0;gr<2;gr++) for (var gc=0;gc<4;gc++){
+      var m = new THREE.Mesh(gpcG, gpcM);
+      m.position.set(-1.32+gc*0.88, 0, -0.85+gr*1.7);
+      m.userData.part='gpu-gpc'; core.add(m); if(!firstGpc) firstGpc=m;
+    }
+    var l2 = box(3.6,0.28,0.55, mat(0x3fa39a,{rough:0.4, emiss:0x0d3a37, ei:0.8}));
+    l2.position.set(0,0,2.0); l2.userData.part='gpu-l2'; core.add(l2);
+    var hbmM = mat(0xc8a86a,{rough:0.5});
+    var hbmG = new THREE.BoxGeometry(1.15,0.42,2.1);
+    var firstHbm = null, hbmCount = 0;
+    [-2.62,2.62].forEach(function(x){
+      [-1.45,0,1.45].forEach(function(z){
+        var h = new THREE.Mesh(hbmG, hbmM); h.position.set(x,0.03,z);
+        h.userData.part='gpu-hbm'; core.add(h);
+        if(!firstHbm) firstHbm=h; hbmCount++;
+      });
     });
-    g.add(reg(core, null, 0.9, 2.6));
-    var lid = box(6.9, 0.35, 4.9, 0xb07b4f, {rough: 0.35, metal: 0.85});
-    g.add(reg(lid, 'lid', 1.35, 4.4));
+    g.add(reg(core, null, 0.95, 2.5));
+    var lid = box(7.3,0.35,5.3, mat(0xb07b4f,{rough:0.35,metal:0.85}));
+    g.add(reg(lid, 'gpu-lid', 1.42, 4.3));
+    addLabel('gpu-lid', lid, 'Vapor-chamber lid', {x:0,y:0.6,z:0}, 'gpu');
+    addLabel('gpu-gpc', firstGpc, 'GH100 · 144 SMs on die', {x:0,y:0.55,z:0}, 'gpu');
+    addLabel('gpu-l2', l2, '50 MB L2', {x:0,y:0.5,z:0}, 'gpu');
+    addLabel('gpu-hbm', firstHbm, '5× HBM3 active (6 on pkg)', {x:0,y:0.6,z:0}, 'gpu');
+    addLabel('gpu-interposer', inter, 'CoWoS interposer', {x:2.9,y:0.45,z:0}, 'gpu');
+    addLabel('gpu-nvlink', nv, 'NVLink · 900 GB/s', {x:-3.4,y:0.45,z:0}, 'gpu');
+    addLabel('gpu-pcb', board, 'SXM5 board', {x:3.6,y:0.4,z:1.6}, 'gpu');
   })();
 
-  /* ----- DPU stack ----- */
+  /* ---------------- DPU ---------------- */
   (function(){
-    var g = groupOf(); g.position.x = DX; scene.add(g);
-    var ballGeo = new THREE.SphereGeometry(0.06, 8, 8);
-    var ballMat = new THREE.MeshStandardMaterial({color: 0xb9bdc4, roughness: 0.3, metal: 0.9});
-    var bga = new THREE.InstancedMesh(ballGeo, ballMat, 22*16);
-    var dummy = new THREE.Object3D(); var i = 0;
-    for (var r = 0; r < 16; r++) for (var c = 0; c < 22; c++) {
-      dummy.position.set(-2.1 + c*0.2, 0.03, -1.5 + r*0.2);
-      dummy.updateMatrix(); bga.setMatrixAt(i++, dummy.matrix);
+    var g = chipBase('dpu');
+    var mBall = mat(0xb9bdc4,{rough:0.3,metal:0.9});
+    var bga = new THREE.InstancedMesh(new THREE.SphereGeometry(0.055,8,8), mBall, 26*18);
+    var d = new THREE.Object3D(), i = 0;
+    for (var r=0;r<18;r++) for (var c=0;c<26;c++){
+      d.position.set(-2.5+c*0.2, 0.03, -1.7+r*0.2); d.updateMatrix();
+      bga.setMatrixAt(i++, d.matrix);
     }
     bga.instanceMatrix.needsUpdate = true;
-    g.add(reg(bga, 'bga', 0, 0));
-    var card = box(5, 0.2, 4, 0x1a2233, {rough: 0.8});
-    g.add(reg(card, 'dpcb', 0.35, 0.9));
-    var soc = box(2.4, 0.35, 2.4, 0x3d5f9e, {rough: 0.4, emissive: 0x16233f, ei: 0.9});
-    g.add(reg(soc, 'soc', 0.75, 2.0));
-    var hs = groupOf();
-    var base = box(3.2, 0.3, 3.2, 0x3a3d42, {rough: 0.6, metal: 0.5}); hs.add(base);
-    for (var f = 0; f < 6; f++) {
-      var fin = box(3.2, 0.7, 0.16, 0x4a4d52, {rough: 0.6, metal: 0.5});
-      fin.position.set(0, 0.5, -1.25 + f*0.5); hs.add(fin);
+    g.add(reg(bga, 'dpu-bga', 0, 0));
+    var cardG = new THREE.Group();
+    var card = box(5.5,0.2,4.5, mat(0x1a2233,{rough:0.8})); card.userData.part='dpu-card'; cardG.add(card);
+    var qsfpM = mat(0x4a5568,{rough:0.5,metal:0.6});
+    var firstQ = null;
+    [-0.7,0.7].forEach(function(x){
+      var q = box(1.15,0.5,0.9, qsfpM); q.position.set(x,0.32,-2.35);
+      q.userData.part='dpu-qsfp'; cardG.add(q); if(!firstQ) firstQ=q;
+    });
+    g.add(reg(cardG, null, 0.4, 0.9));
+    var soc = new THREE.Group();
+    function blk(partId, x, z, w, dd, color){
+      var b = box(w,0.32,dd, mat(color,{rough:0.4, emiss:0x101828, ei:0.7}));
+      b.position.set(x,0,z); b.userData.part=partId; soc.add(b); return b;
     }
-    g.add(reg(hs, 'heatsink', 1.35, 3.6));
+    var xs=[-1.12,-0.37,0.37,1.12], firsts={};
+    xs.forEach(function(x){ firsts['dpu-cores'] = blk('dpu-cores', x, 0.78, 0.68,0.68, 0x3d5f9e) || firsts['dpu-cores']; });
+    firsts['dpu-cache']=blk('dpu-cache', xs[0], 0, 0.68,0.68, 0x5b7bc0);
+    firsts['dpu-dpa']=blk('dpu-dpa', xs[1], 0, 0.68,0.68, 0x4663a8);
+    firsts['dpu-crypto']=blk('dpu-crypto', xs[2], 0, 0.68,0.68, 0x7a5fa8);
+    firsts['dpu-regex']=blk('dpu-regex', xs[3], 0, 0.68,0.68, 0x8a6fb0);
+    firsts['dpu-net']=blk('dpu-net', -0.745, -0.78, 1.43,0.68, 0x2f8f83);
+    firsts['dpu-nvme']=blk('dpu-nvme', xs[2], -0.78, 0.68,0.68, 0x9a7a4a);
+    firsts['dpu-pcie']=blk('dpu-pcie', xs[3], -0.78, 0.68,0.68, 0x4a7a9a);
+    firsts['dpu-dram']=blk('dpu-dram', 0, -1.32, 3.0,0.32, 0xc8a86a);
+    g.add(reg(soc, null, 0.85, 2.0));
+    var hsG = new THREE.Group();
+    var base = box(3.4,0.3,3.4, mat(0x3a3d42,{rough:0.6,metal:0.5})); hsG.add(base);
+    var finM = mat(0x4a4d52,{rough:0.6,metal:0.5});
+    for (var f=0;f<6;f++){
+      var fin = box(3.4,0.7,0.16, finM); fin.position.set(0,0.5,-1.25+f*0.5); hsG.add(fin);
+    }
+    g.add(reg(hsG, 'dpu-hs', 1.45, 3.5));
+    addLabel('dpu-hs', base, 'Finned heatsink', {x:0,y:1.15,z:0}, 'dpu');
+    addLabel('dpu-cores', firsts['dpu-cores'], '16× Arm A78', {x:0,y:0.55,z:0}, 'dpu');
+    addLabel('dpu-dpa', firsts['dpu-dpa'], '16 DPA cores', {x:0,y:0.55,z:0}, 'dpu');
+    addLabel('dpu-net', firsts['dpu-net'], 'ConnectX-7 · 400G', {x:0,y:0.55,z:0}, 'dpu');
+    addLabel('dpu-crypto', firsts['dpu-crypto'], 'Inline crypto', {x:0,y:0.55,z:0}, 'dpu');
+    addLabel('dpu-regex', firsts['dpu-regex'], 'RegEx engine', {x:0,y:0.55,z:0}, 'dpu');
+    addLabel('dpu-nvme', firsts['dpu-nvme'], 'NVMe-oF', {x:0,y:0.55,z:0}, 'dpu');
+    addLabel('dpu-pcie', firsts['dpu-pcie'], 'PCIe Gen5 switch', {x:0,y:0.55,z:0}, 'dpu');
+    addLabel('dpu-dram', firsts['dpu-dram'], 'DDR5 controller', {x:0,y:0.5,z:0}, 'dpu');
+    addLabel('dpu-cache', firsts['dpu-cache'], 'Mesh cache', {x:0,y:0.55,z:0}, 'dpu');
+    addLabel('dpu-card', card, 'DPU card', {x:2.2,y:0.4,z:1.2}, 'dpu');
+    addLabel('dpu-qsfp', firstQ, '2× QSFP112', {x:0,y:0.6,z:0}, 'dpu');
   })();
 
-  /* ----- explode / camera / interaction ----- */
-  var T = 0.55, targetT = 0.55;
+  /* ---------------- state & interaction ---------------- */
+  var T = 0.62, targetT = 0.62;
+  var focus = 'all', tx = 0, ty = 2.4, cx = 0, cy = 2.4;
+  var theta = 0.0, phi = 1.02, radius = 21, baseRadius = 21;
+  var mobile = false;
+
   var slider = document.getElementById('explode');
   var sval = document.getElementById('explode-val');
   slider.addEventListener('input', function(){
-    targetT = slider.value / 100;
-    sval.textContent = slider.value + '%';
+    targetT = slider.value/100; sval.textContent = slider.value + '%';
   });
-
-  var FOCUS = {all: 0, cpu: CX, gpu: GX, dpu: DX};
-  var focusX = 0, curX = 0;
-  document.querySelectorAll('.chipbtn').forEach(function(b){
+  document.querySelectorAll('[data-focus]').forEach(function(b){
     b.addEventListener('click', function(){
-      document.querySelectorAll('.chipbtn').forEach(function(x){ x.classList.remove('on'); });
-      b.classList.add('on');
-      focusX = FOCUS[b.getAttribute('data-focus')];
+      focus = b.getAttribute('data-focus');
+      document.querySelectorAll('[data-focus]').forEach(function(x){
+        x.classList.toggle('on', x === b);
+      });
+      ['cpu','gpu','dpu'].forEach(function(ch){
+        chipGroups[ch].visible = (focus === 'all' || focus === ch);
+      });
+      if (mobile) {
+        ty = focus === 'all' ? -7.5 : chipGroups[focus].position.y + 2.4;
+        tx = 0;
+      } else {
+        tx = focus === 'all' ? 0 : chipGroups[focus].position.x;
+        ty = 2.4;
+      }
     });
   });
 
-  var theta = 0.0, phi = 1.0, radius = 18.5;
-  function fitRadius(){
-    var w = canvas.clientWidth || 800;
-    radius = w < 640 ? 22 : (w < 900 ? 19.5 : 18.5);
-    if (focusX !== 0) radius *= 0.72;
-  }
-  var dragging = false, lx = 0, ly = 0, moved = 0;
-  canvas.addEventListener('pointerdown', function(e){ dragging = true; lx = e.clientX; ly = e.clientY; moved = 0; canvas.setPointerCapture(e.pointerId); });
+  var dragging=false, lx=0, ly=0, moved=0, pinchD=0;
+  canvas.addEventListener('pointerdown', function(e){
+    dragging=true; lx=e.clientX; ly=e.clientY; moved=0;
+    try{ canvas.setPointerCapture(e.pointerId); }catch(_){}
+  });
   canvas.addEventListener('pointermove', function(e){
-    if (!dragging) return;
-    var dx = e.clientX - lx, dy = e.clientY - ly;
-    moved += Math.abs(dx) + Math.abs(dy);
-    theta -= dx * 0.005; phi -= dy * 0.004;
-    phi = Math.max(0.35, Math.min(1.35, phi));
-    lx = e.clientX; ly = e.clientY;
+    if (dragging){
+      var dx=e.clientX-lx, dy=e.clientY-ly;
+      moved += Math.abs(dx)+Math.abs(dy);
+      theta -= dx*0.0052; phi -= dy*0.0042;
+      phi = Math.max(0.3, Math.min(1.4, phi));
+      lx=e.clientX; ly=e.clientY;
+    } else { hoverTip(e); }
   });
-  canvas.addEventListener('pointerup', function(e){
-    dragging = false;
-    if (moved < 6) tap(e);
-  });
+  function endDrag(e){
+    if (dragging && moved < 7) tap(e);
+    dragging=false;
+  }
+  canvas.addEventListener('pointerup', endDrag);
+  canvas.addEventListener('pointercancel', function(){ dragging=false; });
+  canvas.addEventListener('wheel', function(e){
+    e.preventDefault();
+    baseRadius = Math.max(8, Math.min(46, baseRadius * (1 + e.deltaY*0.001)));
+  }, {passive:false});
+  canvas.addEventListener('touchmove', function(e){
+    if (e.touches.length === 2){
+      e.preventDefault();
+      var dd = Math.hypot(e.touches[0].clientX-e.touches[1].clientX,
+                          e.touches[0].clientY-e.touches[1].clientY);
+      if (pinchD) baseRadius = Math.max(8, Math.min(46, baseRadius * (pinchD/dd)));
+      pinchD = dd;
+    }
+  }, {passive:false});
+  canvas.addEventListener('touchend', function(){ pinchD = 0; });
 
   var ray = new THREE.Raycaster(), ptr = new THREE.Vector2();
-  function tap(e){
+  function castAt(e){
     var r = canvas.getBoundingClientRect();
-    ptr.x = ((e.clientX - r.left) / r.width) * 2 - 1;
-    ptr.y = -((e.clientY - r.top) / r.height) * 2 + 1;
+    ptr.x = ((e.clientX-r.left)/r.width)*2-1;
+    ptr.y = -((e.clientY-r.top)/r.height)*2+1;
     ray.setFromCamera(ptr, camera);
     var hits = ray.intersectObjects(clickables, false);
-    if (hits.length) {
-      currentPart = hits[0].object.userData.part;
-      renderAnno();
-      pulsePart(currentPart);
+    for (var i=0;i<hits.length;i++){
+      var pid = hits[i].object.userData.part;
+      if (pid && PARTS[pid]) return pid;
     }
+    return null;
   }
-  window.pulsePart = function(id){
-    (partMeshes[id] || []).forEach(function(o){
-      o.traverse(function(m){
-        if (m.isMesh && m.material && m.material.emissive) {
-          var old = m.material.emissiveIntensity;
-          m.material.emissiveIntensity = 2.2;
-          setTimeout(function(){ m.material.emissiveIntensity = old; }, 650);
-        }
-      });
+  function tap(e){
+    var pid = castAt(e);
+    if (pid){ currentPart = pid; renderPin(); pulse(pid); }
+  }
+  function pulse(pid){
+    (partMats[pid]||[]).forEach(function(mt){
+      mt.userData.topei = 2.4;
+      setTimeout(function(){ mt.userData.topei = mt.emissiveIntensity > 1.5 ? 0.35 : mt.userData.topei; }, 700);
     });
-  };
+  }
+  var hoverRaf = false;
+  function hoverTip(e){
+    if (hoverRaf) return; hoverRaf = true;
+    requestAnimationFrame(function(){
+      hoverRaf = false;
+      var pid = castAt(e);
+      if (pid && PARTS[pid]){
+        var p = PARTS[pid];
+        tip.innerHTML = '<span class="tag" style="color:var(--'+p.chip+')">'+CHIP_OF[p.chip]+'</span><b>'+p.name+'</b>'+p.spec.slice(0,2).join(' · ');
+        tip.style.display = 'block';
+        var r = canvas.getBoundingClientRect();
+        tip.style.left = Math.min(e.clientX-r.left+16, r.width-260)+'px';
+        tip.style.top = (e.clientY-r.top+14)+'px';
+      } else tip.style.display = 'none';
+    });
+  }
 
   function resize(){
     var w = canvas.clientWidth, h = canvas.clientHeight;
     if (!w || !h) return;
     renderer.setSize(w, h, false);
-    camera.aspect = w / h; camera.updateProjectionMatrix();
-    fitRadius();
+    camera.aspect = w/h; camera.updateProjectionMatrix();
+    mobile = layoutChips();
+    baseRadius = w < 700 ? 44 : (w < 1100 ? 25 : 23);
+    if (focus !== 'all'){
+      if (mobile){ ty = chipGroups[focus].position.y + 2.4; tx = 0; }
+      else { tx = chipGroups[focus].position.x; ty = 2.4; }
+    } else if (mobile){ ty = -7.5; tx = 0; } else { tx = 0; ty = 2.4; }
   }
   window.addEventListener('resize', resize);
 
-  var clock = new THREE.Clock();
+  var v3 = new THREE.Vector3();
+  function updateLabels(){
+    var w = canvas.clientWidth, h = canvas.clientHeight;
+    labels.forEach(function(L){
+      var show = labelsOn && chipGroups[L.chip] && chipGroups[L.chip].visible;
+      if (show && diffClass){
+        var p = PARTS[L.part];
+        show = !!(p && p.cls.indexOf(diffClass) >= 0);
+      }
+      if (!show){ L.el.style.display='none'; return; }
+      L.obj.getWorldPosition(v3); v3.x+=L.off.x; v3.y+=L.off.y; v3.z+=L.off.z;
+      v3.project(camera);
+      if (v3.z > 1 || v3.z < -1){ L.el.style.display='none'; return; }
+      L.el.style.display='block';
+      L.el.style.left = ((v3.x*0.5+0.5)*w)+'px';
+      L.el.style.top = ((-v3.y*0.5+0.5)*h)+'px';
+      L.el.classList.toggle('dim', false);
+    });
+  }
+
   function animate(){
     requestAnimationFrame(animate);
-    T += (targetT - T) * 0.12;
-    layers.forEach(function(o){
-      o.position.y = o.userData.baseY + o.userData.explode * T;
-    });
-    curX += (focusX - curX) * 0.08;
+    T += (targetT-T)*0.12;
+    layers.forEach(function(o){ o.position.y = o.userData.baseY + o.userData.explode*T; });
+    cx += (tx-cx)*0.08; cy += (ty-cy)*0.08;
+    var wantR = baseRadius * (focus === 'all' ? 1 : 0.62);
+    radius += (wantR-radius)*0.08;
     camera.position.set(
-      curX + radius * Math.sin(phi) * Math.sin(theta),
-      radius * Math.cos(phi) + 2.2,
-      radius * Math.sin(phi) * Math.cos(theta)
+      cx + radius*Math.sin(phi)*Math.sin(theta),
+      cy + radius*Math.cos(phi),
+      radius*Math.sin(phi)*Math.cos(theta)
     );
-    camera.lookAt(curX, 2.4, 0);
+    camera.lookAt(cx, cy, 0);
+    // diff dimming
+    Object.keys(partMats).forEach(function(pid){
+      var p = PARTS[pid];
+      var match = !diffClass || (p && p.cls.indexOf(diffClass) >= 0);
+      partMats[pid].forEach(function(mt){
+        var to = match ? mt.userData.top : 0.06;
+        mt.opacity += (to-mt.opacity)*0.15;
+        var te = match ? (diffClass ? 0.9 : mt.userData.topei) : 0.05;
+        if (diffClass) mt.emissiveIntensity += (te-mt.emissiveIntensity)*0.15;
+        else mt.emissiveIntensity += (mt.userData.topei-mt.emissiveIntensity)*0.15;
+      });
+    });
     renderer.render(scene, camera);
+    updateLabels();
   }
+  // initial focus button state
+  document.querySelector('[data-focus="all"]').classList.add('on');
   resize(); animate();
 })();
 </script>
