@@ -11,6 +11,11 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://jcamd.com/chips/</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://jcamd.com/graphify/</loc>
     <changefreq>yearly</changefreq>
     <priority>0.5</priority>
