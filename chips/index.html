@@ -69,6 +69,14 @@ body{margin:0;background:var(--bg);color:var(--ink);
 .pill[data-focus="gpu"].on{background:var(--gpu)}
 .pill[data-focus="dpu"].on{background:var(--dpu)}
 .pill[data-focus="all"].on{background:var(--ink)}
+/* variant picker: one labeled group per chip */
+.seg .vbtn[data-chip="cpu"].on{background:var(--cpu);color:#14110d;font-weight:700}
+.seg .vbtn[data-chip="gpu"].on{background:var(--gpu);color:#14110d;font-weight:700}
+.seg .vbtn[data-chip="dpu"].on{background:var(--dpu);color:#14110d;font-weight:700}
+.seg.variants{max-width:min(300px,42vw)}
+.seg.variants .vpills{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;padding:2px}
+.seg.variants .vpills::-webkit-scrollbar{display:none}
+.seg.variants .vbtn{flex:0 0 auto;padding:4px 10px;font-size:.72rem}
 /* hover tooltip */
 #tip{position:absolute;z-index:20;pointer-events:none;display:none;max-width:250px;
   background:rgba(20,17,13,.94);border:1px solid var(--line);border-radius:10px;
@@ -110,6 +118,23 @@ body{margin:0;background:var(--bg);color:var(--ink);
 .dpill:hover{color:var(--ink);border-color:var(--accent)}
 .dpill.on{background:var(--ink);color:#14110d;font-weight:700;border-color:var(--ink)}
 .hint{font-size:.74rem;color:var(--muted);margin-top:8px}
+/* "what changed" card — pinned on variant swap */
+#vchange{position:absolute;z-index:15;left:22px;bottom:158px;width:min(360px,calc(100vw - 44px));
+  background:rgba(30,25,19,.96);border:1px solid var(--line);border-radius:var(--radius);
+  padding:16px 20px;backdrop-filter:blur(10px);display:none;box-shadow:0 18px 50px rgba(0,0,0,.5)}
+#vchange.show{display:block}
+#vchange .close{position:absolute;top:8px;right:12px;background:none;border:none;color:var(--muted);
+  font-size:1.1rem;cursor:pointer}
+#vchange .vc-kick{margin:0 0 2px;font-size:.66rem;text-transform:uppercase;letter-spacing:.14em;color:var(--accent)}
+#vchange h3{margin:0 0 10px;font-size:1rem}
+#vchange .vc-row{display:flex;gap:8px;font-size:.8rem;padding:6px 0;border-top:1px solid var(--line);align-items:baseline}
+#vchange .vc-row b{flex:0 0 92px;font-size:.64rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:600}
+#vchange .vc-row .was{color:var(--muted);text-decoration:line-through;text-decoration-color:rgba(208,138,90,.6)}
+#vchange .vc-row .arr{color:var(--accent);flex:0 0 auto}
+#vchange .vc-row .now{color:var(--ink)}
+#vchange .vc-row.same{opacity:.45}
+#vchange .vc-row.same .was{text-decoration:none}
+#vchange #vc-note{margin:10px 0 0;font-size:.82rem;color:var(--muted);line-height:1.5}
 /* data-flow loop mode */
 #flowbar{display:none;margin-bottom:10px;background:rgba(20,17,13,.84);border:1px solid var(--line);
   border-radius:12px;padding:10px 16px 12px;backdrop-filter:blur(8px)}
@@ -251,6 +276,37 @@ footer.site a{color:var(--accent);text-decoration:none}
       <button class="pill" data-focus="gpu">GPU</button>
       <button class="pill" data-focus="dpu">DPU</button>
     </div>
+    <div class="seg variants" role="group" aria-label="CPU variant">
+      <span class="cap">CPU</span>
+      <div class="vpills">
+        <button class="pill vbtn on" data-chip="cpu" data-variant="genoa">9654</button>
+        <button class="pill vbtn" data-chip="cpu" data-variant="genoa-x">9684X</button>
+        <button class="pill vbtn" data-chip="cpu" data-variant="bergamo">9754</button>
+        <button class="pill vbtn" data-chip="cpu" data-variant="granite">6980P</button>
+        <button class="pill vbtn" data-chip="cpu" data-variant="m4max">M4 Max</button>
+        <button class="pill vbtn" data-chip="cpu" data-variant="ryzen">9950X</button>
+      </div>
+    </div>
+    <div class="seg variants" role="group" aria-label="GPU variant">
+      <span class="cap">GPU</span>
+      <div class="vpills">
+        <button class="pill vbtn on" data-chip="gpu" data-variant="h100-sxm">H100 SXM</button>
+        <button class="pill vbtn" data-chip="gpu" data-variant="h100-nvl">H100 NVL</button>
+        <button class="pill vbtn" data-chip="gpu" data-variant="b200">B200</button>
+        <button class="pill vbtn" data-chip="gpu" data-variant="rtx4090">RTX 4090</button>
+        <button class="pill vbtn" data-chip="gpu" data-variant="mi300x">MI300X</button>
+      </div>
+    </div>
+    <div class="seg variants" role="group" aria-label="DPU variant">
+      <span class="cap">DPU</span>
+      <div class="vpills">
+        <button class="pill vbtn on" data-chip="dpu" data-variant="bf3">BlueField-3</button>
+        <button class="pill vbtn" data-chip="dpu" data-variant="bf2">BlueField-2</button>
+        <button class="pill vbtn" data-chip="dpu" data-variant="e2100">IPU E2100</button>
+        <button class="pill vbtn" data-chip="dpu" data-variant="elba">Elba</button>
+        <button class="pill vbtn" data-chip="dpu" data-variant="octeon10">OCTEON 10</button>
+      </div>
+    </div>
     <div class="seg" role="group" aria-label="Labels">
       <button class="pill on" id="label-toggle">Labels</button>
     </div>
@@ -267,6 +323,14 @@ footer.site a{color:var(--accent);text-decoration:none}
     <h3 id="pin-name"></h3>
     <p id="pin-desc"></p>
     <div class="specs" id="pin-specs"></div>
+  </aside>
+
+  <aside id="vchange" aria-live="polite">
+    <button class="close" id="vchange-close" aria-label="Dismiss">×</button>
+    <p class="vc-kick">What changed</p>
+    <h3 id="vc-title"></h3>
+    <div id="vc-rows"></div>
+    <p id="vc-note"></p>
   </aside>
 
   <div class="ovl-dock">
@@ -346,9 +410,9 @@ footer.site a{color:var(--accent);text-decoration:none}
     <h2 id="diff-title">Compare</h2>
     <div class="diff-what"><h3>What it is</h3><p id="diff-what"></p></div>
     <div class="diff-grid">
-      <div class="dcard cpu"><h4>CPU</h4><p class="model">AMD EPYC 9654 “Genoa”</p><div id="diff-cpu"></div></div>
-      <div class="dcard gpu"><h4>GPU</h4><p class="model">NVIDIA H100 SXM5 “GH100”</p><div id="diff-gpu"></div></div>
-      <div class="dcard dpu"><h4>DPU</h4><p class="model">NVIDIA BlueField-3</p><div id="diff-dpu"></div></div>
+      <div class="dcard cpu"><h4>CPU</h4><p class="model" id="diff-cpu-model">AMD EPYC 9654 “Genoa”</p><div id="diff-cpu"></div></div>
+      <div class="dcard gpu"><h4>GPU</h4><p class="model" id="diff-gpu-model">NVIDIA H100 SXM5 “GH100”</p><div id="diff-gpu"></div></div>
+      <div class="dcard dpu"><h4>DPU</h4><p class="model" id="diff-dpu-model">NVIDIA BlueField-3</p><div id="diff-dpu"></div></div>
     </div>
   </div>
 </section>
@@ -360,36 +424,36 @@ footer.site a{color:var(--accent);text-decoration:none}
     <p class="sub">The same seven component classes, one row each. The pattern: every chip spends its transistor budget on the thing its job demands most.</p>
     <div class="tablewrap">
       <table>
-        <thead><tr><th>Component class</th><th>CPU — EPYC 9654</th><th>GPU — H100</th><th>DPU — BlueField-3</th></tr></thead>
+        <thead><tr><th>Component class</th><th id="gl-cpu-h">CPU — EPYC 9654</th><th id="gl-gpu-h">GPU — H100</th><th id="gl-dpu-h">DPU — BlueField-3</th></tr></thead>
         <tbody>
           <tr><th>⚙ Compute cores</th>
-            <td><span class="c">96× Zen 4</span><span class="why">general-purpose, branchy code</span></td>
-            <td><span class="c">132 SMs · 16,896 CUDA</span><span class="why">massively parallel math</span></td>
-            <td><span class="c">16× Arm A78 + 16 DPA</span><span class="why">control plane + packet I/O</span></td></tr>
+            <td data-g="cpu:compute"><span class="c">96× Zen 4</span><span class="why">general-purpose, branchy code</span></td>
+            <td data-g="gpu:compute"><span class="c">132 SMs · 16,896 CUDA</span><span class="why">massively parallel math</span></td>
+            <td data-g="dpu:compute"><span class="c">16× Arm A78 + 16 DPA</span><span class="why">control plane + packet I/O</span></td></tr>
           <tr><th>🗄 Cache hierarchy</th>
-            <td><span class="c">96 MB L2 + 384 MB L3</span><span class="why">hide DRAM latency for random access</span></td>
-            <td><span class="c">50 MB shared L2</span><span class="why">rendezvous for 132 SMs, streaming data</span></td>
-            <td><span class="c">modest L2/L3 on mesh</span><span class="why">packets stream through, not cached</span></td></tr>
+            <td data-g="cpu:cache"><span class="c">96 MB L2 + 384 MB L3</span><span class="why">hide DRAM latency for random access</span></td>
+            <td data-g="gpu:cache"><span class="c">50 MB shared L2</span><span class="why">rendezvous for 132 SMs, streaming data</span></td>
+            <td data-g="dpu:cache"><span class="c">modest L2/L3 on mesh</span><span class="why">packets stream through, not cached</span></td></tr>
           <tr><th>🧠 Memory system</th>
-            <td><span class="c">12-ch DDR5, 461 GB/s</span><span class="why">huge capacity (TBs), moderate speed</span></td>
-            <td><span class="c">5× HBM3, 3.35 TB/s</span><span class="why">bandwidth at all costs; 80 GB is enough</span></td>
-            <td><span class="c">1 DDR5 ctrl, 16–32 GB</span><span class="why">just a control plane; packets bypass RAM</span></td></tr>
+            <td data-g="cpu:memory"><span class="c">12-ch DDR5, 461 GB/s</span><span class="why">huge capacity (TBs), moderate speed</span></td>
+            <td data-g="gpu:memory"><span class="c">5× HBM3, 3.35 TB/s</span><span class="why">bandwidth at all costs; 80 GB is enough</span></td>
+            <td data-g="dpu:memory"><span class="c">1 DDR5 ctrl, 16–32 GB</span><span class="why">just a control plane; packets bypass RAM</span></td></tr>
           <tr><th>🔗 Interconnect</th>
-            <td><span class="c">Infinity Fabric via sIOD</span><span class="why">glue 12 chiplets into one CPU</span></td>
-            <td><span class="c">CoWoS interposer + NVLink 900 GB/s</span><span class="why">feed SMs; scale to 256 GPUs</span></td>
-            <td><span class="c">PCIe Gen5 switch (32 lanes)</span><span class="why">own devices on the bus, bypass host</span></td></tr>
+            <td data-g="cpu:interconnect"><span class="c">Infinity Fabric via sIOD</span><span class="why">glue 12 chiplets into one CPU</span></td>
+            <td data-g="gpu:interconnect"><span class="c">CoWoS interposer + NVLink 900 GB/s</span><span class="why">feed SMs; scale to 256 GPUs</span></td>
+            <td data-g="dpu:interconnect"><span class="c">PCIe Gen5 switch (32 lanes)</span><span class="why">own devices on the bus, bypass host</span></td></tr>
           <tr><th>🌐 Network I/O</th>
-            <td><span class="c">— none on die</span><span class="why">that's the DPU's job</span></td>
-            <td><span class="c">— none on die</span><span class="why">NVLink is GPU-to-GPU, not network</span></td>
-            <td><span class="c">ConnectX-7 · 400 GbE</span><span class="why">the whole point of the chip</span></td></tr>
+            <td data-g="cpu:network"><span class="c">— none on die</span><span class="why">that's the DPU's job</span></td>
+            <td data-g="gpu:network"><span class="c">— none on die</span><span class="why">NVLink is GPU-to-GPU, not network</span></td>
+            <td data-g="dpu:network"><span class="c">ConnectX-7 · 400 GbE</span><span class="why">the whole point of the chip</span></td></tr>
           <tr><th>🚀 Accelerators</th>
-            <td><span class="c">AVX-512 in-core</span><span class="why">vector math, no extra blocks</span></td>
-            <td><span class="c">528 4th-gen Tensor Cores</span><span class="why">the chip IS the accelerator</span></td>
-            <td><span class="c">crypto · RegEx · NVMe-oF</span><span class="why">infrastructure tax, in fixed logic</span></td></tr>
+            <td data-g="cpu:accel"><span class="c">AVX-512 in-core</span><span class="why">vector math, no extra blocks</span></td>
+            <td data-g="gpu:accel"><span class="c">528 4th-gen Tensor Cores</span><span class="why">the chip IS the accelerator</span></td>
+            <td data-g="dpu:accel"><span class="c">crypto · RegEx · NVMe-oF</span><span class="why">infrastructure tax, in fixed logic</span></td></tr>
           <tr><th>📦 Package</th>
-            <td><span class="c">LGA-6096, socketed</span><span class="why">field-replaceable server CPU</span></td>
-            <td><span class="c">SXM5 mezzanine, 700 W</span><span class="why">power + NVLink no slot can carry</span></td>
-            <td><span class="c">BGA card, air-cooled</span><span class="why">cheap, permanent, one per server</span></td></tr>
+            <td data-g="cpu:package"><span class="c">LGA-6096, socketed</span><span class="why">field-replaceable server CPU</span></td>
+            <td data-g="gpu:package"><span class="c">SXM5 mezzanine, 700 W</span><span class="why">power + NVLink no slot can carry</span></td>
+            <td data-g="dpu:package"><span class="c">BGA card, air-cooled</span><span class="why">cheap, permanent, one per server</span></td></tr>
         </tbody>
       </table>
     </div>
@@ -406,7 +470,20 @@ footer.site a{color:var(--accent);text-decoration:none}
         <li><b>AMD EPYC 9654 “Genoa”</b> — 96C/192T Zen 4 (12 CCDs × 8 cores), 1 MB L2/core, 32 MB L3/CCD (384 MB), 5 nm CCDs + 6 nm 397 mm² sIOD, 12-ch DDR5-4800 (460.8 GB/s), 128× PCIe Gen5, SP5 LGA-6096, 360 W. <a href="https://www.techpowerup.com/cpu-specs/epyc-9654.c2933">TechPowerUp specs</a>; CCD/CCX layout via <a href="https://www.tomshardware.com/news/amds-epyc-bergamo-and-zen-4c-detailed-same-as-zen-4-but-denser">Tom's Hardware</a>.</li>
         <li><b>NVIDIA H100 SXM5 “GH100”</b> — full die 144 SMs (132 enabled), 128 CUDA + 4 Tensor cores/SM, 50 MB L2, 5 active HBM3 stacks of 6 on package, 5120-bit, 80 GB, ~3.35 TB/s, 80B transistors, 814 mm² TSMC 4N, 4th-gen NVLink 900 GB/s, 700 W. <a href="https://www.techpowerup.com/gpu-specs/h100-sxm5-80-gb.c3900">TechPowerUp specs</a>; <a href="https://www.tweaktown.com/news/88080/nvidia-hopper-h100-gpu-detailed-tsmc-4nm-hbm3-vram-80b-transistors/index.html">TweakTown</a>; <a href="https://www.hwcooling.net/en/nvidias-new-fastest-ai-gpu-h200-with-141gb-of-hbm3e-memory/">HWCooling (5-of-6 stacks)</a>.</li>
         <li><b>NVIDIA BlueField-3</b> — 22B transistors, 16× Arm A78 v8.2 on coherent mesh, ConnectX-7 400 GbE/NDR, 4× crypto acceleration, 16 DPA packet cores, PCIe Gen5 switch, 1 DDR5 controller (16/32 GB on-card), inline IPsec/TLS, RegEx, NVMe-oF offload. <a href="https://developer.nvidia.com/blog/power-the-next-wave-of-applications-with-nvidia-bluefield-3-dpus">NVIDIA technical blog</a>; <a href="https://docs.nvidia.com/networking/display/bf3dpu/introduction">NVIDIA docs</a>.</li>
-        <li>Exploded-stack geometry, pad counts, and internal block placement are <em>estimates</em> for illustration — vendors don't publish package CAD.</li>
+        <li>Exploded-stack geometry, pad counts, and internal block placement are <em>estimates</em> for illustration — vendors don't publish package CAD. Variant geometry (tile counts, die placement, V-Cache tiers) follows vendor block diagrams schematically, not to scale.</li>
+        <li><b>EPYC 9684X “Genoa-X”</b> — 96C/192T, 12 CCDs, 96 MB L3/CCD (1,152 MB total) via 3D V-Cache stacking, same SP5 platform. AMD EPYC 9004X series product brief.</li>
+        <li><b>EPYC 9754 “Bergamo”</b> — 128C/256T, 8× 16-core Zen 4c CCDs, 256 MB L3, 12-ch DDR5-4800 (460.8 GB/s), SP5. AMD EPYC 9004 series product brief.</li>
+        <li><b>Xeon 6980P “Granite Rapids”</b> — 128C/256T, 504 MB L3, 3 compute tiles + 2 SoC tiles on EMIB, 12-ch DDR5-6400, 96× PCIe Gen5/CXL, LGA-7529, 500 W. Intel Xeon 6 product brief.</li>
+        <li><b>Apple M4 Max</b> — up to 16 CPU cores, 40 GPU cores, 16-core Neural Engine, 128 GB unified LPDDR5X, 546 GB/s. Apple M4 Max tech specs.</li>
+        <li><b>Ryzen 9 9950X</b> — 16C/32T Zen 5 (Granite Ridge), 4.3/5.7 GHz, 64 MB L3 + 16 MB L2, 2-ch DDR5, PCIe Gen5, 2-CU RDNA2 iGPU, AM5 LGA-1718, 170 W. <a href="https://www.techpowerup.com/cpu-specs/ryzen-9-9950x.c3649">TechPowerUp specs</a>.</li>
+        <li><b>H100 NVL</b> — paired PCIe cards joined by 3 NVLink bridges, 94 GB HBM3 per card (188 GB pooled), ~3.9 TB/s per card, 350–400 W per card. NVIDIA H100 NVL product brief.</li>
+        <li><b>B200 “Blackwell”</b> — 2 dies, 8× HBM3E stacks, 192 GB, ~8 TB/s, 10 TB/s NV-HBI die link, NVLink 5 at 1.8 TB/s. NVIDIA Blackwell architecture brief.</li>
+        <li><b>RTX 4090</b> — AD102, 128 SMs / 16,384 CUDA, 24 GB GDDR6X on 384-bit (~1.01 TB/s), PCIe 4.0 ×16, 450 W. NVIDIA GeForce RTX 4090 specs; TechPowerUp GPU database.</li>
+        <li><b>Instinct MI300X</b> — 8× 5 nm XCD chiplets + 4× 6 nm I/O dies, 8 HBM3 stacks, 192 GB, 5.3 TB/s, 256 MB Infinity Cache, 750 W OAM. <a href="https://www.tomshardware.com/pc-components/cpus/amd-unveils-instinct-mi300x-gpu-and-mi300a-apu-claims-up-to-16x-lead-over-nvidias-competing-gpus">Tom's Hardware</a>; <a href="https://www.amd.com/content/dam/amd/en/documents/advancing-ai-keynote.pdf">AMD Advancing AI keynote (PDF)</a>.</li>
+        <li><b>BlueField-2</b> — 8× Arm A72, ConnectX-6 Dx (up to 200 Gb/s), PCIe Gen4, fixed-function accelerators. NVIDIA BlueField-2 product brief.</li>
+        <li><b>Intel IPU E2100 “Mount Evans”</b> — up to 16× Arm Neoverse N1, 32 MB system cache, 48 GB LPDDR4x, PCIe 4.0 ×16, 2× 200 GbE, P4-programmable pipeline. Intel IPU E2100 product brief.</li>
+        <li><b>Pensando Elba</b> — 7 nm, 16× Arm A72, 144 P4 MPUs, 2× 200 GbE, PCIe Gen4, DDR5-5600. AMD Pensando Elba product brief.</li>
+        <li><b>Marvell OCTEON 10</b> — 5 nm, up to 24× Arm Neoverse N2 (Armv9 + SVE2), DDR5, PCIe Gen5, up to 400 GbE, integrated 1 Tb switch, inline AI. Marvell OCTEON 10 product brief.</li>
       </ul>
     </div>
   </div>
@@ -422,12 +499,14 @@ footer.site a{color:var(--accent);text-decoration:none}
 <script>
 /* ================= explanation depth ================= */
 var LEVEL = 'pro';
+var lastVChange = null; /* {chip, oldV, v} — re-rendered when the depth level changes */
 function setLevel(l){
   LEVEL = l;
   document.querySelectorAll('.lbtn').forEach(function(b){
     b.classList.toggle('on', b.getAttribute('data-lvl') === LEVEL);
   });
   renderPin(); renderDiff();
+  if (lastVChange && window.renderVChange) window.renderVChange(lastVChange.chip, lastVChange.oldV, lastVChange.v);
   if (window.renderFlow) window.renderFlow();
   if (window.renderScale) window.renderScale();
 }
@@ -604,10 +683,1147 @@ var PARTS = {
  eli5:'Hundreds of tiny metal balls melted under the chip, gluing it to its board forever. This chip never needs swapping.',
  fifteen:'Ball grid array: the SoC is soldered to its card. Permanent and cheap — fine for a chip that ships inside every server.',
  pro:'Soldered BGA, ~1k+ balls (est.). Lower cost and better shock reliability than LGA; the tradeoff is no field replacement — the card is the FRU.',
- expert:'Ball pitch ~0.8–1.0 mm class (est.); CTE mismatch managed by alloy/pad design. Rework is possible but economically the card is replaced as a unit.'}
+ expert:'Ball pitch ~0.8–1.0 mm class (est.); CTE mismatch managed by alloy/pad design. Rework is possible but economically the card is replaced as a unit.'},
+/* ---- variant-only blocks (market variants) ---- */
+'cpu-vcache':{chip:'cpu',cls:['cache'],name:'3D V-Cache — stacked L3 die',
+ spec:['+64 MB stacked / CCD','TSV hybrid bond','1,152 MB L3 total'],
+ eli5:'A bonus memory pancake stacked right on top of each thinking-chiplet — 64 extra megabytes of shared whiteboard, twelve times over.',
+ fifteen:'A 64 MB SRAM die bonded face-to-face onto each CCD with through-silicon vias, over the 32 MB of native L3: 96 MB per CCD, 1,152 MB per package.',
+ pro:'TSV hybrid-bonded (SoIC) stacked L3: 64 MB per CCD at a few cycles of TSV latency — still an order below DRAM. Same IF topology, same sIOD; only L3 depth changes.',
+ expert:'Direct Cu–Cu hybrid bond, ~9 µm-class TSV pitch. The stacked tier adds minimal latency for 3× capacity — the knee of the miss curve moves to 100–900 MB working sets.'},
+'cpu-ctile':{chip:'cpu',cls:['compute','cache'],name:'Compute tile (Intel 3)',
+ spec:['~44 cores / tile','168 MB L3 / tile','3 tiles · 128C total'],
+ eli5:'One of three big thinking-tiles. Each holds about 44 workers — together they make the 128-worker Xeon.',
+ fifteen:'Granite Rapids compute tile on Intel 3: ~44 Redwood Cove cores with 168 MB of shared L3. Three tiles, stitched to the SoC tiles by EMIB bridges.',
+ pro:'Intel 3 compute tile, ~44 cores, 168 MB L3/tile. Disaggregation moves the process advantage (Intel 3) onto the compute while I/O stays on Intel 7.',
+ expert:'Tile-level binning: tiles are the yield unit, like CCDs. EMIB die-to-die links carry core-to-SoC traffic; the tile boundary is NUMA-visible, like CCD-to-CCD on EPYC.'},
+'cpu-soctile':{chip:'cpu',cls:['memory','interconnect'],name:'SoC tile (Intel 7)',
+ spec:['DDR5-6400 controllers','PCIe Gen5 / CXL','2 tiles flanking compute'],
+ eli5:'The helper-tiles on the ends — they handle the memory sticks and the wires to the outside world, like the post office in Genoa.',
+ fifteen:'Intel 7 SoC tile: DDR5-6400 memory controllers and PCIe Gen5/CXL lanes, flanking the compute tiles and linked by EMIB bridges.',
+ pro:'2× SoC tiles carry the 12 DDR5-6400 channels (921.6 GB/s) and 96 PCIe Gen5/CXL lanes. I/O on the older, cheaper Intel 7 node — the economic logic of disaggregation.',
+ expert:'Node partitioning: compute on Intel 3, I/O on Intel 7. EMIB bridges replace the sIOD star; bandwidth per socket doubles Genoa via DDR5-6400.'},
+'cpu-emib':{chip:'cpu',cls:['interconnect'],name:'EMIB bridges',
+ spec:['Silicon bridge in substrate','Die-to-die links','~GB/s per bridge class'],
+ eli5:'Tiny silicon bridges buried in the package floor, carrying messages between the tiles — like secret tunnels under the floorboards.',
+ fifteen:'Embedded Multi-die Interconnect Bridges: small silicon bridges set into the organic substrate, wiring adjacent tiles together at die-to-die speeds.',
+ pro:'EMIB: a thin silicon bridge in the package substrate with dense micro-bumps. Shorter and denser than package traces — the physical reason the tiles act as one CPU.',
+ expert:'EMIB vs sIOD-star: point-to-point tile links instead of a central I/O die. Latency is bridge-hop dependent; Intel’s answer to Infinity Fabric packaging.'},
+'cpu-soc':{chip:'cpu',cls:['compute','accel'],name:'M4 Max SoC die',
+ spec:['16C CPU + 40C GPU + 16C NPU','3 nm (N3E)','One monolithic die'],
+ eli5:'Apple’s one-chip-does-everything: the thinkers, the painters (graphics), and the AI helpers all on a single square of silicon.',
+ fifteen:'A single N3E SoC: up to 16 CPU cores, 40 GPU cores, and a 16-core Neural Engine — no chiplets, no tiles, one die.',
+ pro:'Monolithic N3E SoC: CPU+GPU+NPU share the fabric and the unified memory pool. Integration over modularity — fixed configuration, zero assembly complexity.',
+ expert:'The anti-chiplet: ~100 W-class envelope for CPU+GPU+NPU combined, via physical integration. Latency wins everywhere; the cost is fixed capacity and no serviceability.'},
+'cpu-umem':{chip:'cpu',cls:['memory'],name:'Unified LPDDR5X memory',
+ spec:['Up to 128 GB','546 GB/s','Shared by CPU+GPU+NPU'],
+ eli5:'Memory glued right next to the chip that EVERYONE shares — the thinkers, painters, and AI helpers all dip into the same bowl.',
+ fifteen:'Up to 128 GB of LPDDR5X on the package, shared by CPU, GPU, and Neural Engine at 546 GB/s — no copies between separate memories.',
+ pro:'Unified memory architecture: one 546 GB/s pool, zero PCIe copies between CPU and GPU. The bandwidth of HBM-class integration with LPDDR5X power.',
+ expert:'Package-adjacent LPDDR5X; the memory wall becomes a shared resource — GPU kernels read CPU-written buffers in place. Capacity is fixed at build time.'},
+'gpu-xcd':{chip:'gpu',cls:['compute','cache'],name:'XCD — CDNA3 compute chiplet',
+ spec:['8× XCDs on package','CDNA3 matrix cores','32 MB Infinity Cache each'],
+ eli5:'One of eight small thinking-chiplets — AMD splits the giant GPU brain into eight pieces that work together.',
+ fifteen:'Accelerator Complex Die: CDNA3 compute with matrix cores and 32 MB of Infinity Cache, one of eight chiplets ringed around four I/O dies.',
+ pro:'8× XCD chiplets vs H100’s monolith: disaggregation for yield and SKU flexibility. Infinity Fabric links hide the partition — mostly.',
+ expert:'Chiplet GPU: the XCD↔HBM path crosses chiplet hops, adding latency vs monolithic GH100. AMD bets the hop cost is smaller than the yield/SKU win.'},
+'gpu-iod2':{chip:'gpu',cls:['memory','interconnect'],name:'MI300X I/O die',
+ spec:['4× IODs','HBM3 controllers','Infinity Fabric hub'],
+ eli5:'The four helpers in the middle — they connect the eight thinking-chiplets to the memory towers.',
+ fifteen:'One of four I/O dies at the center of the MI300X package: HBM3 memory controllers and the Infinity Fabric hub tying the 8 XCDs together.',
+ pro:'4× IODs carry the 8 HBM3 stacks (192 GB, 5.3 TB/s) and the XCD fabric. The I/O die is the price of disaggregation — like EPYC’s sIOD, for GPUs.',
+ expert:'Central IODs on the interposer; XCD-to-HBM traffic funnels through them. The topology tax mirrors the sIOD on EPYC — NUMA for GPUs.'},
+'gpu-nvhbi':{chip:'gpu',cls:['interconnect'],name:'NV-HBI die-to-die link',
+ spec:['10 TB/s','Cache-coherent','Fuses 2 dies into 1 GPU'],
+ eli5:'The invisible super-bridge stitching the two giant brains together so tightly they act as one.',
+ fifteen:'NVIDIA High-Bandwidth Interface: a 10 TB/s die-to-die link that keeps both Blackwell dies cache-coherent — software sees one GPU.',
+ pro:'NV-HBI: 10 TB/s, fully coherent die-to-die. The two reticle-limit dies share all 192 GB as one pool; the partition is invisible to CUDA.',
+ expert:'Partitioning returns as NV-HBI: the crossbar spans two dies at 10 TB/s — enough for full coherence. The monolithic illusion, preserved at 208B transistors.'},
+'gpu-gddr':{chip:'gpu',cls:['memory'],name:'GDDR6X memory chips',
+ spec:['12× chips','24 GB · 384-bit','~1.01 TB/s'],
+ eli5:'Twelve flat memory chips laid around the brain like a moat — fast, but nothing like the stacked towers on server GPUs.',
+ fifteen:'12 GDDR6X chips ringing the AD102 die on the organic substrate: 24 GB at ~1 TB/s. No interposer, no stacks — the consumer packaging tradeoff.',
+ pro:'GDDR6X on-substrate: 384-bit, ~1.01 TB/s — one third of H100’s HBM3 bandwidth at a fraction of the packaging cost. Bandwidth is what the data center pays for.',
+ expert:'PAM4 GDDR6X at 21 Gbps/pin class; signal integrity on organic substrate caps the interface. The cost/bandwidth tradeoff vs CoWoS+HBM made visible.'},
+'dpu-p4':{chip:'dpu',cls:['accel','network'],name:'P4 programmable pipeline',
+ spec:['Match-action pipeline','P4-programmable','Line-rate processing'],
+ eli5:'A mail-sorting machine you can reprogram: it reads each message’s address and decides what to do, without slowing down.',
+ fifteen:'A P4-programmable match-action packet pipeline: parse, match tables, modify, forward — reprogrammed in software, executed at line rate in hardware.',
+ pro:'P4 pipeline (Mount Evans/Elba class): the data plane is software-defined. New protocols and policies compile to the pipeline — no silicon respin.',
+ expert:'P4 vs fixed-function vs DPA-threads: the pipeline gives deterministic line-rate with full programmability. The philosophical split with BlueField’s DOCA/DPA model.'},
+'dpu-mpu':{chip:'dpu',cls:['accel','network'],name:'144× P4 match-processing units',
+ spec:['144 MPUs @ 2 GHz','P4-programmable','16M hardware queues'],
+ eli5:'A giant grid of 144 tiny mail-sorters, each reprogrammable like Lego — the most flexible mailroom on this stage.',
+ fifteen:'Pensando Elba’s data plane: 144 P4-programmable match-processing units at 2 GHz — a reprogrammable switch pipeline with 16M hardware queues.',
+ pro:'Elba’s thesis: the DPU is a P4 switch with servers attached. 144 MPUs at line rate, 2K VNICs — software-defined networking, firewall, and load balancing in hardware.',
+ expert:'P4-native data plane vs fixed-function: Elba trades fixed-logic efficiency for pipeline programmability. Flow scale (16M queues) is the design center.'},
+'dpu-ai':{chip:'dpu',cls:['accel'],name:'Inline AI/ML acceleration',
+ spec:['In-pipeline inference','Vector packet processing','Tile-scalable'],
+ eli5:'Tiny AI helpers built right into the mail-sorting line — they can spot patterns in messages as they fly past.',
+ fifteen:'OCTEON 10’s inline AI: machine-learning acceleration directly in the packet pipeline, plus hardware vector packet processing — not a lookaside coprocessor.',
+ pro:'Inline (not lookaside) AI in the data path: inference on packets at line rate, tile-scalable from 5G base stations to 400G cloud. Armv9 + SVE2.',
+ expert:'First Armv9 DPU with SVE2; AI in the data path vs lookaside changes the latency math for inline security and telemetry inference.'}
 };
+
+/* ================= per-variant part overrides =================
+   Sparse: PARTS[pid] is the base-variant entry; PVAR[pid][variant] replaces
+   name/spec/levels where the base copy would be factually wrong.
+   P(pid) (above) returns the merged entry for the selected variant. */
+var PVAR = {
+/* ---- CPU ---- */
+'cpu-ccd':{
+ 'genoa-x':{name:'12× CCD chiplets + stacked V-Cache',
+  spec:['8× Zen 4 each','32 MB native + 64 MB stacked','96 MB L3 / CCD · 1,152 MB total'],
+  eli5:'The same twelve thinking-chiplets, but each now wears a bonus memory pancake on top — the whiteboard under each neighborhood tripled.',
+  fifteen:'The familiar Zen 4 CCD, now with a 64 MB 3D-stacked SRAM die bonded over its 32 MB of native L3 via TSVs: 96 MB per CCD.',
+  pro:'Persephone CCD + SoIC stacked cache: 32 MB native + 64 MB stacked at a few cycles of TSV latency. Same cores, same IF — only L3 depth changed.',
+  expert:'Hybrid-bonded V-Cache on the N5 CCD; the stacked tier trades minimal latency for 3× capacity. Watch it rise above the CCDs when the explosion opens.'},
+ 'bergamo':{name:'8× dense CCD chiplets — Zen 4c',
+  spec:['16× Zen 4c cores each','32 MB L3 / CCD','128C/256T total'],
+  eli5:'Eight denser thinking-chiplets with 16 slimmer workers each — more total workers (128), each a bit less muscular.',
+  fifteen:'Zen 4c CCDs: 16 efficiency-tuned cores per CCD, 8 CCDs, 128C/256T on the same SP5 platform. Density over per-core muscle.',
+  pro:'Zen 4c trims clocks/area: 16 cores share 32 MB L3 (2 MB/core vs 4 MB). Same sIOD, DDR5, PCIe — the throughput play for scale-out clouds.',
+  expert:'Same sIOD/SP5, denser CCD. Perf/core down, perf/socket and perf/watt up — the cloud-native tradeoff made physical.'},
+ 'ryzen':{name:'2× Zen 5 CCD chiplets',
+  spec:['8× Zen 5 cores each','32 MB L3 / CCD','16C/32T total'],
+  eli5:'Just two thinking-chiplets for your desk — 8 workers each, 16 total. Same Lego idea as the server chips, shrunk.',
+  fifteen:'Two Zen 5 CCDs on AM5: 8 cores each with 32 MB of L3. The desktop echo of EPYC’s chiplet playbook.',
+  pro:'Zen 5 CCDs (N4): 8 cores, 32 MB L3 each, AVX-512. Same disaggregation as EPYC — 2 chiplets + IOD instead of 12.',
+  expert:'Client CCDs binned for clocks, not density. The chiplet approach scales down: 2 CCDs on AM5 vs 12 on SP5.'}
+},
+'cpu-iod':{
+ 'ryzen':{name:'Client I/O die (with iGPU)',
+  spec:['2-ch DDR5','PCIe 5.0','2-CU RDNA2 iGPU'],
+  eli5:'The desktop post office — smaller than the server one, and it even has a tiny painter (graphics) built in.',
+  fifteen:'Ryzen IOD: 2 DDR5 memory channels, PCIe 5.0, and a small 2-compute-unit RDNA2 iGPU for displays.',
+  pro:'Client IOD on N6: 2-ch DDR5 is the binding constraint vs SP5’s 12. Integrated iGPU removes the need for a graphics card for office work.',
+  expert:'The IOD carries the platform: memory, PCIe, display. Two channels is the desktop tradeoff — bandwidth per core far below EPYC.'}
+},
+'cpu-pads':{
+ 'granite':{name:'LGA-7529 lands',
+  spec:['7,529 contacts','Bigger than SP5','500 W class'],
+  eli5:'Over seven thousand gold contact dots under the chip — even more than Genoa’s, because this chip can drink 500 watts.',
+  fifteen:'LGA-7529: 7,529 lands for the 500 W Granite Rapids package — larger socket, more power and ground pins.',
+  pro:'LGA-7529 scales the land grid for 500 W TDP and 12-ch DDR5-6400. Bigger package, bigger socket, bigger power delivery.',
+  expert:'7529 contacts vs SP5’s 6096: the extra pins buy PDN inductance headroom for 500 W transients and 96 PCIe/CXL lanes.'},
+ 'm4max':{name:'BGA solder balls',
+  spec:['Soldered, not socketed','Package-on-package memory','~100 W class'],
+  eli5:'Tiny solder balls glue the chip down forever — no socket, because this chip is never meant to be swapped.',
+  fifteen:'BGA: the M4 Max is soldered to the board with package-adjacent LPDDR5X. Permanent, compact, efficient.',
+  pro:'Soldered BGA, no socket — the SoC + memory are one assembly. The tradeoff for 546 GB/s unified bandwidth: fixed configuration.',
+  expert:'No LGA: the package is the product. Soldered LPDDR5X next to the die is what makes the unified memory bandwidth possible.'},
+ 'ryzen':{name:'AM5 — LGA-1718 lands',
+  spec:['1,718 contacts','Desktop socket','170 W class'],
+  eli5:'Seventeen hundred gold dots — a much smaller socket for a much smaller, cooler chip.',
+  fifteen:'AM5 LGA-1718: the desktop socket. 1,718 lands, 170 W — the same LGA idea as SP5, sized for desks.',
+  pro:'LGA-1718: fewer pins because 2 memory channels and fewer PCIe lanes need fewer signals. Socketed, so the CPU is upgradeable.',
+  expert:'Pin count follows I/O: 1718 vs 6096. The desktop package needs a fraction of the power/ground and signal pins.'}
+},
+'cpu-ihs':{
+ 'granite':{name:'Nickel heat spreader (IHS)',
+  spec:['Ni-plated copper','Indium-solder TIM1','LGA-7529 cold-plate datum'],
+  eli5:'The shiny metal hat — bigger here, because it has to spread 500 watts of heat.',
+  fifteen:'IHS over 5 tiles: nickel-plated copper, soldered to all compute and SoC tiles, taking the 500 W heat load to the cold plate.',
+  pro:'Ni-plated Cu lid over the 5-tile MCM; In-solder TIM1. Spreading 500 W across the LGA-7529 cold plate is the thermal challenge.',
+  expert:'IHS stack over EMIB tiles: bond-line uniformity across 5 tiles at 500 W. Warpage control at LGA-7529 scale.'},
+ 'ryzen':{name:'Nickel heat spreader (IHS)',
+  spec:['Ni-plated copper','Indium-solder TIM1','AM5 cold-plate datum'],
+  eli5:'The shiny metal hat on the desktop CPU — same idea, smaller chip, 170 watts.',
+  fifteen:'IHS over 3 small dies: nickel-plated copper with solder TIM, sized for the 170 W AM5 package.',
+  pro:'Ni-plated Cu lid, In-solder TIM1 to CCDs/IOD. 170 W across a 3-die MCM — the desktop thermal problem.',
+  expert:'Smaller MCM, simpler IHS: 3 dies, 170 W. Solder TIM1 avoids pump-out over the desktop’s thermal cycles.'}
+}};
 var CHIP_OF = {cpu:'CPU', gpu:'GPU', dpu:'DPU'};
+/* ---- GPU ---- */
+PVAR['gpu-gpc'] = {
+ 'b200':{name:'Blackwell die — SM clusters',
+  spec:['2 dies · 148 SM class','5th-gen Tensor Cores','NV-HBI coherent'],
+  eli5:'One of two giant brains — each half of the B200, packed with super-fast AI math helpers.',
+  fifteen:'One Blackwell die: ~74 SMs with 5th-gen Tensor Cores (FP4/FP6), fused to its twin by NV-HBI into a single GPU.',
+  pro:'Blackwell die on 4NP: doubled transistor budget vs Hopper, 5th-gen Tensor Cores. The reticle limit forced two dies — NV-HBI hides it.',
+  expert:'208B transistors across 2 dies; each die owns 4 HBM3E stacks. The SM count per die is reticle-limited — the package is the scaling unit now.'},
+ 'rtx4090':{name:'AD102 die — SM clusters',
+  spec:['128 SMs · 16,384 CUDA','Ada Tensor Cores','Monolithic 4N'],
+  eli5:'The gaming brain — 128 teams of workers on one chip, tuned for painting game worlds fast.',
+  fifteen:'AD102 on TSMC 4N: 128 SMs, 16,384 CUDA cores, 4th-gen Ada Tensor Cores — the biggest Ada die, on a consumer card.',
+  pro:'Monolithic AD102: 128 SMs with Ada’s efficiency gains (SER, DLSS 3). Same Tensor Core generation as H100, without HBM or NVLink.',
+  expert:'76B transistors monolithic — the consumer reticle play. No interposer: GDDR6X on organic substrate, 1/3 the bandwidth, 1/10th the price class.'}
+};
+PVAR['gpu-hbm'] = {
+ 'b200':{name:'HBM3E stacks',
+  spec:['8× stacks','192 GB total','~8 TB/s'],
+  eli5:'Eight taller memory towers — 192 gigabytes total, feeding the two brains at 8 terabytes a second.',
+  fifteen:'8 HBM3E stacks, 192 GB at ~8 TB/s: double H100’s capacity and 2.4× the bandwidth, 4 stacks per Blackwell die.',
+  pro:'HBM3E at ~9.6 Gbps/pin class, 4096-bit per stack pair. The bandwidth the doubled transistor budget needs to stay fed.',
+  expert:'~4 TB/s per die of memory bandwidth, matched to the 10 TB/s NV-HBI — a balanced roofline by design.'},
+ 'h100-nvl':{name:'HBM3 stacks (per card)',
+  spec:['94 GB / card','~3.9 TB/s / card','188 GB pooled'],
+  eli5:'Each card’s own memory towers — 94 gigabytes per card, 188 when the twins pool together.',
+  fifteen:'Per-card HBM3: 94 GB at ~3.9 TB/s. Two cards pool to 188 GB for big-model inference over the NVLink bridges.',
+  pro:'94 GB HBM3 per GPU, ~3.9 TB/s each. Capacity (188 GB pooled) over SXM’s bandwidth — the inference SKU tradeoff.',
+  expert:'Same HBM3 generation as SXM, more capacity per card. The pooled 188 GB targets tensor-parallel LLM serving.'},
+ 'mi300x':{name:'HBM3 stacks',
+  spec:['8× stacks','192 GB total','5.3 TB/s'],
+  eli5:'Eight memory towers ringed around the chiplets — 192 gigabytes for giant AI models.',
+  fifteen:'8 HBM3 stacks, 192 GB at 5.3 TB/s: AMD’s capacity play for LLM inference, matching B200’s 192 GB.',
+  pro:'192 GB HBM3 at 5.3 TB/s via the 4 central I/O dies. The capacity matches Blackwell; the bandwidth trails HBM3E.',
+  expert:'HBM3 (not E) at 5.3 TB/s — the XCD↔HBM path crosses the IOD. Capacity parity with B200, bandwidth a generation behind.'}
+};
+PVAR['gpu-l2'] = {
+ 'b200':{name:'126 MB L2 cache',
+  spec:['126 MB shared','Spans 2 dies','Bandwidth filter'],
+  eli5:'The giant shared table both brains use — 126 megabytes, two and a half times H100’s.',
+  fifteen:'126 MB of L2 spanning both Blackwell dies over NV-HBI — the rendezvous for all SMs and the HBM3E flood.',
+  pro:'126 MB partitioned L2, coherent across the NV-HBI. Sized to filter the 8 TB/s HBM3E stream for the doubled SM count.',
+  expert:'Cross-die L2 coherence at 10 TB/s NV-HBI. The L2 is the last knob before HBM3E — kernels tile for its residency.'}
+};
+PVAR['gpu-nvlink'] = {
+ 'b200':{name:'NVLink 5 edge',
+  spec:['1.8 TB/s','5th gen','Scale-out fabric'],
+  eli5:'The super-fast bridge to other B200s — twice as fast as H100’s, for giant AI clusters.',
+  fifteen:'NVLink 5: 1.8 TB/s per GPU of scale-out bandwidth — double NVLink 4 — for multi-GPU training and inference.',
+  pro:'NVLink 5 at 1.8 TB/s bidirectional. The scale-out fabric for GB200 NVL72 racks: 72 GPUs acting as one.',
+  expert:'Doubled per-GPU fabric bandwidth matches the doubled compute. NVL72: the rack is the computer.'},
+ 'h100-nvl':{name:'3× NVLink bridges',
+  spec:['Card-to-card bridges','GPU-direct','Pools 188 GB'],
+  eli5:'Three golden bridges across the top of the twin cards, letting them share memory like one big card.',
+  fifteen:'Three NVLink bridges join the PCIe pair: GPU-direct bandwidth for tensor-parallel inference across 188 GB.',
+  pro:'Bridge-based NVLink (not NVSwitch): the pair shares memory and all-reduce traffic without leaving the GPUs.',
+  expert:'The NVL product: bridges provide the all-reduce path for tensor-parallel serving. SXM’s NVSwitch scale isn’t needed for inference pairs.'},
+ 'mi300x':{name:'Infinity Fabric links',
+  spec:['GPU-to-GPU fabric','Scale-out','xGMI class'],
+  eli5:'The fast bridge to other MI300Xs — AMD’s version of NVLink.',
+  fifteen:'AMD’s GPU fabric: xGMI/Infinity Fabric links scale MI300X to multi-GPU nodes for training and inference.',
+  pro:'Infinity Fabric GPU links: the scale-out path for MI300X pods. Open fabric vs NVLink’s closed ecosystem.',
+  expert:'xGMI links between OAM modules; the scale story mirrors NVLink but on AMD’s fabric. Bandwidth trails NVLink 5.'}
+};
+PVAR['gpu-pcb'] = {
+ 'h100-nvl':{name:'PCIe card board (×2)',
+  spec:['2× FHFL cards','PCIe 5.0 ×16','350–400 W / card'],
+  eli5:'Two normal-size cards that plug into server slots — no special 700 W board needed.',
+  fifteen:'Dual PCIe cards: each H100 NVL card is a standard FHFL PCIe card at 350–400 W, joined by NVLink bridges.',
+  pro:'PCIe form factor: fits standard servers without SXM baseboards. 350–400 W per card over PCIe + aux power.',
+  expert:'The NVL tradeoff: standard PCIe packaging for deployability, at the cost of SXM’s bandwidth and NVSwitch scale.'},
+ 'b200':{name:'SXM-class module board',
+  spec:['B200 module','~1 kW class','NVLink 5 + NV-HBI'],
+  eli5:'The giant board for the giant chip — it has to feed two brains and eight memory towers with enormous power.',
+  fifteen:'B200 module board: SXM-class mezzanine carrying the dual-die package, 8 HBM3E stacks, and ~1 kW of power delivery.',
+  pro:'SXM-class module: power blades for ~1 kW, NVLink 5 escape, liquid cooling. The module is a power-delivery system first.',
+  expert:'1 kW-class module: the power/thermal envelope defines the form factor. NVL72 racks liquid-cool these directly.'},
+ 'rtx4090':{name:'Triple-slot PCIe card',
+  spec:['PCIe 4.0 ×16','450 W · 16-pin','Display outputs'],
+  eli5:'A huge gaming card — three slots wide, with plugs for your monitors and a special 16-pin power cable.',
+  fifteen:'RTX 4090 board: triple-slot PCIe 4.0 card, 450 W via 16-pin, display outputs — the consumer package.',
+  pro:'Consumer card: PCIe 4.0 ×16, 450 W, 16-pin 12VHPWR. Display outputs and a cooler you can hear — the opposite of SXM.',
+  expert:'The packaging cost story: organic substrate, no interposer, air cooling. 1/10th the price class of H100 for 1/3 the bandwidth.'},
+ 'mi300x':{name:'OAM module board',
+  spec:['OAM form factor','750 W','8× HBM3'],
+  eli5:'AMD’s server module — a big flat board for the chiplet GPU and its eight memory towers.',
+  fifteen:'OAM (OCP Accelerator Module): the open-compute server form factor, 750 W, carrying the MI300X package.',
+  pro:'OAM 750 W: the open alternative to SXM. Standardized module for multi-vendor accelerator trays.',
+  expert:'OAM vs SXM: the form-factor war. OAM standardizes the 700 W-class module across vendors; SXM keeps it NVIDIA-only.'}
+};
+PVAR['gpu-lid'] = {
+ 'rtx4090':{name:'Triple-slot cooler',
+  spec:['3 axial fans','Vapor chamber','450 W air-cooled'],
+  eli5:'The giant cooler with three spinning fans — it has to blow away 450 watts of heat.',
+  fifteen:'Triple-slot air cooler: vapor chamber + 3 axial fans. Loud, huge, and the reason the card is 3 slots wide.',
+  pro:'Air-cooled 450 W: vapor chamber spreading heat to a fin stack, 3 fans. The consumer thermal solution — no cold plates.',
+  expert:'450 W on air: the acoustic and volume cost of consumer packaging. Data-center parts use cold plates; this uses fans.'},
+ 'b200':{name:'Cold-plate lid',
+  spec:['Liquid cooling','~1 kW','Module-level'],
+  eli5:'The metal top that water flows through — this chip is too hot for fans.',
+  fifteen:'Liquid cold-plate lid: the ~1 kW B200 module is direct-liquid-cooled in NVL72 racks.',
+  pro:'Cold-plate cooling for 1 kW: facility water removes heat the air never could. The lid is a heat exchanger, not a heatsink.',
+  expert:'1 kW demands DLC. The module lid interfaces to the rack manifold — cooling is now facility infrastructure.'},
+ 'mi300x':{name:'Vapor-chamber lid',
+  spec:['750 W','OAM cold plate','Passive module'],
+  eli5:'The metal top spreading 750 watts of heat to the cold plate.',
+  fifteen:'OAM lid: spreads 750 W from the chiplet package to the cold plate — passive module, system cooling.',
+  pro:'750 W OAM: vapor chamber + cold plate. The chiplet package’s heat is spread before it meets the system cooling.',
+  expert:'Chiplet thermals: 12 dies’ heat through one lid. Vapor chamber evens the hot spots; the OAM tray provides the cold plate.'}
+};
+/* ---- DPU ---- */
+PVAR['dpu-cores'] = {
+ 'bf2':{name:'8× Arm Cortex-A72',
+  spec:['8 cores','ConnectX-6 Dx era','Control plane'],
+  eli5:'Eight smaller bosses — the previous generation’s control room.',
+  fifteen:'8× Arm A72: the BF2 control plane. Half the cores, older generation than BF3’s A78s.',
+  pro:'8× A72 cores run the control plane and exceptions. The data plane is fixed logic — the cores only handle what the pipeline can’t.',
+  expert:'A72 at the DPU: efficiency cores for control. The generational delta to A78 (BF3) is IPC and frequency.'},
+ 'e2100':{name:'16× Arm Neoverse N1',
+  spec:['16 cores','Coherent with P4 pipeline','Control plane'],
+  eli5:'Sixteen efficient bosses that work alongside the P4 mail-sorting machine.',
+  fifteen:'16× Neoverse N1: Intel’s IPU control plane, coherent with the P4 pipeline and 32 MB of shared cache.',
+  pro:'N1 complex: server-class Arm cores for control and exception paths. Coherent with the P4 data plane via the 32 MB SLC.',
+  expert:'Neoverse N1 (not A-series): the IPU gets real server cores. The P4 pipeline handles the fast path; N1 handles everything programmable.'},
+ 'elba':{name:'16× Arm Cortex-A72',
+  spec:['16 cores','Control plane','P4 data plane'],
+  eli5:'Sixteen bosses for the control room — the 144 mail-sorters do the fast work.',
+  fifteen:'16× A72: Elba’s control plane. The data plane is the 144-MPU P4 pipeline; the cores handle control and exceptions.',
+  pro:'16× A72 for control; the P4 MPUs own the fast path. Classic split: programmable control, pipeline data plane.',
+  expert:'A72 suffices because the MPUs do the work. The core count is about control-plane scale (2K VNICs), not packet pushing.'},
+ 'octeon10':{name:'up to 24× Arm Neoverse N2',
+  spec:['Up to 24 cores','Armv9 + SVE2','5 nm'],
+  eli5:'Up to 24 tiny, modern bosses — the newest, most efficient ones here.',
+  fifteen:'Up to 24× Neoverse N2 on 5 nm: the OCTEON 10 control plane, with Armv9 and SVE2 vector extensions.',
+  pro:'N2 cores: 3× the perf of the predecessor at half the power (per Marvell). Armv9 + SVE2 for vector packet work.',
+  expert:'First Armv9 DPU: SVE2 vectorizes packet processing on the cores themselves. N2’s IPC + 5 nm is the efficiency story.'}
+};
+PVAR['dpu-net'] = {
+ 'bf2':{name:'ConnectX-6 Dx network block',
+  spec:['200 Gb/s','2× 100G / 1× 200G','RDMA + RoCE'],
+  eli5:'The 200-gigabit mailroom door — half the speed of BlueField-3’s, still enormously fast.',
+  fifteen:'ConnectX-6 Dx: 200 Gb/s Ethernet/InfiniBand with RDMA. The BF2 network engine — one generation behind CX-7.',
+  pro:'CX-6 Dx at 200G: RDMA, RoCE, GPUDirect. The line rate defines the DPU’s ceiling — 200G vs 400G is the gen-over-gen story.',
+  expert:'200G PAM4; the SERDES generation sets the ceiling. BF2’s 200G was the cloud standard when it shipped.'},
+ 'e2100':{name:'2× 200 GbE MAC',
+  spec:['2× 200 GbE','E810-class','P4-fed'],
+  eli5:'Two 200-gigabit doors feeding the P4 mail-sorting machine.',
+  fifteen:'Dual 200 GbE MACs (E810-class): the E2100’s network front end, feeding the P4 pipeline.',
+  pro:'2× 200G: the Mount Evans front end. Packets land from the MACs straight into the P4 match-action pipeline.',
+  expert:'E810-derived MAC/PCS at 200G; the pipeline — not the MAC — is the differentiator. PSP/IPsec crypto inline.'},
+ 'elba':{name:'2× 200 GbE MAC',
+  spec:['2× 200 GbE','P4 MPU-fed','Line rate'],
+  eli5:'Two 200-gigabit doors feeding the giant grid of mail-sorters.',
+  fifteen:'Dual 200 GbE: Elba’s network front end, feeding the 144-MPU P4 pipeline at line rate.',
+  pro:'2× 200G into the MPU array. The MACs are commodity; the 144 programmable MPUs behind them are the product.',
+  expert:'Line-rate 200G × 2; the MPU array processes at full duplex. Queue scale (16M) is the differentiator, not the MAC.'},
+ 'octeon10':{name:'400G MAC + 1 Tb switch',
+  spec:['Up to 400 GbE','Integrated switch','1 Tb class'],
+  eli5:'A super-fast door plus a whole mail-sorting building inside — a switch built into the chip.',
+  fifteen:'Up to 400 GbE with an integrated 1-terabit switch: OCTEON 10 switches packets on-chip, not just processes them.',
+  pro:'Integrated 1T switch + 400G MACs: the DPU absorbs top-of-rack functions. Fewer boxes, same network.',
+  expert:'CN106’s integrated switch: the DPU becomes the network. 400G is the port speed; the switch fabric is the story.'}
+};
+PVAR['dpu-dram'] = {
+ 'bf2':{name:'DDR4 memory controller',
+  spec:['DDR4','16 GB class','Control plane memory'],
+  eli5:'The older, slower notebook for the bosses — DDR4 instead of DDR5.',
+  fifteen:'DDR4 for the BF2 control plane: 16 GB class. Packets bypass it; only the Arm cores use it.',
+  pro:'DDR4 vs DDR5: the gen-over-gen memory story. Control-plane memory — the fast path never touches DRAM.',
+  expert:'DDR4 bandwidth suffices because the data plane bypasses DRAM. The memory is for the OS and control apps.'},
+ 'e2100':{name:'48 GB LPDDR4x',
+  spec:['48 GB','LPDDR4x','Soldered'],
+  eli5:'A huge 48 GB notebook glued next to the chip — the biggest memory of any DPU here.',
+  fifteen:'48 GB of soldered LPDDR4x: the E2100’s N1 complex gets a giant memory for virtualization and storage workloads.',
+  pro:'48 GB LPDDR4x: unusually large for a DPU — sized for Google’s virtualized infrastructure (virtio, NVMe-oF state).',
+  expert:'LPDDR4x trades bandwidth for capacity and power. 48 GB is the NVMe-oF/virtio state store — the Google co-design showing.'},
+ 'elba':{name:'DDR5-5600 controllers',
+  spec:['Dual DDR5-5600','Control + tables','P4 tables'],
+  eli5:'Fast DDR5 notebooks — holding the mail-sorters’ address books.',
+  fifteen:'Dual DDR5-5600: Elba’s memory for control plane and P4 match tables.',
+  pro:'DDR5-5600 × 2: feeds the MPU tables and the A72 control plane. Table size is the P4 pipeline’s scaling knob.',
+  expert:'Match-table capacity lives in DRAM; the MPUs cache the hot entries. DDR5-5600 keeps table lookups fed.'},
+ 'octeon10':{name:'DDR5 controllers',
+  spec:['DDR5','Control plane','Packet buffers'],
+  eli5:'Fast DDR5 memory for the bosses and the AI helpers’ notes.',
+  fifteen:'DDR5: OCTEON 10’s control-plane and buffer memory on the 5 nm SoC.',
+  pro:'DDR5 controllers: control plane, packet buffers, AI working sets. Standard modern memory for a 5 nm SoC.',
+  expert:'DDR5 on 5 nm: the memory system is unremarkable by design — the differentiation is N2 + inline AI + switch.'}
+};
+PVAR['dpu-pcie'] = {
+ 'bf2':{name:'PCIe Gen4 switch',
+  spec:['PCIe 4.0','Host + devices','DMA'],
+  eli5:'The older, slower slide to the computer — PCIe 4 instead of 5.',
+  fifteen:'PCIe Gen4: BF2’s host interface and device switch. Half the per-lane speed of Gen5.',
+  pro:'Gen4 ×16: 256 GB/s each way. Enough for 200G line rate with headroom — the balanced BF2 design.',
+  expert:'Gen4 matches the 200G network: no wasted SERDES. The BF3 jump to Gen5 pairs with 400G.'},
+ 'e2100':{name:'PCIe 4.0 ×16',
+  spec:['PCIe 4.0 ×16','Host interface','NVMe-oF initiator'],
+  eli5:'The slide to the computer — and this one can fetch storage all by itself.',
+  fifteen:'PCIe 4.0 ×16: the E2100’s host link, doubling as an NVMe-oF initiator to disaggregated storage.',
+  pro:'Gen4 ×16 as NVMe-oF initiator: the IPU pulls storage over the fabric without the host. The Google use case.',
+  expert:'PCIe as a storage fabric: the IPU initiates NVMe-oF, bypassing the host entirely. Disaggregated storage needs this.'},
+ 'elba':{name:'PCIe Gen4',
+  spec:['PCIe 4.0','Host interface','DMA'],
+  eli5:'The slide to the computer — PCIe 4, plenty for the 400 gigabits of network.',
+  fifteen:'PCIe Gen4: Elba’s host interface. 2×200G of network fits comfortably.',
+  pro:'Gen4 ×16: matched to the 400G network. No Gen5 tax for a 400G DPU.',
+  expert:'Balanced I/O: 400G network, Gen4 host. Elba doesn’t over-provision the host link.'},
+ 'octeon10':{name:'PCIe 5.0 ×16',
+  spec:['PCIe 5.0','Host + devices','400G+ headroom'],
+  eli5:'The newest, fastest slide — PCIe 5, ready for 400-gigabit traffic and more.',
+  fifteen:'PCIe 5.0 ×16: OCTEON 10’s host link, with headroom past 400G.',
+  pro:'Gen5 ×16: 512 GB/s each way — headroom for 400G plus devices. The modern I/O pairing for a 5 nm DPU.',
+  expert:'Gen5 matches the 400G network with margin. The 5 nm SoC gets the 5th-gen I/O it deserves.'}
+};
+PVAR['dpu-qsfp'] = {
+ 'bf2':{name:'QSFP56 cages',
+  spec:['2× cages','200 GbE','QSFP56'],
+  eli5:'Two plug-in doors for fiber cables — 200 gigabits each.',
+  fifteen:'2× QSFP56: the BF2’s pluggable optics — 200G per cage.',
+  pro:'QSFP56 at 200G: PAM4 optics. Pluggable = the network team picks the fiber.',
+  expert:'QSFP56 vs QSFP112: the connector generation follows the SERDES. 200G per cage.'},
+ 'e2100':{name:'2× 200G cages',
+  spec:['2× 200GbE','Pluggable','200G optics'],
+  eli5:'Two doors for fiber cables, 200 gigabits each.',
+  fifteen:'Dual 200G cages: the E2100’s pluggable network ports.',
+  pro:'2× 200G pluggable: standard optics for the 200G front end.',
+  expert:'Pluggable optics keep the IPU agnostic to fiber plant. 200G is the Google-fleet standard it was built for.'},
+ 'elba':{name:'2× 200G cages',
+  spec:['2× 200GbE','Pluggable','Line rate'],
+  eli5:'Two fiber doors feeding the mail-sorter grid.',
+  fifteen:'Dual 200G cages: Elba’s pluggable ports, feeding the MPU array at line rate.',
+  pro:'2× 200G pluggable: the network edge of the P4 pipeline.',
+  expert:'Standard pluggables; the pipeline behind them is the product.'},
+ 'octeon10':{name:'QSFP-DD cages',
+  spec:['Up to 400 GbE','QSFP-DD','Pluggable'],
+  eli5:'The newest, biggest fiber doors — up to 400 gigabits.',
+  fifteen:'QSFP-DD: up to 400 GbE pluggable optics for the OCTEON 10.',
+  pro:'QSFP-DD at 400G: the current datacenter standard. Pluggable keeps the DPU fiber-agnostic.',
+  expert:'QSFP-DD doubles QSFP56’s density/speed. 400G today, 800G-capable connector for tomorrow.'}
+};
 var CHIP_MODEL = {cpu:'AMD EPYC 9654 “Genoa”', gpu:'NVIDIA H100 SXM5 “GH100”', dpu:'NVIDIA BlueField-3'};
+
+/* ================= market variants =================
+   16 verified market variants (specs checked against vendor/press sources,
+   Sep 2026). Each variant carries: display names, a 5-axis physical
+   comparison (cmp), glance-table headlines, a level-aware "what changed"
+   note, part ids to pulse on entry, and builder geometry (geo).
+   window.__chipVariant = {cpu,gpu,dpu} is the selection contract read by
+   the flow loop; swapVariant() (inside the stage IIFE) rebuilds the 3D
+   model and calls window.refreshFlowPaths(). */
+var VARIANT_SEL = {cpu:'genoa', gpu:'h100-sxm', dpu:'bf3'};
+window.__chipVariant = {cpu:'genoa', gpu:'h100-sxm', dpu:'bf3'};
+function selVariant(chip){
+  return (window.__chipVariant && window.__chipVariant[chip]) || VARIANT_SEL[chip];
+}
+/* merged part encyclopedia entry for the currently selected variant */
+function P(pid){
+  var p = PARTS[pid]; if (!p) return null;
+  var v = selVariant(p.chip);
+  var o = (PVAR[pid] && PVAR[pid][v]) || null;
+  if (!o) return p;
+  var m = {}; for (var k in p) m[k] = p[k];
+  for (var k2 in o) m[k2] = o[k2];
+  return m;
+}
+
+var CPU_SPOTS12 = [[-1.78,-1.78],[-0.6,-1.78],[0.6,-1.78],[1.78,-1.78],
+  [-1.78,1.78],[-0.6,1.78],[0.6,1.78],[1.78,1.78],
+  [-1.78,-0.58],[1.78,-0.58],[-1.78,0.58],[1.78,0.58]];
+
+var VARIANTS = { cpu: {
+/* ---- EPYC 9654 Genoa (baseline) ---- */
+'genoa':{
+  name:'AMD EPYC 9654 “Genoa”', short:'EPYC 9654',
+  cmp:{dies:'12× Zen 4 CCDs · 96C/192T', cache:'384 MB L3 (32 MB/CCD) + 96 MB L2',
+    mem:'12-ch DDR5-4800 · 460.8 GB/s', io:'Infinity Fabric via sIOD · 128× PCIe Gen5',
+    net:'— none on die', accel:'AVX-512 in-core', pkg:'SP5 · LGA-6096 · 360 W'},
+  glance:{compute:'96× Zen 4', cache:'96 MB L2 + 384 MB L3', memory:'12-ch DDR5, 461 GB/s',
+    interconnect:'Infinity Fabric via sIOD', network:'— none on die', accel:'AVX-512 in-core', package:'LGA-6096, socketed'},
+  note:{
+    eli5:'The baseline server CPU on this stage: twelve 8-core chiplets around one big I/O die. Every other CPU here is a riff on this layout.',
+    fifteen:'The reference layout: 12 Zen 4 CCDs on a central sIOD. Bergamo swaps in denser CCDs, Genoa-X stacks cache on top, Granite Rapids re-tiles everything.',
+    pro:'Genoa is the chiplet baseline: 12× N5 CCDs + N6 sIOD. Variant deltas to watch: CCD count/type, stacked cache, tile partitioning, memory channels.',
+    expert:'Reference MCM: 12× Persephone CCDs, sIOD-star IF, 12-ch DDR5. All CPU variants here are evaluated against this topology.'},
+  pulse:['cpu-ccd','cpu-iod'],
+  geo:{sub:[5.2,5.2], pads:'lga', padsN:[76,40], ccdSpots:CPU_SPOTS12, ccdPart:'cpu-ccd',
+    iod:{x:0,z:0,w:2.0,d:2.0}, vcache:false, tim:true,
+    labels:[['cpu-ihs','Heat spreader'],['cpu-ccd','12× CCD · 8 Zen 4 + 32 MB L3 each'],
+      ['cpu-iod','sIOD · DDR5 + PCIe + Infinity Fabric'],['cpu-substrate','Package substrate'],['cpu-pads','LGA-6096']]}
+},
+/* ---- EPYC 9684X Genoa-X: stacked V-Cache showcase ---- */
+'genoa-x':{
+  name:'AMD EPYC 9684X “Genoa-X”', short:'EPYC 9684X',
+  cmp:{dies:'12× CCDs + 12 stacked V-Cache dies · 96C/192T', cache:'1,152 MB L3 (96 MB/CCD) + 96 MB L2',
+    mem:'12-ch DDR5-4800 · 460.8 GB/s', io:'Infinity Fabric via sIOD · 128× PCIe Gen5',
+    net:'— none on die', accel:'AVX-512 in-core', pkg:'SP5 · LGA-6096 · 400 W'},
+  glance:{compute:'96× Zen 4', cache:'96 MB L2 + 1,152 MB L3', memory:'12-ch DDR5, 461 GB/s',
+    interconnect:'Infinity Fabric via sIOD', network:'— none on die', accel:'AVX-512 in-core', package:'LGA-6096, socketed'},
+  note:{
+    eli5:'Same chip as Genoa, but every thinking-chiplet gets a bonus memory pancake stacked on top — triple the shared whiteboard, same 96 workers.',
+    fifteen:'Genoa-X solders a 64 MB 3D V-Cache die onto each CCD with TSVs: 96 MB L3 per CCD, 1,152 MB per package, same cores, same socket.',
+    pro:'TSV hybrid-bonded stacked L3: 32 MB native + 64 MB stacked per CCD. Same IF topology and sIOD — the only change is L3 depth, aimed at cache-resident server workloads.',
+    expert:'SoIC stacking on Persephone CCDs adds a few cycles of TSV latency for 3× L3 capacity. Sweet spot: 100–900 MB working sets that spilled to DDR5 on Genoa.'},
+  pulse:['cpu-vcache','cpu-ccd'],
+  geo:{sub:[5.2,5.2], pads:'lga', padsN:[76,40], ccdSpots:CPU_SPOTS12, ccdPart:'cpu-ccd',
+    iod:{x:0,z:0,w:2.0,d:2.0}, vcache:true, tim:true,
+    labels:[['cpu-ihs','Heat spreader'],['cpu-vcache','3D V-Cache · +64 MB stacked per CCD'],
+      ['cpu-ccd','12× CCD underneath'],['cpu-iod','sIOD · DDR5 + PCIe + Infinity Fabric'],
+      ['cpu-substrate','Package substrate'],['cpu-pads','LGA-6096']]}
+},
+/* ---- EPYC 9754 Bergamo: dense Zen 4c ---- */
+'bergamo':{
+  name:'AMD EPYC 9754 “Bergamo”', short:'EPYC 9754',
+  cmp:{dies:'8× Zen 4c CCDs · 128C/256T', cache:'256 MB L3 (32 MB/CCD) + 128 MB L2',
+    mem:'12-ch DDR5-4800 · 460.8 GB/s', io:'Infinity Fabric via sIOD · 128× PCIe Gen5',
+    net:'— none on die', accel:'AVX-512 in-core', pkg:'SP5 · LGA-6096 · 360 W'},
+  glance:{compute:'128× Zen 4c', cache:'128 MB L2 + 256 MB L3', memory:'12-ch DDR5, 461 GB/s',
+    interconnect:'Infinity Fabric via sIOD', network:'— none on die', accel:'AVX-512 in-core', package:'LGA-6096, socketed'},
+  note:{
+    eli5:'Fewer, denser thinking-chiplets: 8 chiplets with 16 slimmed-down workers each instead of 12 with 8. More total workers: 128.',
+    fifteen:'Bergamo’s Zen 4c CCDs trade per-core muscle for density — 16 cores per CCD at lower clocks, 8 CCDs for 128 cores on the same SP5 platform.',
+    pro:'Zen 4c trims clocks and area for density: 8 CCDs × 16 cores = 128C/256T with the same 12-ch DDR5, 128 PCIe lanes, and sIOD.',
+    expert:'Same sIOD/SP5, denser CCD: 16× Zen 4c sharing 32 MB L3. Cloud-native throughput play — perf/core down, perf/socket and perf/watt up for scale-out.'},
+  pulse:['cpu-ccd'],
+  geo:{sub:[5.2,5.2], pads:'lga', padsN:[76,40], ccdSpots:CPU_SPOTS8, ccdPart:'cpu-ccd',
+    iod:{x:0,z:0,w:2.0,d:2.0}, vcache:false, tim:true,
+    labels:[['cpu-ihs','Heat spreader'],['cpu-ccd','8× dense CCD · 16 Zen 4c each'],
+      ['cpu-iod','sIOD · DDR5 + PCIe + Infinity Fabric'],['cpu-substrate','Package substrate'],['cpu-pads','LGA-6096']]}
+},
+/* ---- Xeon 6980P Granite Rapids: tiles + EMIB ---- */
+'granite':{
+  name:'Intel Xeon 6980P “Granite Rapids”', short:'Xeon 6980P',
+  cmp:{dies:'3× compute tiles + 2× SoC tiles · 128C/256T', cache:'504 MB L3 (168 MB/tile) + 256 MB L2',
+    mem:'12-ch DDR5-6400 · 921.6 GB/s', io:'EMIB bridges · 6× UPI · 96× PCIe Gen5/CXL',
+    net:'— none on die', accel:'AMX + AVX-512', pkg:'LGA-7529 · 500 W'},
+  glance:{compute:'128× Redwood Cove', cache:'256 MB L2 + 504 MB L3', memory:'12-ch DDR5-6400, 922 GB/s',
+    interconnect:'EMIB + UPI mesh', network:'— none on die', accel:'AMX + AVX-512', package:'LGA-7529, 500 W'},
+  note:{
+    eli5:'Intel builds its giant differently: three big thinking-tiles plus two helper-tiles for memory and wires, stitched together with tiny bridges.',
+    fifteen:'Granite Rapids splits the CPU into 3 Intel 3 compute tiles (44 cores each) and 2 Intel 7 SoC tiles, stitched by EMIB bridges — tiles in a row, not chiplets around an I/O die.',
+    pro:'Disaggregated differently than EPYC: compute tiles on Intel 3, I/O on Intel 7, EMIB die-to-die. 504 MB L3, 12-ch DDR5-6400 (922 GB/s), 96 PCIe Gen5/CXL lanes, 500 W.',
+    expert:'Tile architecture: 3× ~44-core compute tiles + 2 SoC tiles; EMIB replaces the sIOD star. Memory bandwidth doubles Genoa’s (DDR5-6400); TDP hits 500 W on LGA-7529.'},
+  pulse:['cpu-ctile','cpu-soctile','cpu-emib'],
+  geo:{sub:[6.8,4.8], pads:'lga', padsN:[80,42], tim:true,
+    tiles:[
+      {part:'cpu-soctile', x:-2.85, z:0, w:0.95, d:2.8, color:0x8a7a5a},
+      {part:'cpu-ctile', x:-1.55, z:0, w:1.55, d:2.8, color:0xd86a3a},
+      {part:'cpu-ctile', x:0.15, z:0, w:1.55, d:2.8, color:0xd86a3a},
+      {part:'cpu-ctile', x:1.85, z:0, w:1.55, d:2.8, color:0xd86a3a},
+      {part:'cpu-soctile', x:2.95, z:0, w:0.95, d:2.8, color:0x8a7a5a}],
+    bridges:[{x:-2.35,z:0,w:0.3,d:2.8},{x:-0.7,z:0,w:0.3,d:2.8},{x:0.975,z:0,w:0.3,d:2.8},{x:2.55,z:0,w:0.3,d:2.8}],
+    labels:[['cpu-ihs','Heat spreader'],['cpu-ctile','3× compute tiles · 44 cores each'],
+      ['cpu-soctile','2× SoC tiles · DDR5 + PCIe'],['cpu-emib','EMIB bridges'],
+      ['cpu-substrate','Package substrate'],['cpu-pads','LGA-7529']]}
+},
+/* ---- Apple M4 Max: unified SoC ---- */
+'m4max':{
+  name:'Apple M4 Max', short:'M4 Max',
+  cmp:{dies:'1× SoC die · 16C CPU + 40C GPU + 16C NPU', cache:'unified system cache',
+    mem:'128 GB LPDDR5X unified · 546 GB/s', io:'Thunderbolt 5 · 120 Gb/s',
+    net:'— none on die', accel:'40-core GPU · 38 TOPS Neural Engine · media engine', pkg:'BGA · ~100 W class'},
+  glance:{compute:'16C CPU + 40C GPU + NPU', cache:'unified system cache', memory:'128 GB unified, 546 GB/s',
+    interconnect:'on-die fabric', network:'— none on die', accel:'40C GPU · 38 TOPS NPU', package:'BGA, ~100 W'},
+  note:{
+    eli5:'Apple crams everything onto ONE chip — the thinkers, the painters (graphics), the AI helpers — with memory glued right next to it that everyone shares.',
+    fifteen:'A single N3E SoC: 16-core CPU, 40-core GPU, 16-core Neural Engine sharing up to 128 GB of LPDDR5X at 546 GB/s — no socket, no DIMMs, no separate GPU.',
+    pro:'Unified memory architecture: one 546 GB/s pool serves CPU+GPU+NPU, eliminating PCIe copies. ~100 W envelope vs 360–500 W server parts — integration over modularity.',
+    expert:'N3E monolithic SoC + package-adjacent LPDDR5X. The anti-chiplet: latency and bandwidth win via physical integration; the tradeoff is fixed capacity and zero serviceability.'},
+  pulse:['cpu-soc','cpu-umem'],
+  geo:{sub:[4.8,3.8], pads:'bga', padsN:[44,32], tim:false,
+    tiles:[
+      {part:'cpu-umem', x:-1.95, z:0, w:1.15, d:2.7, color:0xc8a86a},
+      {part:'cpu-soc', x:0, z:0, w:2.7, d:2.7, color:0xe0a04c},
+      {part:'cpu-umem', x:1.95, z:0, w:1.15, d:2.7, color:0xc8a86a}],
+    labels:[['cpu-soc','M4 Max SoC · CPU+GPU+NPU'],['cpu-umem','Unified LPDDR5X · 546 GB/s'],
+      ['cpu-substrate','Package substrate'],['cpu-pads','BGA solder balls']]}
+},
+/* ---- Ryzen 9 9950X: desktop chiplet ---- */
+'ryzen':{
+  name:'AMD Ryzen 9 9950X', short:'Ryzen 9950X',
+  cmp:{dies:'2× Zen 5 CCDs + IOD · 16C/32T', cache:'64 MB L3 (32 MB/CCD) + 16 MB L2',
+    mem:'2-ch DDR5', io:'PCIe 5.0 via IOD',
+    net:'— none on die', accel:'AVX-512 in-core · RDNA2 iGPU (2 CU)', pkg:'AM5 · LGA-1718 · 170 W'},
+  glance:{compute:'16× Zen 5', cache:'16 MB L2 + 64 MB L3', memory:'2-ch DDR5',
+    interconnect:'Infinity Fabric via IOD', network:'— none on die', accel:'AVX-512 · tiny iGPU', package:'AM5 LGA-1718, 170 W'},
+  note:{
+    eli5:'The same Lego idea shrunk for your desk: just 2 thinking-chiplets and one helper, in a much smaller socket.',
+    fifteen:'Ryzen 9 9950X: 2 Zen 5 CCDs + IOD with a tiny built-in GPU, on AM5. 16 cores, 170 W — the desktop echo of EPYC’s chiplet playbook.',
+    pro:'2× Zen 5 CCDs + IOD (with 2-CU RDNA2 iGPU) on AM5 LGA-1718. Same disaggregation philosophy as EPYC, scaled to 2 memory channels and desktop thermals.',
+    expert:'Zen 5 CCDs (8 cores, 32 MB L3 each) + client IOD; 2-ch DDR5 is the binding constraint vs SP5’s 12. Shows the chiplet approach scaling down, not just up.'},
+  pulse:['cpu-ccd','cpu-iod'],
+  geo:{sub:[3.4,3.4], pads:'lga', padsN:[54,34], tim:true,
+    tiles:[
+      {part:'cpu-ccd', x:-0.85, z:0.6, w:0.95, d:0.95, color:0xe08a4c},
+      {part:'cpu-ccd', x:0.85, z:0.6, w:0.95, d:0.95, color:0xe08a4c},
+      {part:'cpu-iod', x:0, z:-0.95, w:1.6, d:1.0, color:0x6b6f75}],
+    labels:[['cpu-ihs','Heat spreader'],['cpu-ccd','2× CCD · 8 Zen 5 each'],
+      ['cpu-iod','IOD · DDR5 + PCIe + iGPU'],['cpu-substrate','Package substrate'],['cpu-pads','AM5 · LGA-1718']]}
+}
+}};
+
+VARIANTS.dpu = {
+/* ---- BlueField-3 (baseline) ---- */
+'bf3':{
+  name:'NVIDIA BlueField-3', short:'BlueField-3',
+  cmp:{dies:'1× BF3 SoC · 16× Arm A78 + 16× DPA', cache:'mesh-shared cache',
+    mem:'DDR5 ctrl · 16–32 GB', io:'PCIe Gen5 switch · 32 lanes',
+    net:'ConnectX-7 · 400 GbE · 2× QSFP112', accel:'crypto · RegEx · NVMe-oF offloads', pkg:'BGA card · air-cooled'},
+  glance:{compute:'16× Arm A78 + 16 DPA', cache:'modest L2/L3 on mesh', memory:'1 DDR5 ctrl, 16–32 GB',
+    interconnect:'PCIe Gen5 switch (32 lanes)', network:'ConnectX-7 · 400 GbE', accel:'crypto · RegEx · NVMe-oF', package:'BGA card, air-cooled'},
+  note:{
+    eli5:'The baseline helper-chip: 16 bosses plus 16 packet-sorters, a 400-gigabit mailroom, and hardware that handles security and storage chores for free.',
+    fifteen:'The reference DPU: Arm control plane + DPA data-plane threads + ConnectX-7 networking on one SoC, offloading the “infrastructure tax” from the host CPU.',
+    pro:'BF3 is the DPU baseline: 16× A78 + 16× DPA threads on a mesh, DDR5, PCIe Gen5 switch, 400G. Variant deltas: Arm core gen/count, line rate, packet pipeline programmability.',
+    expert:'Reference SmartNIC-SoC: DOCA-programmable DPA for packet processing, ConnectX-7 for 400G RDMA. All DPU variants are evaluated against this offload-density baseline.'},
+  pulse:['dpu-cores','dpu-dpa','dpu-qsfp'],
+  geo:{card:{w:6,d:4.6}, qsfp:{n:2,xs:[-0.7,0.7]},
+    blocks:[{part:'dpu-net',x:-2.4,z:1.6,w:0.7,d:0.7,color:0x4a7a8a},
+      {part:'dpu-crypto',x:1.9,z:1.6,w:0.7,d:0.7,color:0x7a5fa8},
+      {part:'dpu-regex',x:2.4,z:0.6,w:0.7,d:0.7,color:0x8a6fb0}],
+    grids:[
+      {part:'dpu-cores',cols:4,rows:2,x0:-1.5,z0:0.2,dx:1.0,dz:0.9,w:0.8,d:0.7,color:0x7a5a9a},
+      {part:'dpu-dpa',cols:4,rows:2,x0:-1.5,z0:-0.9,dx:1.0,dz:0.9,w:0.8,d:0.7,color:0x5a8a6a}],
+    dram:{x:0,z:-1.32,w:3.0,d:0.32,part:'dpu-dram'}, hs:{x:0,z:-0.2,w:3.4,fins:6},
+    pcie:{x:0,z:-2.15},
+    labels:[['dpu-hs','Heat spreader'],['dpu-cores','16× Arm A78'],['dpu-dpa','16× DPA threads'],
+      ['dpu-net','ConnectX-7 · 400G'],['dpu-crypto','Inline crypto'],['dpu-regex','RegEx engine'],
+      ['dpu-qsfp','2× QSFP112 · 400 GbE'],['dpu-dram','DDR5'],
+      ['dpu-pcie','PCIe Gen5 ×16']]}
+},
+/* ---- BlueField-2: previous generation ---- */
+'bf2':{
+  name:'NVIDIA BlueField-2', short:'BlueField-2',
+  cmp:{dies:'1× BF2 SoC · 8× Arm A72', cache:'mesh-shared cache',
+    mem:'DDR4 ctrl · 16 GB class', io:'PCIe Gen4 switch',
+    net:'ConnectX-6 Dx · 200 Gb/s · 2× QSFP56', accel:'eSwitch · IPsec/TLS offloads', pkg:'PCIe card · air-cooled'},
+  glance:{compute:'8× Arm A72', cache:'modest L2/L3 on mesh', memory:'DDR4 ctrl, 16 GB class',
+    interconnect:'PCIe Gen4 switch', network:'ConnectX-6 Dx · 200 Gb/s', accel:'eSwitch · IPsec/TLS', package:'PCIe card, air-cooled'},
+  note:{
+    eli5:'The older helper: 8 smaller bosses, a 200-gigabit mailroom, older memory. Same idea, last generation’s muscles.',
+    fifteen:'BlueField-2: 8× A72 cores, ConnectX-6 Dx at 200 Gb/s, DDR4, PCIe Gen4 — the previous generation’s balance of offload vs cost.',
+    pro:'Gen-over-gen: BF3 doubles Arm cores (A78), doubles line rate (400G), moves to DDR5 and PCIe Gen5. BF2 shows how fast the DPU treadmill runs.',
+    expert:'Mellanox-era integration: ConnectX-6 Dx + 8× A72 on one SoC. The architectural template BF3 scales — same control/data-plane split, narrower pipes.'},
+  pulse:['dpu-cores','dpu-qsfp'],
+  geo:{card:{w:6,d:4.6}, qsfp:{n:2,xs:[-0.7,0.7]},
+    blocks:[{part:'dpu-net',x:-2.4,z:1.6,w:0.7,d:0.7,color:0x4a7a8a},
+      {part:'dpu-crypto',x:1.9,z:1.6,w:0.7,d:0.7,color:0x7a5fa8},
+      {part:'dpu-regex',x:2.4,z:0.6,w:0.7,d:0.7,color:0x8a6fb0}],
+    grids:[
+      {part:'dpu-cores',cols:2,rows:2,x0:-0.5,z0:0.2,dx:1.0,dz:0.9,w:0.8,d:0.7,color:0x7a5a9a}],
+    dram:{x:0,z:-1.32,w:3.0,d:0.32,part:'dpu-dram'}, hs:{x:0,z:-0.2,w:3.0,fins:5},
+    pcie:{x:0,z:-2.15},
+    labels:[['dpu-hs','Heat spreader'],['dpu-cores','8× Arm A72'],['dpu-crypto','IPsec/TLS offload'],
+      ['dpu-net','ConnectX-6 Dx · 200G'],['dpu-qsfp','2× QSFP56 · 200 GbE'],['dpu-dram','DDR4'],
+      ['dpu-pcie','PCIe Gen4 ×16']]}
+},
+/* ---- Intel IPU E2100 (Mount Evans): P4 pipeline + N1 ---- */
+'e2100':{
+  name:'Intel IPU E2100 “Mount Evans”', short:'IPU E2100',
+  cmp:{dies:'1× E2100 SoC · 16× Neoverse N1 + P4 pipeline', cache:'32 MB SLC',
+    mem:'48 GB LPDDR4x', io:'PCIe 4.0 ×16',
+    net:'2× 200 GbE · E810-class MAC', accel:'P4 match-action pipeline · IPsec · NVMe-oF', pkg:'PCIe card · air-cooled'},
+  glance:{compute:'16× Neoverse N1', cache:'32 MB SLC', memory:'48 GB LPDDR4x',
+    interconnect:'PCIe 4.0 ×16', network:'2× 200 GbE', accel:'P4 pipeline · IPsec · NVMe-oF', package:'PCIe card, air-cooled'},
+  note:{
+    eli5:'Intel’s helper speaks a special language (P4) for sorting mail, with 16 efficient bosses and a huge 48 GB notebook.',
+    fifteen:'Intel IPU E2100 (Mount Evans): 16× Neoverse N1, P4-programmable packet pipeline, 48 GB LPDDR4x, 200 GbE — built with Google for virtualized infrastructure.',
+    pro:'ASIC IPU: P4 pipeline + N1 complex + inline IPsec/NVMe offloads. The Google co-design shows — NVMe-oF initiator and PSP crypto are first-class, not bolt-ons.',
+    expert:'Mount Evans: P4 match-action pipeline with a coherent N1 complex; 32 MB SLC. Competes with BlueField on programmability — P4 vs DOCA/DPA is the philosophical split.'},
+  pulse:['dpu-p4','dpu-cores'],
+  geo:{card:{w:6.5,d:4.8}, qsfp:{n:2,xs:[-0.7,0.7]},
+    blocks:[{part:'dpu-net',x:-2.6,z:1.7,w:0.7,d:0.7,color:0x4a7a8a}],
+    grids:[
+      {part:'dpu-cores',cols:4,rows:2,x0:-1.5,z0:0.3,dx:1.0,dz:0.9,w:0.8,d:0.7,color:0x3a6a9a},
+      {part:'dpu-p4',cols:4,rows:2,x0:-1.5,z0:-0.8,dx:1.0,dz:0.9,w:0.8,d:0.7,color:0x9a6a3a}],
+    dram:{x:0,z:-1.4,w:2.4,d:0.3,part:'dpu-dram'}, hs:{x:0,z:-0.2,w:3.2,fins:5},
+    pcie:{x:0,z:-2.25},
+    labels:[['dpu-hs','Heat spreader'],['dpu-cores','16× Neoverse N1'],['dpu-p4','P4 pipeline'],
+      ['dpu-net','2× 200 GbE MAC'],['dpu-qsfp','2× 200 GbE'],['dpu-dram','48 GB LPDDR4x'],
+      ['dpu-pcie','PCIe 4.0 ×16']]}
+},
+/* ---- Pensando Elba: 144 P4 MPUs ---- */
+'elba':{
+  name:'Pensando Elba DPU', short:'Pensando Elba',
+  cmp:{dies:'1× Elba SoC · 16× Arm A72 + 144× P4 MPU', cache:'on-chip SRAM per MPU',
+    mem:'DDR5-5600 · dual controllers', io:'PCIe Gen4',
+    net:'2× 200 GbE', accel:'144× P4 match-processing units @2 GHz · 16M queues', pkg:'PCIe card · air-cooled'},
+  glance:{compute:'16× A72 + 144 MPUs', cache:'per-MPU SRAM', memory:'dual DDR5-5600',
+    interconnect:'PCIe Gen4', network:'2× 200 GbE', accel:'144× P4 MPUs', package:'PCIe card, air-cooled'},
+  note:{
+    eli5:'This one’s mailroom is a giant grid of 144 tiny sorters you can reprogram like Lego — the most flexible mailroom here.',
+    fifteen:'Pensando Elba: 144 P4-programmable match-processing units at 2 GHz — the data plane is a reprogrammable switch pipeline, with 16 A72s for control.',
+    pro:'Elba’s thesis: the DPU is a P4 switch with servers attached. 144 MPUs at line rate, dual DDR5-5600, 2×200G — software-defined networking, firewall, and load balancing in the pipeline.',
+    expert:'P4-native data plane vs fixed-function: Elba trades fixed-logic efficiency for pipeline programmability. 16M hardware queues, 2K VNICs — the flow scale is the point.'},
+  pulse:['dpu-mpu','dpu-cores'],
+  geo:{card:{w:6,d:4.8}, qsfp:{n:2,xs:[-0.7,0.7]},
+    blocks:[{part:'dpu-net',x:-2.4,z:1.75,w:0.7,d:0.7,color:0x4a7a8a}],
+    grids:[
+      {part:'dpu-cores',cols:2,rows:2,x0:-0.5,z0:0.9,dx:1.0,dz:0.9,w:0.8,d:0.7,color:0x7a5a9a},
+      {part:'dpu-mpu',cols:6,rows:4,x0:-2.5,z0:-1.5,dx:1.0,dz:0.6,w:0.8,d:0.45,color:0x9a4a6a}],
+    dram:{x:0,z:1.9,w:2.6,d:0.3,part:'dpu-dram'}, hs:{x:0,z:0.2,w:3.2,fins:5},
+    pcie:{x:0,z:-2.25},
+    labels:[['dpu-hs','Heat spreader'],['dpu-cores','16× Arm A72'],['dpu-mpu','144× P4 MPUs'],
+      ['dpu-net','2× 200 GbE MAC'],['dpu-qsfp','2× 200 GbE'],['dpu-dram','DDR5-5600'],
+      ['dpu-pcie','PCIe Gen4 ×16']]}
+},
+/* ---- Marvell OCTEON 10: N2 + inline AI, 5nm ---- */
+'octeon10':{
+  name:'Marvell OCTEON 10 “CN106”', short:'OCTEON 10',
+  cmp:{dies:'1× CN106 SoC · up to 24× Neoverse N2 + AI', cache:'per-core + shared cache',
+    mem:'DDR5 controllers', io:'PCIe 5.0',
+    net:'up to 400 GbE · 1 Tb integrated switch', accel:'inline AI/ML · vector packet processing', pkg:'BGA card · air-cooled'},
+  glance:{compute:'up to 24× Neoverse N2', cache:'per-core + shared', memory:'DDR5',
+    interconnect:'PCIe 5.0', network:'up to 400 GbE', accel:'inline AI/ML', package:'BGA card, air-cooled'},
+  note:{
+    eli5:'The efficiency champion: up to 24 tiny, modern bosses on super-small 5 nm transistors, with built-in AI helpers and a switch inside.',
+    fifteen:'Marvell OCTEON 10 (CN106): up to 24 Arm Neoverse N2 on TSMC 5 nm, inline AI/ML acceleration, hardware vector packet processing, up to 400 GbE.',
+    pro:'5 nm + N2 + inline AI: OCTEON 10 puts inference directly in the packet pipeline, with a 1-terabit integrated switch and PCIe 5.0/DDR5. 3× the perf of its predecessor at half the power.',
+    expert:'First Armv9 DPU with SVE2; tile-scalable AI in the data path (not lookaside). The edge-to-core scaling story: same architecture from fanless 5G base stations to 400G cloud NICs.'},
+  pulse:['dpu-cores','dpu-ai'],
+  geo:{card:{w:6,d:4.8}, qsfp:{n:2,xs:[-0.7,0.7]},
+    blocks:[
+      {part:'dpu-net',x:-2.4,z:1.75,w:0.7,d:0.7,color:0x4a7a8a},
+      {part:'dpu-ai',x:1.9,z:1.5,w:1.2,d:0.8,color:0xb08a2a}],
+    grids:[
+      {part:'dpu-cores',cols:3,rows:2,x0:-1.0,z0:0.2,dx:1.0,dz:0.9,w:0.8,d:0.7,color:0x2a7a8a}],
+    dram:{x:0,z:-1.4,w:2.8,d:0.32,part:'dpu-dram'}, hs:{x:0,z:-0.2,w:3.2,fins:5},
+    pcie:{x:0,z:-2.25},
+    labels:[['dpu-hs','Heat spreader'],['dpu-cores','up to 24× Neoverse N2'],['dpu-ai','Inline AI/ML'],
+      ['dpu-net','400G MAC'],['dpu-qsfp','QSFP-DD · up to 400 GbE'],['dpu-dram','DDR5'],
+      ['dpu-pcie','PCIe 5.0 ×16']]}
+}
+};
+VARIANTS.gpu = {
+/* ---- H100 SXM5 (baseline) ---- */
+'h100-sxm':{
+  name:'NVIDIA H100 SXM5 “GH100”', short:'H100 SXM',
+  cmp:{dies:'1× GH100 monolith · 132 SMs / 16,896 CUDA', cache:'50 MB shared L2',
+    mem:'5× HBM3 stacks · 80 GB · 3.35 TB/s', io:'NVLink 4.0 · 900 GB/s · CoWoS interposer',
+    net:'— GPU-to-GPU NVLink, no network', accel:'528 4th-gen Tensor Cores', pkg:'SXM5 mezzanine · 700 W'},
+  glance:{compute:'132 SMs · 16,896 CUDA', cache:'50 MB shared L2', memory:'5× HBM3, 3.35 TB/s',
+    interconnect:'CoWoS interposer + NVLink 900 GB/s', network:'— none on die', accel:'528 4th-gen Tensor Cores', package:'SXM5 mezzanine, 700 W'},
+  note:{
+    eli5:'The baseline AI GPU: one giant brain with five tall memory towers, riding a 700 W mezzanine board that only fits in big servers.',
+    fifteen:'The reference data-center GPU: monolithic GH100 on a CoWoS interposer, 5 HBM3 stacks, NVLink 4. Every GPU variant here is a different answer to the same memory-bandwidth problem.',
+    pro:'H100 is the monolith baseline: one reticle-scale die + 5 HBM3 on silicon interposer. Variant deltas: die partitioning (B200), memory tech (HBM3E/GDDR6X), and package (SXM vs PCIe vs OAM).',
+    expert:'Reference: 4 nm monolith, 3.35 TB/s HBM3, NVLink 4. All GPU variants are evaluated against this bandwidth-per-watt and packaging baseline.'},
+  pulse:['gpu-gpc','gpu-hbm'],
+  geo:{kind:'module', board:{w:9.5,d:6.5,color:0x14261a,part:'gpu-pcb'}, pads:'sxm',
+    inter:{w:7,d:5},
+    dies:(function(){var a=[],rows=[[-1.62,2],[-0.81,3],[0,3],[0.81,3],[1.62,2]];
+      rows.forEach(function(r){for(var i=0;i<r[1];i++)a.push({part:'gpu-gpc',x:(i-(r[1]-1)/2)*1.62,z:r[0],w:1.5,d:1.5,color:0x1f6f43});});return a;})(),
+    l2:{x:0,z:2.15,w:3.6,d:0.55},
+    hbm:{xs:[-3.0,3.0],zs:[-1.5,0,1.5],w:1.1,d:2.0,part:'gpu-hbm'},
+    nvlink:{x:0,z:-2.85}, lid:{w:7.3,d:5.3},
+    labels:[['gpu-gpc','GH100 die · 132 SMs'],['gpu-hbm','5× HBM3 · 3.35 TB/s'],
+      ['gpu-l2','50 MB L2'],['gpu-nvlink','NVLink 4 · 900 GB/s'],['gpu-inter','CoWoS interposer'],
+      ['gpu-pcb','SXM5 mezzanine · 700 W']]}
+},
+/* ---- H100 NVL: paired PCIe cards, NVLink bridges ---- */
+'h100-nvl':{
+  name:'NVIDIA H100 NVL (PCIe pair)', short:'H100 NVL',
+  cmp:{dies:'2× GH100-class dies · paired cards', cache:'50 MB shared L2 per GPU',
+    mem:'94 GB HBM3 per GPU · 188 GB pooled · ~3.9 TB/s each', io:'3× NVLink bridges between cards',
+    net:'— GPU-to-GPU NVLink, no network', accel:'4th-gen Tensor Cores per GPU', pkg:'2× PCIe cards · 350–400 W each'},
+  glance:{compute:'132 SMs × 2 cards', cache:'50 MB L2 per GPU', memory:'188 GB pooled HBM3',
+    interconnect:'3× NVLink bridges', network:'— none on die', accel:'4th-gen Tensor Cores × 2', package:'PCIe pair, 350–400 W/card'},
+  note:{
+    eli5:'Two H100 cards sold as twins, holding hands with three golden bridges on top so they share one giant 188 GB memory.',
+    fifteen:'H100 NVL is a PCIe pair: two cards, three NVLink bridges across the top, 94 GB HBM3 each — built for LLM inference where SXM boards won’t fit.',
+    pro:'Dual-GPU PCIe product: full GH100-class dies, ~3.9 TB/s HBM3 each, 350–400 W per card. The bridges give GPU-direct bandwidth without NVSwitch.',
+    expert:'Inference SKU: capacity (188 GB pooled) over SXM’s bandwidth; NVLink bridges provide the all-reduce path for tensor-parallel serving across the pair.'},
+  pulse:['gpu-nvlink','gpu-hbm'],
+  geo:{kind:'dualcard', pads:'pcie',
+    cards:[{x:-4.7},{x:4.7}], cardW:7.5, cardD:4.5,
+    dies:[{part:'gpu-gpc',x:-4.7,z:0,w:2.6,d:2.6,color:0x1f6f43},{part:'gpu-gpc',x:4.7,z:0,w:2.6,d:2.6,color:0x1f6f43}],
+    hbm:(function(){var a=[];[-4.7,4.7].forEach(function(cx){[-2.6,2.6].forEach(function(dx){[-1.2,0,1.2].forEach(function(z){a.push({part:'gpu-hbm',x:cx+dx,z:z,w:0.85,d:1.5});});});});return a;})(),
+    bridges:3, bridgeZ:1.7,
+    labels:[['gpu-gpc','GH100-class die per card'],['gpu-hbm','94 GB HBM3 per card'],
+      ['gpu-nvlink','3× NVLink bridges'],['gpu-pcb','2× PCIe cards · 350–400 W each']]}
+},
+/* ---- B200 Blackwell: two dies, NV-HBI, HBM3E ---- */
+'b200':{
+  name:'NVIDIA B200 “Blackwell”', short:'B200',
+  cmp:{dies:'2× reticle-limit dies · fully coherent', cache:'126 MB L2',
+    mem:'8× HBM3E stacks · 192 GB · ~8 TB/s', io:'NV-HBI 10 TB/s die link · NVLink 5 · 1.8 TB/s',
+    net:'— GPU-to-GPU NVLink, no network', accel:'5th-gen Tensor Cores · FP4/FP6', pkg:'SXM-class module · ~1000 W class'},
+  glance:{compute:'2 dies · 148 SM class', cache:'126 MB L2', memory:'8× HBM3E, 192 GB, ~8 TB/s',
+    interconnect:'NV-HBI 10 TB/s + NVLink 1.8 TB/s', network:'— none on die', accel:'5th-gen Tensor Cores', package:'SXM-class, ~1 kW'},
+  note:{
+    eli5:'NVIDIA’s new monster: TWO giant brains stitched together acting as one, with eight taller memory towers.',
+    fifteen:'B200 splits the GPU into two reticle-limit dies on one package, fused by a 10 TB/s NV-HBI link, with 8 HBM3E stacks (192 GB, ~8 TB/s).',
+    pro:'Blackwell: 208B transistors across 2 dies, fully coherent over NV-HBI. The die got too big for one reticle, so the package became the GPU.',
+    expert:'Partitioning returns via NV-HBI: 10 TB/s die-to-die keeps the two-die illusion coherent. HBM3E at ~9.6 Gbps/pin rebalances the roofline around 8 TB/s memory bandwidth.'},
+  pulse:['gpu-nvhbi','gpu-hbm'],
+  geo:{kind:'module', board:{w:10.5,d:7,color:0x14261a,part:'gpu-pcb'}, pads:'sxm',
+    inter:{w:8,d:5.5},
+    dies:(function(){var a=[];[-1.5,1.5].forEach(function(dx){[-1.5,0,1.5].forEach(function(z){[-0.78,0.78].forEach(function(ox){a.push({part:'gpu-gpc',x:dx+ox,z:z,w:1.4,d:1.4,color:0x1f8a4d});});});});return a;})(),
+    l2:{x:0,z:2.35,w:4.4,d:0.5},
+    hbm:(function(){var a=[];[-3.3,3.3].forEach(function(x){[-1.95,-0.65,0.65,1.95].forEach(function(z){a.push({part:'gpu-hbm',x:x,z:z,w:1.15,d:1.15});});});return a;})(),
+    nvhbi:{x:0,z:0,w:0.5,d:4}, nvlink:{x:0,z:-3.1}, lid:{w:8.3,d:5.8},
+    labels:[['gpu-gpc','2× Blackwell dies'],['gpu-nvhbi','NV-HBI · 10 TB/s'],
+      ['gpu-hbm','8× HBM3E · 192 GB'],['gpu-l2','126 MB L2'],['gpu-nvlink','NVLink 5 · 1.8 TB/s'],
+      ['gpu-inter','CoWoS interposer'],['gpu-pcb','SXM-class module']]}
+},
+/* ---- RTX 4090: consumer AD102, GDDR6X on substrate ---- */
+'rtx4090':{
+  name:'NVIDIA GeForce RTX 4090 “AD102”', short:'RTX 4090',
+  cmp:{dies:'1× AD102 monolith · 128 SMs / 16,384 CUDA', cache:'72 MB L2',
+    mem:'12× GDDR6X chips · 24 GB · 384-bit · ~1.01 TB/s', io:'PCIe 4.0 ×16 · no interposer',
+    net:'— none on die', accel:'4th-gen Tensor Cores (Ada)', pkg:'triple-slot PCIe card · 450 W · 16-pin'},
+  glance:{compute:'128 SMs · 16,384 CUDA', cache:'72 MB L2', memory:'24 GB GDDR6X, ~1 TB/s',
+    interconnect:'on-substrate GDDR6X', network:'— none on die', accel:'4th-gen Tensor Cores', package:'PCIe card, 450 W'},
+  note:{
+    eli5:'The gaming cousin: one smaller brain with its memory chips laid flat AROUND it like a moat, on a card that plugs into a normal PC slot.',
+    fifteen:'AD102 on a triple-slot PCIe card: 24 GB of GDDR6X in 12 chips ringing the die — no interposer, no stacks, 450 W from a 16-pin plug.',
+    pro:'Consumer packaging: GDDR6X on organic substrate (no CoWoS), PCIe 4.0 ×16, display outputs. ~1 TB/s from 384-bit GDDR6X vs 3.35 TB/s HBM3 — bandwidth is what the data center pays for.',
+    expert:'Same Ada silicon economics: monolithic AD102, memory on-substrate. The physical contrast with H100 is the cost/bandwidth tradeoff made visible — no interposer, 1/3 the bandwidth, 1/10th the price class.'},
+  pulse:['gpu-gddr','gpu-gpc'],
+  geo:{kind:'pcbcard', board:{w:11,d:4.5,color:0x101418,part:'gpu-pcb'}, pads:'pcie',
+    dies:[{part:'gpu-gpc',x:-2.2,z:0,w:1.7,d:1.7,color:0x2a7a4d}],
+    gddr:{cx:-2.2,cz:0,rx:1.55,rz:1.35,n:12,w:0.55,d:0.75},
+    pcieEdge:{x:3.8,z:-1.7}, pin16:{x:4.6,z:1.5}, bracket:true, shroud:true,
+    labels:[['gpu-gpc','AD102 die · 128 SMs'],['gpu-gddr','12× GDDR6X · 24 GB'],
+      ['gpu-lid','Triple-slot cooler'],['gpu-pcb','PCIe 4.0 ×16 card · 450 W']]}
+},
+/* ---- MI300X: chiplet CDNA3, 8 HBM3 ---- */
+'mi300x':{
+  name:'AMD Instinct MI300X “CDNA3”', short:'MI300X',
+  cmp:{dies:'8× XCD compute + 4× IOD · chiplet GPU', cache:'256 MB Infinity Cache (shared)',
+    mem:'8× HBM3 stacks · 192 GB · 5.3 TB/s', io:'Infinity Fabric chiplet links · CoWoS-class',
+    net:'— GPU-to-GPU fabric, no network', accel:'CDNA3 matrix cores', pkg:'OAM module · 750 W'},
+  glance:{compute:'8× XCD · CDNA3', cache:'256 MB Infinity Cache', memory:'8× HBM3, 192 GB, 5.3 TB/s',
+    interconnect:'Infinity Fabric + interposer', network:'— none on die', accel:'CDNA3 matrix cores', package:'OAM, 750 W'},
+  note:{
+    eli5:'AMD’s answer: instead of one giant brain, eight small thinking-chiplets plus four helpers, ringed by eight memory towers.',
+    fifteen:'MI300X disaggregates the GPU: 8 CDNA-3 compute chiplets + 4 I/O dies on an interposer, with 8 HBM3 stacks — 192 GB at 5.3 TB/s for LLM inference.',
+    pro:'Chiplet GPU: 8× XCD + 4× IOD vs H100’s monolith. 192 GB HBM3 targets inference capacity; the bet is that Infinity Fabric chiplet links are fast enough to hide the partition.',
+    expert:'The anti-H100 packaging bet: disaggregation for yield and SKU flexibility, at the cost of chiplet-hop latency on the XCD↔HBM path. OAM 750 W.'},
+  pulse:['gpu-xcd','gpu-hbm'],
+  geo:{kind:'module', board:{w:9.5,d:6.5,color:0x141a14,part:'gpu-pcb'}, pads:'sxm',
+    inter:{w:8,d:5.5},
+    dies:(function(){var a=[];
+      for(var i=0;i<8;i++){var t=i/8*Math.PI*2+Math.PI/8;
+        a.push({part:'gpu-xcd',x:Math.cos(t)*2.1,z:Math.sin(t)*2.1,w:1.0,d:1.0,color:0xb04a3a});}
+      [[-0.55,-0.55],[0.55,-0.55],[-0.55,0.55],[0.55,0.55]].forEach(function(p){
+        a.push({part:'gpu-iod2',x:p[0],z:p[1],w:0.7,d:0.7,color:0x7a6a5a});});
+      return a;})(),
+    hbm:(function(){var a=[];[-3.2,3.2].forEach(function(x){[-1.95,-0.65,0.65,1.95].forEach(function(z){a.push({part:'gpu-hbm',x:x,z:z,w:1.1,d:1.1});});});return a;})(),
+    nvlink:{x:0,z:-3.0}, lid:{w:8.3,d:5.8},
+    labels:[['gpu-xcd','8× XCD compute chiplets'],['gpu-iod2','4× I/O dies'],
+      ['gpu-hbm','8× HBM3 · 192 GB · 5.3 TB/s'],['gpu-nvlink','GPU fabric link'],
+      ['gpu-inter','Interposer'],['gpu-pcb','OAM module · 750 W']]}
+}
+};
+
+/* ================= variant component-diff (VDIFF) =================
+   Sparse per-variant overrides: VDIFF[classId][variant][level] = {how,why}.
+   vHow() falls back to the base DIFFS entry when absent. Only classes that
+   differ physically get overrides — everything else is shared. */
+var VDIFF = {
+'cache':{
+ 'genoa-x':{
+  eli5:'Each neighborhood’s whiteboard tripled. Same twelve blocks — with a memory pancake stacked on top of each.',
+  fifteen:'Per-CCD L3 goes 32 MB → 96 MB via a 64 MB 3D-stacked SRAM die on top of each CCD. Same Zen 4 cores underneath.',
+  pro:'Stacked V-Cache: 64 MB of SRAM bonded per CCD over the 32 MB native — 1,152 MB of L3 per socket. Watch the cache tier rise when you open the explosion.',
+  expert:'Hybrid-bonded cache die on the N5 CCD via TSVs. The stacked tier trades a few cycles of latency for 3× the capacity — technical-computing working sets now stay on-die.'
+ },
+ 'bergamo':{
+  eli5:'Same 32 MB whiteboard per neighborhood — but these neighborhoods now have 16 slimmer workers instead of 8.',
+  fifteen:'32 MB of L3 per CCD is unchanged, but the Zen 4c CCD packs 16 cores onto it: 2 MB per core vs 4 MB on Genoa.',
+  pro:'L3 per core halves (4 MB → 2 MB) on the dense Zen 4c CCD. Cache-miss rates rise for per-thread working sets — the throughput tradeoff.',
+  expert:'Shared L3 contention doubles per core. Cloud-native, highly threaded workloads tolerate it; cache-sensitive single threads don’t.'
+ },
+ 'ryzen':{
+  eli5:'A 32 MB whiteboard under each of the two desktop neighborhoods — the same idea, shrunken.',
+  fifteen:'32 MB of L3 per 8-core Zen 5 CCD: 4 MB per core, same ratio as EPYC Genoa.',
+  pro:'Two Zen 5 CCDs × 32 MB L3. The desktop keeps Genoa’s per-core cache ratio — the chiplet playbook scales down intact.',
+  expert:'Per-core L3 identical to Genoa; the difference is count (2 CCDs) and bins, not cache architecture.'
+ },
+ 'b200':{
+  eli5:'The shared table grew to 126 megabytes — and it stretches across both brains.',
+  fifteen:'126 MB of L2 spanning both Blackwell dies over NV-HBI: 2.5× H100’s 50 MB, coherent across the package.',
+  pro:'126 MB partitioned L2, coherent across NV-HBI. Sized to filter the 8 TB/s HBM3E stream for the doubled SM count.',
+  expert:'Cross-die L2 coherence at 10 TB/s NV-HBI. Kernels tile for L2 residency — the last knob before HBM3E.'
+ },
+},
+'compute':{
+ 'genoa-x':{
+  eli5:'Same workers, bigger whiteboard. The 12 neighborhoods keep their 8 workers each — 96 total.',
+  fifteen:'Unchanged: 12× 8-core Zen 4 CCDs, 96C/192T. Genoa-X is Genoa with V-Cache — the cores didn’t move.',
+  pro:'Same silicon, same cores: 96C/192T. Only the L3 changed. This is the cleanest upgrade story on the page — same socket, same platform, more cache.',
+  expert:'No core change; the CCD is the identical N5 die plus the stacked tier. Binning for cache-heavy SKUs only.'
+ },
+ 'bergamo':{
+  eli5:'Sixteen slimmer workers per neighborhood instead of eight — 128 workers total.',
+  fifteen:'Zen 4c: 16 efficiency-tuned cores per CCD × 8 CCDs = 128C/256T. Same SP5 platform, denser compute.',
+  pro:'Zen 4c trades per-core muscle for density: 16 cores share 32 MB L3. Perf/socket and perf/watt up, perf/core down.',
+  expert:'Zen 4c trims structures (smaller L2, lower clocks) for area. The cloud-native core: throughput per socket is the metric.'
+ },
+ 'granite':{
+  eli5:'128 workers too — but built from three big compute tiles instead of twelve small chiplets.',
+  fifteen:'128 cores from 3 large compute tiles (not 12 CCDs): Intel’s tile answer to AMD’s chiplet lead.',
+  pro:'3 compute tiles + 2 SoC tiles via EMIB: Intel’s disaggregated Granite Rapids. 128C on a 5-tile MCM.',
+  expert:'EMIB tiles vs IF chiplets: two vendors’ answers to the reticle limit. Intel’s tiles are bigger and fewer.'
+ },
+ 'm4max':{
+  eli5:'Only up to 16 workers — but each one is a sprinter, and they share one giant whiteboard with the painters.',
+  fifteen:'Up to 16 CPU cores (performance + efficiency mix) on a monolithic die — a laptop chip, not a server chip.',
+  pro:'16 cores is the point: M4 Max optimizes per-core perf and perf/watt, not socket throughput. Unified memory replaces the server cache hierarchy.',
+  expert:'The anti-EPYC: few fat cores, monolithic die, no chiplet tax. Different planet — compare perf/watt, not core count.'
+ },
+ 'ryzen':{
+  eli5:'16 workers for your desk — 2 neighborhoods of 8. Plenty for games and work.',
+  fifteen:'16C/32T Zen 5 on AM5: 2× 8-core CCDs. The desktop chiplet story — EPYC’s architecture, desk-sized.',
+  pro:'16C/32T at 170 W: the desktop perf play. Same Zen 5 cores as server parts, binned for clocks.',
+  expert:'Client bins trade power for frequency. The CCD is the same fundamental design as EPYC’s.'
+ },
+ 'bf2':{
+  eli5:'Eight smaller bosses — the previous generation’s control room.',
+  fifteen:'8× Arm A72: half the cores, one generation older than BlueField-3’s A78s.',
+  pro:'8× A72 for control and exceptions. The data plane is fixed logic — cores only handle what the pipeline can’t.',
+  expert:'A72 vs A78: the gen-over-gen IPC story. Control-plane cores don’t push packets.'
+ },
+ 'e2100':{
+  eli5:'Sixteen efficient bosses working alongside the P4 mail-sorting machine.',
+  fifteen:'16× Neoverse N1: server-class Arm cores, coherent with the P4 pipeline and 32 MB of shared cache.',
+  pro:'N1 complex: real server cores for control and exception paths. Coherent with the P4 data plane via the 32 MB SLC.',
+  expert:'Neoverse N1, not A-series: the IPU gets datacenter cores. P4 owns the fast path; N1 owns the programmable rest.'
+ },
+ 'elba':{
+  eli5:'Sixteen bosses for the control room — the 144 mail-sorters do the fast work.',
+  fifteen:'16× A72: Elba’s control plane. The data plane is the 144-MPU P4 pipeline.',
+  pro:'16× A72 for control; the P4 MPUs own the fast path. Classic split: programmable control, pipeline data plane.',
+  expert:'A72 suffices because the MPUs do the work. Core count is about control-plane scale (2K VNICs), not packets.'
+ },
+ 'octeon10':{
+  eli5:'Up to 24 tiny, modern bosses — the newest, most efficient ones here.',
+  fifteen:'Up to 24× Neoverse N2 on 5 nm, with Armv9 and SVE2 vector extensions.',
+  pro:'N2 cores: 3× the perf of the predecessor at half the power (per Marvell). Armv9 + SVE2 for vector packet work.',
+  expert:'First Armv9 DPU: SVE2 vectorizes packet processing on the cores. N2 IPC + 5 nm is the efficiency story.'
+ },
+},
+'interconnect':{
+ 'granite':{
+  eli5:'Different Lego glue: Intel uses EMIB bridges under its tiles; AMD uses the Infinity Fabric web.',
+  fifteen:'Granite Rapids tiles talk over EMIB (embedded multi-die interconnect bridges) — Intel’s answer to Infinity Fabric.',
+  pro:'EMIB: small silicon bridges embedded in the package substrate connect the 5 tiles. Denser than organic routing, different from AMD’s IF.',
+  expert:'EMIB vs IF: bridge-based vs fabric-based disaggregation. Both solve the reticle limit; the latency/bandwidth tradeoffs differ per tile.'
+ },
+ 'b200':{
+  eli5:'The bridge to other B200s is twice as fast now — 1.8 terabytes a second.',
+  fifteen:'NVLink 5: 1.8 TB/s per GPU of scale-out bandwidth — double NVLink 4 — for multi-GPU training and inference.',
+  pro:'NVLink 5 at 1.8 TB/s bidirectional. The scale-out fabric for GB200 NVL72 racks: 72 GPUs acting as one.',
+  expert:'Doubled per-GPU fabric bandwidth matches the doubled compute. NVL72: the rack is the computer.'
+ },
+ 'h100-nvl':{
+  eli5:'Three golden bridges across the top of the twin cards let them share memory like one big card.',
+  fifteen:'Three NVLink bridges join the PCIe pair: GPU-direct bandwidth for tensor-parallel inference across 188 GB.',
+  pro:'Bridge-based NVLink (not NVSwitch): the pair shares memory and all-reduce traffic without leaving the GPUs.',
+  expert:'The NVL product: bridges provide the all-reduce path for tensor-parallel serving. SXM’s NVSwitch scale isn’t needed for inference pairs.'
+ },
+ 'mi300x':{
+  eli5:'AMD’s bridge to other MI300Xs — its version of NVLink.',
+  fifteen:'Infinity Fabric / xGMI links scale MI300X to multi-GPU nodes for training and inference.',
+  pro:'Infinity Fabric GPU links: the scale-out path for MI300X pods. Open fabric vs NVLink’s closed ecosystem.',
+  expert:'xGMI links between OAM modules; the scale story mirrors NVLink but on AMD’s fabric. Bandwidth trails NVLink 5.'
+ },
+ 'rtx4090':{
+  eli5:'No bridge at all — this card works alone.',
+  fifteen:'No NVLink on the RTX 4090: Ada removed the bridge fingers. Multi-GPU gaming is dead; PCIe is the only path.',
+  pro:'NVLink removed on Ada consumer cards: NVIDIA’s segmentation. Two 4090s talk over PCIe 4.0 ×16 — slowly.',
+  expert:'The bridge fingers are gone: consumer multi-GPU is officially over. Pro cards keep NVLink; GeForce doesn’t.'
+ },
+ 'bf2':{
+  eli5:'The older, slower slide — PCIe 4 instead of 5.',
+  fifteen:'PCIe Gen4: BF2’s host interface. Half the per-lane speed of Gen5 — matched to its 200G network.',
+  pro:'Gen4 ×16: enough for 200G line rate with headroom. The balanced BF2 design — no wasted SERDES.',
+  expert:'Gen4 matches 200G: the I/O generations move together. BF3’s Gen5 pairs with 400G.'
+ },
+ 'e2100':{
+  eli5:'The slide to the computer — and this one can fetch storage all by itself.',
+  fifteen:'PCIe 4.0 ×16, doubling as an NVMe-oF initiator to disaggregated storage.',
+  pro:'Gen4 ×16 as NVMe-oF initiator: the IPU pulls storage over the fabric without the host. The Google use case.',
+  expert:'PCIe as a storage fabric: the IPU initiates NVMe-oF, bypassing the host. Disaggregated storage needs this.'
+ },
+ 'elba':{
+  eli5:'The slide to the computer — PCIe 4, plenty for 400 gigabits of network.',
+  fifteen:'PCIe Gen4: Elba’s host interface. 2×200G of network fits comfortably.',
+  pro:'Gen4 ×16: matched to the 400G network. No Gen5 tax for a 400G DPU.',
+  expert:'Balanced I/O: 400G network, Gen4 host. Elba doesn’t over-provision.'
+ },
+ 'octeon10':{
+  eli5:'The newest, fastest slide — PCIe 5, ready for 400-gigabit traffic.',
+  fifteen:'PCIe 5.0 ×16: OCTEON 10’s host link, with headroom past 400G.',
+  pro:'Gen5 ×16: 512 GB/s each way — headroom for 400G plus devices. The modern pairing for a 5 nm DPU.',
+  expert:'Gen5 matches 400G with margin. The 5 nm SoC gets the 5th-gen I/O it deserves.'
+ },
+},
+'memory':{
+ 'granite':{
+  eli5:'The post office got bigger: faster mail (DDR5-6400), more loading docks (96 PCIe lanes).',
+  fifteen:'2 SoC tiles carry 12 channels of DDR5-6400 and 96 PCIe Gen5/CXL lanes — more I/O than Genoa’s sIOD generation.',
+  pro:'Disaggregated I/O: 2 SoC tiles vs AMD’s monolithic sIOD. DDR5-6400 (vs 4800) and CXL on 96 lanes — the platform play.',
+  expert:'Two SoC tiles split the I/O: the I/O die is now also disaggregated. CXL lanes enable memory expansion the EPYC platform lacks.'
+ },
+ 'ryzen':{
+  eli5:'A much smaller post office: only 2 mail lanes (DDR5 channels) for the desktop.',
+  fifteen:'Client IOD: 2 DDR5 channels, PCIe 5.0. The desktop I/O budget — a fraction of SP5’s 12 channels.',
+  pro:'2-ch DDR5 is the desktop’s binding constraint: ~100 GB/s vs Genoa’s 460 GB/s. Per-core bandwidth far below server.',
+  expert:'The IOD carries the platform tax. 2 channels is fine for 16 cores; it would starve 96.'
+ },
+ 'b200':{
+  eli5:'Eight taller memory towers — 192 gigabytes total, feeding the twins at 8 terabytes a second.',
+  fifteen:'8 HBM3E stacks, 192 GB at ~8 TB/s: double H100’s capacity, 2.4× the bandwidth, 4 stacks per Blackwell die.',
+  pro:'HBM3E at ~9.6 Gbps/pin class. The bandwidth the doubled transistor budget needs to stay fed.',
+  expert:'~4 TB/s per die of memory bandwidth, matched to the 10 TB/s NV-HBI — a balanced roofline by design.'
+ },
+ 'h100-nvl':{
+  eli5:'Each twin card has its own 94 GB of memory — 188 GB when they pool together.',
+  fifteen:'94 GB HBM3 per card at ~3.9 TB/s. Two cards pool to 188 GB for big-model inference over NVLink bridges.',
+  pro:'94 GB per GPU: capacity over SXM’s bandwidth — the inference SKU tradeoff.',
+  expert:'Same HBM3 generation as SXM, more capacity per card. The pooled 188 GB targets tensor-parallel LLM serving.'
+ },
+ 'mi300x':{
+  eli5:'Eight memory towers ringed around the chiplets — 192 gigabytes for giant AI models.',
+  fifteen:'8 HBM3 stacks, 192 GB at 5.3 TB/s: AMD’s capacity play for LLM inference, matching B200’s 192 GB.',
+  pro:'192 GB HBM3 at 5.3 TB/s via 4 central I/O dies. Capacity matches Blackwell; bandwidth trails HBM3E.',
+  expert:'HBM3 (not E) at 5.3 TB/s — the XCD↔HBM path crosses the IOD. Capacity parity, bandwidth a generation behind.'
+ },
+ 'rtx4090':{
+  eli5:'No towers here — flat memory chips around the big brain: 24 GB, fast but not server-fast.',
+  fifteen:'24 GB GDDR6X on a 384-bit bus at ~1 TB/s: consumer memory, on-package PCB instead of an interposer.',
+  pro:'GDDR6X vs HBM: 1/3 the bandwidth at 1/10th the price class. The consumer memory tradeoff made physical.',
+  expert:'No interposer: GDDR6X on organic substrate. 384-bit × 21 Gbps ≈ 1 TB/s — plenty for gaming, starved for training.'
+ },
+ 'bf2':{
+  eli5:'The older, slower notebook — DDR4 instead of DDR5.',
+  fifteen:'DDR4 for the BF2 control plane: 16 GB class. Packets bypass it; only the Arm cores use it.',
+  pro:'DDR4 vs DDR5: the gen-over-gen memory story. Control-plane memory — the fast path never touches DRAM.',
+  expert:'DDR4 suffices because the data plane bypasses DRAM. The memory is for the OS and control apps.'
+ },
+ 'e2100':{
+  eli5:'A huge 48 GB notebook glued next to the chip — the biggest memory of any DPU here.',
+  fifteen:'48 GB of soldered LPDDR4x: the E2100’s giant memory for virtualization and storage workloads.',
+  pro:'48 GB LPDDR4x: unusually large for a DPU — sized for Google’s virtualized infrastructure state (virtio, NVMe-oF).',
+  expert:'LPDDR4x trades bandwidth for capacity/power. 48 GB is the NVMe-oF/virtio state store — the Google co-design.'
+ },
+ 'elba':{
+  eli5:'Fast DDR5 notebooks holding the mail-sorters’ address books.',
+  fifteen:'Dual DDR5-5600: Elba’s memory for control plane and P4 match tables.',
+  pro:'DDR5-5600 × 2: table size is the P4 pipeline’s scaling knob. The MPUs cache hot entries from DRAM.',
+  expert:'Match-table capacity in DRAM; hot entries cached in the MPUs. DDR5-5600 keeps lookups fed.'
+ },
+ 'octeon10':{
+  eli5:'Fast DDR5 memory for the bosses and the AI helpers’ notes.',
+  fifteen:'DDR5: OCTEON 10’s control-plane and buffer memory on the 5 nm SoC.',
+  pro:'DDR5: control plane, packet buffers, AI working sets. Standard modern memory for a 5 nm SoC.',
+  expert:'The memory system is unremarkable by design — the differentiation is N2 + inline AI + switch.'
+ },
+},
+'package':{
+ 'granite':{
+  eli5:'A bigger metal hat and a bigger socket — 7,529 gold dots, because 500 watts needs serious power delivery.',
+  fifteen:'LGA-7529: 7,529 lands for the 500 W Granite Rapids package. Bigger socket, bigger IHS, bigger thermal problem.',
+  pro:'LGA-7529 vs SP5’s LGA-6096: the pin count buys power-delivery headroom for 500 W transients and 96 PCIe/CXL lanes.',
+  expert:'Socket scale follows power: 7529 contacts vs 6096. The PDN inductance at 500 W is the package design driver.'
+ },
+ 'm4max':{
+  eli5:'No socket at all — the chip is glued down with solder balls, memory stacked right next to it.',
+  fifteen:'Soldered BGA: no socket, no DIMMs. The M4 Max + LPDDR5X is one permanent assembly — the price of 546 GB/s unified bandwidth.',
+  pro:'BGA, not LGA: fixed configuration, compact, efficient. The unified-memory bandwidth is only possible because the DRAM sits next to the die.',
+  expert:'The package is the product: soldered LPDDR5X at 546 GB/s. No DIMM latency, no DIMM flexibility.'
+ },
+ 'ryzen':{
+  eli5:'A smaller socket: 1,718 gold dots for a 170-watt desktop chip.',
+  fifteen:'AM5 LGA-1718: the desktop socket. Fewer pins because 2 memory channels and fewer PCIe lanes need fewer signals.',
+  pro:'LGA-1718: socketed, so the CPU is upgradeable — unlike the soldered M4 Max. 170 W class.',
+  expert:'Pin count follows I/O: 1718 vs 6096. The desktop package needs a fraction of the power/ground pins.'
+ },
+ 'b200':{
+  eli5:'A giant board for a giant chip — feeding two brains and eight memory towers with a kilowatt of power. Too hot for fans — water flows through the metal top to carry away a kilowatt.',
+  fifteen:'B200 module: SXM-class mezzanine, ~1 kW of power delivery, liquid cooling. The module is a power system first. Direct-liquid cold plate: the ~1 kW module is liquid-cooled in NVL72 racks.',
+  pro:'SXM-class module: power blades for ~1 kW, NVLink 5 escape, direct-liquid cooling. The envelope defines the form factor. Cold-plate cooling for 1 kW: facility water removes heat air never could. The lid is a heat exchanger.',
+  expert:'1 kW-class module: the power/thermal envelope defines the package. NVL72 racks liquid-cool these directly. 1 kW demands DLC. The module lid interfaces to the rack manifold — cooling is facility infrastructure.'
+ },
+ 'h100-nvl':{
+  eli5:'Two normal-size cards that plug into regular server slots — no special 700 W board.',
+  fifteen:'Dual PCIe cards: each a standard FHFL PCIe card at 350–400 W, joined by NVLink bridges.',
+  pro:'PCIe form factor: fits standard servers without SXM baseboards. Deployability over SXM’s bandwidth and scale.',
+  expert:'The NVL tradeoff: standard PCIe packaging for deployability, at the cost of SXM’s bandwidth and NVSwitch scale.'
+ },
+ 'rtx4090':{
+  eli5:'A huge gaming card — three slots wide, plugs into your PC, with three spinning fans on a giant cooler. Loud, but it works for 450 watts.',
+  fifteen:'Triple-slot PCIe 4.0 card, 450 W via 16-pin, display outputs. Vapor chamber + 3 axial fans — the reason the card is 3 slots wide.',
+  pro:'Consumer card: PCIe 4.0 ×16, 450 W, 16-pin 12VHPWR. No interposer, air cooling — 1/10th the price class of H100. Acoustic cost included.',
+  expert:'The packaging cost story: organic substrate, no interposer, air cooling. 450 W on air is the acoustic/volume cost of consumer packaging — data-center parts use cold plates; this uses fans.'
+ },
+ 'mi300x':{
+  eli5:'AMD’s big flat server module — an open standard, not NVIDIA-only.',
+  fifteen:'OAM (OCP Accelerator Module): the open-compute 750 W form factor carrying the MI300X package.',
+  pro:'OAM 750 W: the open alternative to SXM. Standardized module for multi-vendor accelerator trays.',
+  expert:'OAM vs SXM: the form-factor war. OAM standardizes the 700 W-class module; SXM keeps it NVIDIA-only.'
+ },
+ 'bf2':{
+  eli5:'Two plug-in fiber doors — 200 gigabits each.',
+  fifteen:'2× QSFP56: BF2’s pluggable optics, 200G per cage.',
+  pro:'QSFP56 at 200G: PAM4 optics. Pluggable = the network team picks the fiber.',
+  expert:'The connector generation follows the SERDES: QSFP56 for 200G.'
+ },
+ 'e2100':{
+  eli5:'Two doors for fiber cables, 200 gigabits each.',
+  fifteen:'Dual 200G cages: the E2100’s pluggable network ports.',
+  pro:'2× 200G pluggable: standard optics for the 200G front end.',
+  expert:'Pluggable optics keep the IPU agnostic to fiber plant.'
+ },
+ 'elba':{
+  eli5:'Two fiber doors feeding the mail-sorter grid.',
+  fifteen:'Dual 200G cages: Elba’s pluggable ports, feeding the MPU array at line rate.',
+  pro:'2× 200G pluggable: the network edge of the P4 pipeline.',
+  expert:'Standard pluggables; the pipeline behind them is the product.'
+ },
+ 'octeon10':{
+  eli5:'The newest, biggest fiber doors — up to 400 gigabits.',
+  fifteen:'QSFP-DD: up to 400 GbE pluggable optics for the OCTEON 10.',
+  pro:'QSFP-DD at 400G: the current datacenter standard. 800G-capable connector for tomorrow.',
+  expert:'QSFP-DD doubles QSFP56’s density/speed. The forward path to 800G.'
+ },
+},
+'network':{
+ 'bf2':{
+  eli5:'The 200-gigabit mailroom door — half the speed of BlueField-3’s.',
+  fifteen:'ConnectX-6 Dx: 200 Gb/s with RDMA. One generation behind BlueField-3’s ConnectX-7.',
+  pro:'CX-6 Dx at 200G: the line rate defines the DPU’s ceiling. 200G vs 400G is the gen-over-gen story.',
+  expert:'200G PAM4; the SERDES generation sets the ceiling. BF2’s 200G was the cloud standard when it shipped.'
+ },
+ 'e2100':{
+  eli5:'Two 200-gigabit doors feeding the P4 mail-sorting machine.',
+  fifteen:'Dual 200 GbE MACs (E810-class): the E2100’s front end, feeding the P4 pipeline.',
+  pro:'2× 200G: packets land from the MACs straight into the P4 match-action pipeline. PSP/IPsec crypto inline.',
+  expert:'E810-derived MAC/PCS at 200G; the pipeline — not the MAC — is the differentiator.'
+ },
+ 'elba':{
+  eli5:'Two 200-gigabit doors feeding the giant grid of mail-sorters.',
+  fifteen:'Dual 200 GbE into the 144-MPU P4 pipeline at line rate.',
+  pro:'2× 200G into the MPU array. The MACs are commodity; the 144 programmable MPUs are the product.',
+  expert:'Full-duplex line rate; queue scale (16M) is the differentiator, not the MAC.'
+ },
+ 'octeon10':{
+  eli5:'A super-fast door plus a whole mail-sorting building inside — a switch built into the chip.',
+  fifteen:'Up to 400 GbE with an integrated 1-terabit switch: OCTEON 10 switches packets on-chip.',
+  pro:'Integrated 1T switch + 400G MACs: the DPU absorbs top-of-rack functions. Fewer boxes, same network.',
+  expert:'CN106’s integrated switch: the DPU becomes the network. 400G is the port speed; the fabric is the story.'
+ },
+},
+'accel':{
+ 'bf2':{
+  eli5:'The helpers are wired in place — fast, but they can’t learn new tricks.',
+  fifteen:'Fixed-function accelerators (crypto, regex, virtio) on BF2: fast, not reprogrammable like BF3’s DPA.',
+  pro:'Fixed-function offload: the BF2 model. BF3’s DPA made the data plane programmable; BF2’s engines are wired.',
+  expert:'Fixed vs programmable data plane: the architectural fork. Fixed wins perf/watt for known functions; programmable wins agility.'
+ },
+ 'e2100':{
+  eli5:'The mail-sorting machine reads its instructions from a special book — and you can rewrite the book.',
+  fifteen:'P4-programmable pipeline: the E2100’s data plane is defined in P4, recompiled for new protocols.',
+  pro:'P4 match-action pipeline: the protocol is software. New headers, new actions — recompile, don’t respin silicon.',
+  expert:'P4 as the data-plane ISA: the IPU’s bet. 32 MB SLC holds the tables; the pipeline is the program.'
+ },
+ 'elba':{
+  eli5:'144 mail-sorters in a grid, all following your rewritten rulebook.',
+  fifteen:'144 P4 MPUs in a grid: Elba’s massively parallel programmable pipeline — the most MPUs of any DPU here.',
+  pro:'144 MPUs: Elba scales programmability by count. 2K VNICs and 16M queues behind a P4 program.',
+  expert:'MPU count as the scaling knob: Elba’s answer to fixed-function engines. Throughput scales with MPUs, not clocks.'
+ },
+ 'octeon10':{
+  eli5:'The helpers do AI right in the mail line — spotting bad mail as it flies past.',
+  fifteen:'Inline AI in the data path: OCTEON 10 runs ML inference on packets at line rate, not in a side room.',
+  pro:'Inline (not lookaside) AI: inference on packets at line rate. Tile-scalable from 5G base stations to 400G cloud.',
+  expert:'AI in the data path vs lookaside: the latency math changes when inference rides the packet pipeline.'
+ },
+},
+};
+/* how/why for the selected variant, falling back to the base DIFFS entry */
+function vHow(cls, level, chip){
+  var base = (DIFF[cls] && DIFF[cls][level] && DIFF[cls][level][chip]) || {how:'',why:''};
+  var v = selVariant(chip);
+  var o = (VDIFF[cls] && VDIFF[cls][v] && VDIFF[cls][v][level]) || null;
+  if (!o) return base;
+  return {how:o, why:base.why};
+}
 
 /* ================= component-diff dataset =================
    per class: per level: {what, cpu:{how,why}, gpu:{how,why}, dpu:{how,why}}
@@ -746,7 +1962,7 @@ var currentPart = null, diffClass = null, labelsOn = true;
 function renderPin(){
   var pin = document.getElementById('pin');
   if (!currentPart || !PARTS[currentPart]) { pin.classList.remove('show'); return; }
-  var p = PARTS[currentPart];
+  var p = P(currentPart);
   var tags = '<span class="tag '+p.chip+'">'+CHIP_OF[p.chip]+'</span>' +
     p.cls.map(function(c){ return '<span class="tag cls">'+CLS_NAME[c]+'</span>'; }).join('');
   document.getElementById('pin-tags').innerHTML = tags;
@@ -764,7 +1980,7 @@ function renderDiff(){
   document.getElementById('diff-title').textContent = DIFF[diffClass].title;
   document.getElementById('diff-what').textContent = d.what;
   ['cpu','gpu','dpu'].forEach(function(ch){
-    var el = document.getElementById('diff-'+ch), c = d[ch], html = '';
+    var el = document.getElementById('diff-'+ch), c = vHow(diffClass, LEVEL, ch), html = '';
     if (c.absent) {
       html = '<div class="absent"><b>— absent on this die.</b><br>'+c.why+'</div>';
     } else {
@@ -871,101 +2087,290 @@ document.getElementById('label-toggle').addEventListener('click', function(){
     return false;
   }
 
-  /* ---------------- CPU ---------------- */
-  (function(){
+  /* ---------------- CPU (per-variant dynamic builder) ---------------- */
+  function buildCPU(v){
+    v = v || 'genoa';
     var g = chipBase('cpu');
+    var L = function(pid, obj, off){ addLabel(pid, obj, P(pid).name, off || {x:0,y:0.6,z:0}, 'cpu'); };
     var mPad = mat(0xc9a227,{rough:0.35,metal:0.8});
-    var pads = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.05,0.05,0.07,6), mPad, 76*40);
-    var d = new THREE.Object3D(), i = 0;
-    for (var r=0;r<40;r++) for (var c=0;c<76;c++){
-      d.position.set(-2.2+c*0.059, 0.035, -1.18+r*0.06); d.updateMatrix();
-      pads.setMatrixAt(i++, d.matrix);
+    var subW = 5.2;
+    /* pads: pin count follows the socket */
+    function padsGrid(cols, rows, sx, sz, ox, oz, ball){
+      var geo = ball ? new THREE.SphereGeometry(0.055,8,8)
+                     : new THREE.CylinderGeometry(0.05,0.05,0.07,6);
+      var p = new THREE.InstancedMesh(geo, mPad, cols*rows);
+      var d = new THREE.Object3D(), i = 0;
+      for (var r=0;r<rows;r++) for (var c=0;c<cols;c++){
+        d.position.set(ox+c*sx, 0.035, oz+r*sz); d.updateMatrix();
+        p.setMatrixAt(i++, d.matrix);
+      }
+      p.instanceMatrix.needsUpdate = true;
+      g.add(reg(p, 'cpu-pads', 0, 0));
+      return p;
     }
-    pads.instanceMatrix.needsUpdate = true;
-    g.add(reg(pads, 'cpu-pads', 0, 0));
-    var sub = box(5.2,0.35,5.2, mat(0x1e4d2e,{rough:0.75}));
+    var pads;
+    if (v==='granite') { subW = 7.2; pads = padsGrid(82,44, 0.059,0.06, -2.4,-1.3); }
+    else if (v==='ryzen') { subW = 3.4; pads = padsGrid(42,30, 0.07,0.07, -1.45,-1.05); }
+    else if (v==='m4max') { subW = 3.2; pads = padsGrid(30,20, 0.09,0.09, -1.35,-0.9, true); }
+    else { pads = padsGrid(76,40, 0.059,0.06, -2.2,-1.18); }
+    var sub = box(subW,0.35,subW, mat(0x1e4d2e,{rough:0.75}));
     g.add(reg(sub, 'cpu-substrate', 0.42, 1.0));
     var dies = new THREE.Group();
-    var iod = box(2.0,0.22,2.0, mat(0x6b6f75,{rough:0.5})); iod.userData.part='cpu-iod'; dies.add(iod);
+    var firstCcd = null, iodMesh = null, vcGroup = null;
     var ccdM = mat(0xe08a4c,{rough:0.45, emiss:0x3a1c08, ei:0.6});
     var ccdG = new THREE.BoxGeometry(0.95,0.24,0.95);
-    var spots=[[-1.78,-1.78],[-0.6,-1.78],[0.6,-1.78],[1.78,-1.78],
-               [-1.78,1.78],[-0.6,1.78],[0.6,1.78],[1.78,1.78],
-               [-1.78,-0.58],[1.78,-0.58],[-1.78,0.58],[1.78,0.58]];
-    var firstCcd = null;
-    spots.forEach(function(s){
-      var m = new THREE.Mesh(ccdG, ccdM); m.position.set(s[0],0,s[1]);
-      m.userData.part='ccd'; dies.add(m); if(!firstCcd) firstCcd=m;
-    });
-    firstCcd.userData.part='cpu-ccd';
-    dies.traverse(function(m){ if(m.isMesh && m.userData.part==='ccd') m.userData.part='cpu-ccd'; });
+    function ccdAt(x, z, part){
+      var m = new THREE.Mesh(ccdG, ccdM); m.position.set(x,0,z);
+      m.userData.part = part || 'cpu-ccd'; dies.add(m);
+      if (!firstCcd && (part||'cpu-ccd')==='cpu-ccd') firstCcd = m;
+      return m;
+    }
+    if (v==='genoa' || v==='genoa-x' || v==='bergamo'){
+      iodMesh = box(2.0,0.22,2.0, mat(0x6b6f75,{rough:0.5}));
+      iodMesh.userData.part='cpu-iod'; dies.add(iodMesh);
+      var spots = (v==='bergamo') ? CPU_SPOTS8 : CPU_SPOTS12;
+      spots.forEach(function(s){ ccdAt(s[0], s[1]); });
+      if (v==='genoa-x'){
+        /* showcase: 12 V-Cache tiers as their own layer, rising above the CCDs */
+        vcGroup = new THREE.Group();
+        var vcM = mat(0xf0b429,{rough:0.35, emiss:0x4a2f08, ei:0.9});
+        var vcG = new THREE.BoxGeometry(0.8,0.3,0.8);
+        spots.forEach(function(s){
+          var m = new THREE.Mesh(vcG, vcM); m.position.set(s[0],0.27,s[1]);
+          m.userData.part='cpu-vcache'; vcGroup.add(m);
+        });
+      }
+    } else if (v==='granite'){
+      /* 3 compute tiles + 2 SoC tiles, EMIB bridges beneath */
+      var emibM = mat(0x8a6f3a,{rough:0.4,metal:0.7});
+      [[-0.7,0],[0.95,0]].forEach(function(p){
+        var e = box(0.5,0.1,2.9, emibM); e.position.set(p[0],-0.06,p[1]);
+        e.userData.part='cpu-emib'; dies.add(e);
+      });
+      var ctM = mat(0xd86a3a,{rough:0.45, emiss:0x3a1c08, ei:0.6});
+      var stM = mat(0x8a7a5a,{rough:0.5});
+      [['cpu-soctile',-2.85,0.95,stM],['cpu-ctile',-1.55,1.55,ctM],
+       ['cpu-ctile',0.15,1.55,ctM],['cpu-ctile',1.85,1.55,ctM],
+       ['cpu-soctile',2.85,0.95,stM]].forEach(function(t){
+        var m = new THREE.Mesh(new THREE.BoxGeometry(t[2],0.26,2.9), t[3]);
+        m.position.set(t[1],0,0); m.userData.part=t[0]; dies.add(m);
+        if (t[0]==='cpu-ctile' && !firstCcd) firstCcd = m;
+        if (t[0]==='cpu-soctile' && !iodMesh) iodMesh = m;
+      });
+    } else if (v==='ryzen'){
+      iodMesh = box(1.4,0.22,1.4, mat(0x6b6f75,{rough:0.5}));
+      iodMesh.userData.part='cpu-iod'; dies.add(iodMesh);
+      ccdAt(-1.05, 0); ccdAt(1.05, 0);
+    } else if (v==='m4max'){
+      /* monolithic SoC die + unified LPDDR5X beside it */
+      var socM = mat(0x9e7bc0,{rough:0.4, emiss:0x2a1a3a, ei:0.7});
+      var soc = new THREE.Mesh(new THREE.BoxGeometry(2.2,0.26,2.2), socM);
+      soc.position.set(-0.35,0,0); soc.userData.part='cpu-soc'; dies.add(soc);
+      firstCcd = soc;
+      var umM = mat(0xc8a86a,{rough:0.5});
+      var um = new THREE.Mesh(new THREE.BoxGeometry(1.1,0.3,2.2), umM);
+      um.position.set(1.35,0.02,0); um.userData.part='cpu-umem'; dies.add(um);
+      iodMesh = um;
+    }
     g.add(reg(dies, null, 0.8, 2.3));
-    var tim = box(5.2,0.08,5.2, mat(0x8a8f96,{rough:0.4,metal:0.6,opacity:0.5}));
+    if (vcGroup) g.add(reg(vcGroup, 'cpu-vcache', 0.8, 3.4));
+    var tim = box(subW,0.08,subW, mat(0x8a8f96,{rough:0.4,metal:0.6,opacity:0.5}));
     g.add(reg(tim, 'cpu-tim', 1.12, 3.4));
-    var ihs = box(5.5,0.6,5.5, mat(0x9aa0a6,{rough:0.3,metal:0.9}));
+    var ihs = box(subW+0.3,0.6,subW+0.3, mat(0x9aa0a6,{rough:0.3,metal:0.9}));
     g.add(reg(ihs, 'cpu-ihs', 1.62, 4.9));
-    addLabel('cpu-ihs', ihs, 'Heat spreader', {x:0,y:0.75,z:0}, 'cpu');
-    addLabel('cpu-ccd', firstCcd, '12× CCD · 8 Zen 4 + 32 MB L3 each', {x:0,y:0.6,z:0}, 'cpu');
-    addLabel('cpu-iod', iod, 'sIOD · DDR5 + PCIe + Infinity Fabric', {x:0,y:0.55,z:0}, 'cpu');
-    addLabel('cpu-substrate', sub, 'Package substrate', {x:2.2,y:0.5,z:0}, 'cpu');
-    addLabel('cpu-pads', pads, 'LGA-6096', {x:-2.2,y:0.35,z:0}, 'cpu');
-  })();
+    L('cpu-ihs', ihs, {x:0,y:0.75,z:0});
+    if (vcGroup) L('cpu-vcache', vcGroup.children[0], {x:0,y:0.6,z:0});
+    if (firstCcd) L(firstCcd.userData.part, firstCcd);
+    if (iodMesh && iodMesh !== firstCcd) L(iodMesh.userData.part, iodMesh);
+    L('cpu-substrate', sub, {x:subW/2-0.6,y:0.5,z:0});
+    L('cpu-pads', pads, {x:-(subW/2-0.6),y:0.35,z:0});
+  }
 
-  /* ---------------- GPU ---------------- */
-  (function(){
+  /* ---------------- GPU (per-variant dynamic builder) ---------------- */
+  function buildGPU(v){
+    v = v || 'h100-sxm';
     var g = chipBase('gpu');
-    var mPad = mat(0xc9a227,{rough:0.35,metal:0.7});
-    var pads = new THREE.InstancedMesh(new THREE.BoxGeometry(0.14,0.06,0.1), mPad, 60*8);
-    var d = new THREE.Object3D(), i = 0;
-    for (var r=0;r<8;r++) for (var c=0;c<60;c++){
-      d.position.set(-4.2+c*0.143, 0.03, -2.9+r*0.16); d.updateMatrix();
-      pads.setMatrixAt(i++, d.matrix);
-    }
-    pads.instanceMatrix.needsUpdate = true;
-    g.add(reg(pads, 'gpu-pads', 0, 0));
-    var pcbG = new THREE.Group();
-    var board = box(9.5,0.2,6.5, mat(0x14261a,{rough:0.8})); board.userData.part='gpu-pcb'; pcbG.add(board);
-    var nv = box(9.5,0.12,0.8, mat(0xc9a227,{rough:0.35,metal:0.7}));
-    nv.position.set(0,0.08,-2.85); nv.userData.part='gpu-nvlink'; pcbG.add(nv);
-    g.add(reg(pcbG, null, 0.25, 0.15));
-    var inter = box(7,0.18,5, mat(0x2a2f36,{rough:0.4,metal:0.3}));
-    g.add(reg(inter, 'gpu-interposer', 0.6, 1.25));
-    var core = new THREE.Group();
+    var L = function(pid, obj, off){ addLabel(pid, obj, P(pid).name, off || {x:0,y:0.6,z:0}, 'gpu'); };
     var gpcM = mat(0x1f7a74,{rough:0.35, emiss:0x0d3a37, ei:0.8});
-    var gpcG = new THREE.BoxGeometry(1.55,0.3,1.55);
-    var firstGpc = null;
-    for (var gr=0;gr<2;gr++) for (var gc=0;gc<4;gc++){
-      var m = new THREE.Mesh(gpcG, gpcM);
-      m.position.set(-1.32+gc*0.88, 0, -0.85+gr*1.7);
-      m.userData.part='gpu-gpc'; core.add(m); if(!firstGpc) firstGpc=m;
-    }
-    var l2 = box(3.6,0.28,0.55, mat(0x3fa39a,{rough:0.4, emiss:0x0d3a37, ei:0.8}));
-    l2.position.set(0,0,2.0); l2.userData.part='gpu-l2'; core.add(l2);
     var hbmM = mat(0xc8a86a,{rough:0.5});
     var hbmG = new THREE.BoxGeometry(1.15,0.42,2.1);
-    var firstHbm = null, hbmCount = 0;
-    [-2.62,2.62].forEach(function(x){
-      [-1.45,0,1.45].forEach(function(z){
+    function hbmRow(parent, xs, zs, part){
+      var first = null;
+      xs.forEach(function(x){ zs.forEach(function(z){
         var h = new THREE.Mesh(hbmG, hbmM); h.position.set(x,0.03,z);
-        h.userData.part='gpu-hbm'; core.add(h);
-        if(!firstHbm) firstHbm=h; hbmCount++;
+        h.userData.part = part || 'gpu-hbm'; parent.add(h);
+        if (!first) first = h;
+      });});
+      return first;
+    }
+    function gpcGrid(parent, cx, cz, cols, rows, part){
+      var first = null;
+      var gg = new THREE.BoxGeometry(1.55,0.3,1.55);
+      for (var gr=0;gr<rows;gr++) for (var gc=0;gc<cols;gc++){
+        var m = new THREE.Mesh(gg, gpcM);
+        m.position.set(cx-(cols-1)*0.44+gc*0.88, 0, cz-(rows-1)*0.85+gr*1.7);
+        m.userData.part = part || 'gpu-gpc'; parent.add(m);
+        if (!first) first = m;
+      }
+      return first;
+    }
+    if (v==='h100-sxm' || v==='b200'){
+      /* ---- SXM-class module ---- */
+      var mPad = mat(0xc9a227,{rough:0.35,metal:0.7});
+      var pads = new THREE.InstancedMesh(new THREE.BoxGeometry(0.14,0.06,0.1), mPad, 60*8);
+      var d = new THREE.Object3D(), i = 0;
+      for (var r=0;r<8;r++) for (var c=0;c<60;c++){
+        d.position.set(-4.2+c*0.143, 0.03, -2.9+r*0.16); d.updateMatrix();
+        pads.setMatrixAt(i++, d.matrix);
+      }
+      pads.instanceMatrix.needsUpdate = true;
+      g.add(reg(pads, 'gpu-pads', 0, 0));
+      var pcbG = new THREE.Group();
+      var bw = (v==='b200') ? 11.5 : 9.5;
+      var board = box(bw,0.2,6.5, mat(0x14261a,{rough:0.8})); board.userData.part='gpu-pcb'; pcbG.add(board);
+      var nv = box(bw,0.12,0.8, mat(0xc9a227,{rough:0.35,metal:0.7}));
+      nv.position.set(0,0.08,-2.85); nv.userData.part='gpu-nvlink'; pcbG.add(nv);
+      g.add(reg(pcbG, null, 0.25, 0.15));
+      var inter = box(v==='b200'?9:7, 0.18, 5, mat(0x2a2f36,{rough:0.4,metal:0.3}));
+      g.add(reg(inter, 'gpu-interposer', 0.6, 1.25));
+      var core = new THREE.Group();
+      var firstGpc, firstHbm, l2;
+      if (v==='h100-sxm'){
+        firstGpc = gpcGrid(core, 0, -0.4, 4, 2, 'gpu-gpc');
+        l2 = box(3.6,0.28,0.55, mat(0x3fa39a,{rough:0.4, emiss:0x0d3a37, ei:0.8}));
+        l2.position.set(0,0,2.0); l2.userData.part='gpu-l2'; core.add(l2);
+        firstHbm = hbmRow(core, [-2.62,2.62], [-1.45,0,1.45]);
+      } else {
+        /* B200: two Blackwell dies, NV-HBI between, 8 HBM3E */
+        firstGpc = gpcGrid(core, -2.3, -0.4, 4, 2, 'gpu-gpc');
+        gpcGrid(core, 2.3, -0.4, 4, 2, 'gpu-gpc');
+        var nvhbi = box(0.5,0.2,3.6, mat(0xd8b24a,{rough:0.3,metal:0.8, emiss:0x4a2f08, ei:0.8}));
+        nvhbi.position.set(0,0,-0.4); nvhbi.userData.part='gpu-nvhbi'; core.add(nvhbi);
+        l2 = box(8.2,0.28,0.55, mat(0x3fa39a,{rough:0.4, emiss:0x0d3a37, ei:0.8}));
+        l2.position.set(0,0,2.0); l2.userData.part='gpu-l2'; core.add(l2);
+        firstHbm = hbmRow(core, [-4.6,-2.95,2.95,4.6], [-1.45,1.45]);
+      }
+      g.add(reg(core, null, 0.95, 2.5));
+      var lid = box(bw-2.2,0.35,5.3, mat(0xb07b4f,{rough:0.35,metal:0.85}));
+      g.add(reg(lid, 'gpu-lid', 1.42, 4.3));
+      L('gpu-lid', lid);
+      L('gpu-gpc', firstGpc);
+      L('gpu-l2', l2);
+      L('gpu-hbm', firstHbm);
+      L('gpu-interposer', inter, {x:(bw/2)-0.6,y:0.45,z:0});
+      L('gpu-nvlink', nv, {x:-(bw/2)+1.1,y:0.45,z:0});
+      L('gpu-pcb', board, {x:(bw/2)-1.3,y:0.4,z:1.6});
+      if (v==='b200'){
+        var nvhbiMesh = null;
+        core.traverse(function(m){ if (m.isMesh && m.userData.part==='gpu-nvhbi') nvhbiMesh = m; });
+        if (nvhbiMesh) L('gpu-nvhbi', nvhbiMesh);
+      }
+    } else if (v==='h100-nvl'){
+      /* ---- twin PCIe cards + 3 NVLink bridges ---- */
+      var cardX = [-3.4, 3.4], firstGpc2 = null, firstHbm2 = null;
+      var cardsG = new THREE.Group();
+      cardX.forEach(function(cx){
+        var card = new THREE.Group(); card.position.set(cx,0,0);
+        var bd = box(5.6,0.18,4.6, mat(0x14261a,{rough:0.8})); bd.userData.part='gpu-pcb'; card.add(bd);
+        var die = new THREE.Group(); die.position.set(0,0.2,0);
+        var f = gpcGrid(die, 0, -0.6, 2, 2, 'gpu-gpc'); if (!firstGpc2) firstGpc2 = f;
+        var fh = hbmRow(die, [-1.9,1.9], [-1.5,1.5]); if (!firstHbm2) firstHbm2 = fh;
+        card.add(die);
+        var l2b = box(2.4,0.26,0.5, mat(0x3fa39a,{rough:0.4, emiss:0x0d3a37, ei:0.8}));
+        l2b.position.set(0,0.2,1.9); l2b.userData.part='gpu-l2'; card.add(l2b);
+        cardsG.add(card);
       });
-    });
-    g.add(reg(core, null, 0.95, 2.5));
-    var lid = box(7.3,0.35,5.3, mat(0xb07b4f,{rough:0.35,metal:0.85}));
-    g.add(reg(lid, 'gpu-lid', 1.42, 4.3));
-    addLabel('gpu-lid', lid, 'Vapor-chamber lid', {x:0,y:0.6,z:0}, 'gpu');
-    addLabel('gpu-gpc', firstGpc, 'GH100 · 144 SMs on die', {x:0,y:0.55,z:0}, 'gpu');
-    addLabel('gpu-l2', l2, '50 MB L2', {x:0,y:0.5,z:0}, 'gpu');
-    addLabel('gpu-hbm', firstHbm, '5× HBM3 active (6 on pkg)', {x:0,y:0.6,z:0}, 'gpu');
-    addLabel('gpu-interposer', inter, 'CoWoS interposer', {x:2.9,y:0.45,z:0}, 'gpu');
-    addLabel('gpu-nvlink', nv, 'NVLink · 900 GB/s', {x:-3.4,y:0.45,z:0}, 'gpu');
-    addLabel('gpu-pcb', board, 'SXM5 board', {x:3.6,y:0.4,z:1.6}, 'gpu');
-  })();
+      g.add(reg(cardsG, null, 0.3, 1.2));
+      var brG = new THREE.Group();
+      var firstBr = null;
+      [-1.4,0,1.4].forEach(function(z){
+        var br = box(9.6,0.22,0.5, mat(0xc9a227,{rough:0.35,metal:0.7}));
+        br.position.set(0,0.75,z); br.userData.part='gpu-nvlink'; brG.add(br);
+        if (!firstBr) firstBr = br;
+      });
+      g.add(reg(brG, 'gpu-nvlink', 0.75, 2.6));
+      L('gpu-nvlink', firstBr, {x:0,y:0.5,z:0});
+      L('gpu-gpc', firstGpc2);
+      L('gpu-hbm', firstHbm2);
+    } else if (v==='rtx4090'){
+      /* ---- consumer card: monolithic die + GDDR6X ring + cooler ---- */
+      var pcb2 = box(9.5,0.18,4.2, mat(0x14261a,{rough:0.8})); pcb2.userData.part='gpu-pcb';
+      g.add(reg(pcb2, 'gpu-pcb', 0.2, 0.6));
+      var dieG = new THREE.Group();
+      var die2 = box(2.4,0.3,2.4, gpcM); die2.userData.part='gpu-gpc'; dieG.add(die2);
+      var gddrM = mat(0x8a8f96,{rough:0.5});
+      var firstGd = null;
+      for (var gi=0; gi<12; gi++){
+        var gx = -3.3+(gi%6)*1.05;
+        var gz = (gi<6) ? -1.85 : 1.85;
+        var gd = box(0.8,0.22,0.7, gddrM); gd.position.set(gx,0,gz);
+        gd.userData.part='gpu-gddr'; dieG.add(gd); if (!firstGd) firstGd = gd;
+      }
+      var l2c = box(2.4,0.26,0.5, mat(0x3fa39a,{rough:0.4, emiss:0x0d3a37, ei:0.8}));
+      l2c.position.set(0,0,1.85); l2c.userData.part='gpu-l2'; dieG.add(l2c);
+      g.add(reg(dieG, null, 0.55, 1.8));
+      var cool = new THREE.Group();
+      var shroud = box(9.5,0.5,4.4, mat(0x2a2d33,{rough:0.6})); cool.add(shroud);
+      var fanM = mat(0x4a4d52,{rough:0.5,metal:0.4});
+      [-3,0,3].forEach(function(fx){
+        var fan = new THREE.Mesh(new THREE.CylinderGeometry(1.0,1.0,0.3,24), fanM);
+        fan.position.set(fx,0.3,0); fan.userData.part='gpu-lid'; cool.add(fan);
+      });
+      g.add(reg(cool, 'gpu-lid', 1.2, 3.2));
+      L('gpu-lid', shroud, {x:0,y:0.7,z:0});
+      L('gpu-gpc', die2);
+      L('gpu-gddr', firstGd);
+      L('gpu-l2', l2c);
+      L('gpu-pcb', pcb2, {x:3.6,y:0.4,z:1.2});
+    } else if (v==='mi300x'){
+      /* ---- chiplet GPU: 8 XCD + 4 IOD + 8 HBM ---- */
+      var mPad2 = mat(0xc9a227,{rough:0.35,metal:0.7});
+      var pads2 = new THREE.InstancedMesh(new THREE.BoxGeometry(0.14,0.06,0.1), mPad2, 60*8);
+      var d2 = new THREE.Object3D(), i2 = 0;
+      for (var r2=0;r2<8;r2++) for (var c2=0;c2<60;c2++){
+        d2.position.set(-4.2+c2*0.143, 0.03, -2.9+r2*0.16); d2.updateMatrix();
+        pads2.setMatrixAt(i2++, d2.matrix);
+      }
+      pads2.instanceMatrix.needsUpdate = true;
+      g.add(reg(pads2, 'gpu-pads', 0, 0));
+      var oam = box(10.5,0.2,6.5, mat(0x1a2233,{rough:0.8})); oam.userData.part='gpu-pcb';
+      g.add(reg(oam, 'gpu-pcb', 0.25, 0.5));
+      var inter2 = box(8.5,0.18,5.2, mat(0x2a2f36,{rough:0.4,metal:0.3}));
+      g.add(reg(inter2, 'gpu-interposer', 0.6, 1.25));
+      var core2 = new THREE.Group();
+      var xcdM = mat(0x1f7a74,{rough:0.35, emiss:0x0d3a37, ei:0.8});
+      var xcdG = new THREE.BoxGeometry(1.15,0.3,1.15);
+      var firstX = null;
+      for (var xr=0;xr<2;xr++) for (var xc=0;xc<4;xc++){
+        var xm = new THREE.Mesh(xcdG, xcdM);
+        xm.position.set(-2.4+xc*1.6, 0, xr===0?-1.5:1.5);
+        xm.userData.part='gpu-xcd'; core2.add(xm); if (!firstX) firstX = xm;
+      }
+      var iodM = mat(0x6b6f75,{rough:0.5});
+      var firstI = null;
+      for (var ic=0;ic<4;ic++){
+        var im = box(1.1,0.28,1.6, iodM); im.position.set(-2.4+ic*1.6,0,0);
+        im.userData.part='gpu-iod2'; core2.add(im); if (!firstI) firstI = im;
+      }
+      var firstH2 = hbmRow(core2, [-3.9,-2.5,2.5,3.9], [-1.6,1.6]);
+      g.add(reg(core2, null, 0.95, 2.5));
+      var lid2 = box(8.8,0.35,5.5, mat(0xb07b4f,{rough:0.35,metal:0.85}));
+      g.add(reg(lid2, 'gpu-lid', 1.42, 4.3));
+      L('gpu-lid', lid2);
+      L('gpu-xcd', firstX);
+      L('gpu-iod2', firstI);
+      L('gpu-hbm', firstH2);
+      L('gpu-interposer', inter2, {x:3.6,y:0.45,z:0});
+      L('gpu-pcb', oam, {x:4.2,y:0.4,z:1.6});
+    }
+  }
 
-  /* ---------------- DPU ---------------- */
-  (function(){
+
+  /* ---------------- DPU (per-variant dynamic builder) ---------------- */
+  function buildDPU(v){
+    v = v || 'bf3';
     var g = chipBase('dpu');
+    var L = function(pid, obj, off){ addLabel(pid, obj, P(pid).name, off || {x:0,y:0.55,z:0}, 'dpu'); };
     var mBall = mat(0xb9bdc4,{rough:0.3,metal:0.9});
     var bga = new THREE.InstancedMesh(new THREE.SphereGeometry(0.055,8,8), mBall, 26*18);
     var d = new THREE.Object3D(), i = 0;
@@ -990,15 +2395,55 @@ document.getElementById('label-toggle').addEventListener('click', function(){
       b.position.set(x,0,z); b.userData.part=partId; soc.add(b); return b;
     }
     var xs=[-1.12,-0.37,0.37,1.12], firsts={};
-    xs.forEach(function(x){ firsts['dpu-cores'] = blk('dpu-cores', x, 0.78, 0.68,0.68, 0x3d5f9e) || firsts['dpu-cores']; });
-    firsts['dpu-cache']=blk('dpu-cache', xs[0], 0, 0.68,0.68, 0x5b7bc0);
-    firsts['dpu-dpa']=blk('dpu-dpa', xs[1], 0, 0.68,0.68, 0x4663a8);
-    firsts['dpu-crypto']=blk('dpu-crypto', xs[2], 0, 0.68,0.68, 0x7a5fa8);
-    firsts['dpu-regex']=blk('dpu-regex', xs[3], 0, 0.68,0.68, 0x8a6fb0);
-    firsts['dpu-net']=blk('dpu-net', -0.745, -0.78, 1.43,0.68, 0x2f8f83);
-    firsts['dpu-nvme']=blk('dpu-nvme', xs[2], -0.78, 0.68,0.68, 0x9a7a4a);
-    firsts['dpu-pcie']=blk('dpu-pcie', xs[3], -0.78, 0.68,0.68, 0x4a7a9a);
-    firsts['dpu-dram']=blk('dpu-dram', 0, -1.32, 3.0,0.32, 0xc8a86a);
+    function first(partId, mesh){ if (!firsts[partId]) firsts[partId] = mesh; }
+    if (v==='bf3' || v==='bf2'){
+      var nCore = (v==='bf3') ? 4 : 2;
+      for (var ci=0; ci<nCore; ci++) first('dpu-cores', blk('dpu-cores', xs[ci], 0.78, 0.68,0.68, 0x3d5f9e));
+      first('dpu-cache', blk('dpu-cache', xs[0], 0, 0.68,0.68, 0x5b7bc0));
+      if (v==='bf3') first('dpu-dpa', blk('dpu-dpa', xs[1], 0, 0.68,0.68, 0x4663a8));
+      first('dpu-crypto', blk('dpu-crypto', xs[2], 0, 0.68,0.68, 0x7a5fa8));
+      first('dpu-regex', blk('dpu-regex', xs[3], 0, 0.68,0.68, 0x8a6fb0));
+      first('dpu-net', blk('dpu-net', -0.745, -0.78, 1.43,0.68, 0x2f8f83));
+      first('dpu-nvme', blk('dpu-nvme', xs[2], -0.78, 0.68,0.68, 0x9a7a4a));
+      first('dpu-pcie', blk('dpu-pcie', xs[3], -0.78, 0.68,0.68, 0x4a7a9a));
+      first('dpu-dram', blk('dpu-dram', 0, -1.32, 3.0,0.32, 0xc8a86a));
+    } else if (v==='e2100'){
+      /* Intel IPU E2100: N1 complex + P4 pipeline + 48 GB LPDDR4x */
+      first('dpu-cores', blk('dpu-cores', -1.12, 0.78, 1.43,0.68, 0x3d5f9e));
+      blk('dpu-cores', 0.37, 0.78, 1.43,0.68, 0x3d5f9e);
+      first('dpu-p4', blk('dpu-p4', 0, 0, 2.93,0.68, 0x4663a8));
+      first('dpu-net', blk('dpu-net', -1.12, -0.78, 1.43,0.68, 0x2f8f83));
+      first('dpu-crypto', blk('dpu-crypto', 0.37, -0.78, 1.43,0.68, 0x7a5fa8));
+      first('dpu-pcie', blk('dpu-pcie', 1.12, -0.4, 0.68,1.44, 0x4a7a9a));
+      first('dpu-dram', blk('dpu-dram', 0, -1.32, 3.0,0.32, 0xc8a86a));
+    } else if (v==='elba'){
+      /* Pensando Elba: A72 complex + 144-MPU P4 grid */
+      first('dpu-cores', blk('dpu-cores', -1.5, 0.9, 1.1,0.68, 0x3d5f9e));
+      blk('dpu-cores', -0.35, 0.9, 1.1,0.68, 0x3d5f9e);
+      first('dpu-net', blk('dpu-net', 1.35, 0.9, 1.1,0.68, 0x2f8f83));
+      /* 12×12 MPU grid */
+      var mpuM = mat(0x4663a8,{rough:0.4, emiss:0x101828, ei:0.9});
+      var mpuG = new THREE.BoxGeometry(0.16,0.3,0.16);
+      var mpus = new THREE.InstancedMesh(mpuG, mpuM, 144);
+      var md = new THREE.Object3D(), mi = 0;
+      for (var mr=0;mr<12;mr++) for (var mc=0;mc<12;mc++){
+        md.position.set(-1.55+mc*0.21, 0, -0.35+mr*0.16); md.updateMatrix();
+        mpus.setMatrixAt(mi++, md.matrix);
+      }
+      mpus.instanceMatrix.needsUpdate = true;
+      mpus.userData.part = 'dpu-mpu'; soc.add(mpus);
+      first('dpu-mpu', mpus);
+      first('dpu-pcie', blk('dpu-pcie', 1.35, -0.5, 1.1,0.68, 0x4a7a9a));
+      first('dpu-dram', blk('dpu-dram', 0, -1.32, 3.0,0.32, 0xc8a86a));
+    } else if (v==='octeon10'){
+      /* Marvell OCTEON 10: N2 complex + inline AI + 400G switch */
+      first('dpu-cores', blk('dpu-cores', -1.12, 0.78, 1.43,0.68, 0x3d5f9e));
+      blk('dpu-cores', 0.37, 0.78, 1.43,0.68, 0x3d5f9e);
+      first('dpu-ai', blk('dpu-ai', 0, 0, 2.93,0.68, 0x9a5fb0));
+      first('dpu-net', blk('dpu-net', -1.12, -0.78, 2.18,0.68, 0x2f8f83));
+      first('dpu-pcie', blk('dpu-pcie', 1.12, -0.78, 0.68,0.68, 0x4a7a9a));
+      first('dpu-dram', blk('dpu-dram', 0, -1.32, 3.0,0.32, 0xc8a86a));
+    }
     g.add(reg(soc, null, 0.85, 2.0));
     var hsG = new THREE.Group();
     var base = box(3.4,0.3,3.4, mat(0x3a3d42,{rough:0.6,metal:0.5})); hsG.add(base);
@@ -1007,19 +2452,137 @@ document.getElementById('label-toggle').addEventListener('click', function(){
       var fin = box(3.4,0.7,0.16, finM); fin.position.set(0,0.5,-1.25+f*0.5); hsG.add(fin);
     }
     g.add(reg(hsG, 'dpu-hs', 1.45, 3.5));
-    addLabel('dpu-hs', base, 'Finned heatsink', {x:0,y:1.15,z:0}, 'dpu');
-    addLabel('dpu-cores', firsts['dpu-cores'], '16× Arm A78', {x:0,y:0.55,z:0}, 'dpu');
-    addLabel('dpu-dpa', firsts['dpu-dpa'], '16 DPA cores', {x:0,y:0.55,z:0}, 'dpu');
-    addLabel('dpu-net', firsts['dpu-net'], 'ConnectX-7 · 400G', {x:0,y:0.55,z:0}, 'dpu');
-    addLabel('dpu-crypto', firsts['dpu-crypto'], 'Inline crypto', {x:0,y:0.55,z:0}, 'dpu');
-    addLabel('dpu-regex', firsts['dpu-regex'], 'RegEx engine', {x:0,y:0.55,z:0}, 'dpu');
-    addLabel('dpu-nvme', firsts['dpu-nvme'], 'NVMe-oF', {x:0,y:0.55,z:0}, 'dpu');
-    addLabel('dpu-pcie', firsts['dpu-pcie'], 'PCIe Gen5 switch', {x:0,y:0.55,z:0}, 'dpu');
-    addLabel('dpu-dram', firsts['dpu-dram'], 'DDR5 controller', {x:0,y:0.5,z:0}, 'dpu');
-    addLabel('dpu-cache', firsts['dpu-cache'], 'Mesh cache', {x:0,y:0.55,z:0}, 'dpu');
-    addLabel('dpu-card', card, 'DPU card', {x:2.2,y:0.4,z:1.2}, 'dpu');
-    addLabel('dpu-qsfp', firstQ, '2× QSFP112', {x:0,y:0.6,z:0}, 'dpu');
-  })();
+    L('dpu-hs', base, {x:0,y:1.15,z:0});
+    Object.keys(firsts).forEach(function(pid){ L(pid, firsts[pid]); });
+    L('dpu-card', card, {x:2.2,y:0.4,z:1.2});
+    L('dpu-qsfp', firstQ);
+  }
+
+  /* ---------------- variant UI: labels, glance table, what-changed ---------------- */
+  var GL_AXES = ['compute','cache','memory','interconnect','network','accel','package'];
+  var GL_NAME = {compute:'Compute', cache:'Cache', memory:'Memory', interconnect:'Interconnect',
+                 network:'Network', accel:'Accelerators', package:'Package'};
+  function updateModelLabels(){
+    ['cpu','gpu','dpu'].forEach(function(ch){
+      var v = selVariant(ch), V = VARIANTS[ch] && VARIANTS[ch][v];
+      var el = document.getElementById('diff-'+ch+'-model');
+      if (el && V) el.textContent = V.name;
+    });
+  }
+  function updateGlance(){
+    ['cpu','gpu','dpu'].forEach(function(ch){
+      var v = selVariant(ch), V = VARIANTS[ch] && VARIANTS[ch][v];
+      if (!V) return;
+      var h = document.getElementById('gl-'+ch+'-h');
+      if (h) h.textContent = CHIP_OF[ch] + ' — ' + V.short;
+      GL_AXES.forEach(function(ax){
+        var td = document.querySelector('td[data-g="'+ch+':'+ax+'"]');
+        if (td && V.glance && V.glance[ax]){
+          var c = td.querySelector('.c');
+          if (c) c.textContent = V.glance[ax];
+        }
+      });
+    });
+  }
+  function renderVChange(chip, oldV, v){
+    lastVChange = {chip:chip, oldV:oldV, v:v};
+    var card = document.getElementById('vchange');
+    var V = VARIANTS[chip] && VARIANTS[chip][v];
+    var O = VARIANTS[chip] && VARIANTS[chip][oldV];
+    if (!V || !O){ card.classList.remove('show'); return; }
+    document.getElementById('vc-title').textContent = CHIP_OF[chip]+': '+O.short+' → '+V.short;
+    var rows = GL_AXES.map(function(ax){
+      if (!O.glance || !V.glance || O.glance[ax] === V.glance[ax]) return '';
+      return '<div class="vc-row"><span class="vc-dot"></span><div><b>'+GL_NAME[ax]+
+        '</b><span>'+O.glance[ax]+' → <b>'+V.glance[ax]+'</b></span></div></div>';
+    }).join('');
+    document.getElementById('vc-rows').innerHTML = rows ||
+      '<div class="vc-row"><span class="vc-dot"></span><div><b>Same silicon story</b><span>Only naming changed.</span></div></div>';
+    var key = LEVEL==='eli5' ? 'eli5' : LEVEL==='15' ? 'fifteen' : LEVEL==='pro' ? 'pro' : 'expert';
+    document.getElementById('vc-note').textContent = (V.note && V.note[key]) || '';
+    card.classList.add('show');
+  }
+  function pulseParts(chip, v){
+    var V = VARIANTS[chip] && VARIANTS[chip][v];
+    (V && V.pulse || []).forEach(function(pid, idx){
+      setTimeout(function(){ pulse(pid); }, 400 + idx*380);
+    });
+  }
+  document.getElementById('vchange-close').addEventListener('click', function(){
+    document.getElementById('vchange').classList.remove('show');
+  });
+  /* variant pills */
+  document.querySelectorAll('.vpills .vbtn').forEach(function(b){
+    b.addEventListener('click', function(){
+      var chip = b.getAttribute('data-chip'), v = b.getAttribute('data-variant');
+      document.querySelectorAll('.vpills .vbtn[data-chip="'+chip+'"]').forEach(function(x){
+        x.classList.toggle('on', x === b);
+      });
+      swapVariant(chip, v, true);
+    });
+  });
+
+  /* ---------------- teardown + variant swap ----------------
+     disposeChip removes one chip's group and every registration it made:
+     scene, layers, clickables, partMats/partMeshes, labels. Geometries and
+     materials are disposed so rebuilds don't leak or leave stale raycasts. */
+  function isUnder(o, g){ while (o){ if (o === g) return true; o = o.parent; } return false; }
+  function disposeChip(name){
+    var g = chipGroups[name];
+    if (!g) return;
+    var doomed = {};
+    g.traverse(function(m){ if (m.isMesh) doomed[m.uuid] = true; });
+    layers = layers.filter(function(o){ return !isUnder(o, g); });
+    clickables = clickables.filter(function(m){ return !doomed[m.uuid]; });
+    Object.keys(partMeshes).forEach(function(pid){
+      partMeshes[pid] = partMeshes[pid].filter(function(m){ return !doomed[m.uuid]; });
+      if (!partMeshes[pid].length){ delete partMeshes[pid]; delete partMats[pid]; }
+    });
+    labels = labels.filter(function(l){
+      if (l.chip === name){ l.el.remove(); return false; }
+      return true;
+    });
+    var seen = {};
+    g.traverse(function(m){
+      if (m.isMesh){
+        if (m.geometry) m.geometry.dispose();
+        var mt = m.material;
+        if (mt && !seen[mt.uuid]){ seen[mt.uuid] = 1; mt.dispose(); }
+      }
+    });
+    scene.remove(g);
+    delete chipGroups[name];
+  }
+  var BUILDERS = {cpu:buildCPU, gpu:buildGPU, dpu:buildDPU};
+  function rebuildChip(chip){
+    disposeChip(chip);
+    BUILDERS[chip](selVariant(chip));
+    layoutChips();
+  }
+  /* swapVariant: the single entry point for variant pills */
+  function swapVariant(chip, v, fromPill){
+    var old = selVariant(chip);
+    if (old === v) return;
+    window.__chipVariant[chip] = v;
+    rebuildChip(chip);
+    updateModelLabels();
+    updateGlance();
+    renderVChange(chip, old, v);
+    pulseParts(chip, v);
+    renderDiff();
+    if (currentPart) renderPin();
+    if (window.refreshFlowPaths) window.refreshFlowPaths();
+  }
+  window.swapVariant = swapVariant;
+  window.renderVChange = renderVChange;
+  window.rebuildChip = rebuildChip;
+
+  /* initial build from the default selection */
+  buildCPU(selVariant('cpu'));
+  buildGPU(selVariant('gpu'));
+  buildDPU(selVariant('dpu'));
+  layoutChips();
+
 
   /* ---------------- data-flow loop mode ----------------
      Glowing packets stream along each chip's real data path in a continuous
@@ -1157,6 +2720,231 @@ document.getElementById('label-toggle').addEventListener('click', function(){
           expert:'Partitioning returns as NV-HBI: the crossbar now spans two dies at 10 TB/s \u2014 enough for full coherence. The monolithic illusion, preserved.'}},
         FLOW.gpu.stages[2],
         FLOW.gpu.stages[3]]
+    }
+  };
+  /* ---- more variant flow overrides: keep particles + highlights on the actual silicon.
+     Path points are [x, y, yAmp, z]; scale x/z to each variant's footprint. ---- */
+  function scalePath(path, sx, sz){
+    return path.map(function(p){ return [p[0]*sx, p[1], p[2], p[3]*sz]; });
+  }
+  function stageAs(base, parts, name, cap){
+    return {name:(name || base.name), parts:parts, cap:(cap || base.cap)};
+  }
+  FLOW.cpu.variants['ryzen'] = {
+    path: scalePath(FLOW.cpu.path, 0.65, 0.65),
+    stages: [
+      stageAs(FLOW.cpu.stages[0], ['cpu-iod'], 'DDR5 \u2192 IOD', {
+        eli5:'Data arrives from the two memory sticks into the helper chip in the middle.',
+        fifteen:'Dual-channel DDR5 lands at the client IOD \u2014 the front door for every byte the 16 cores touch.',
+        pro:'2-ch DDR5 (~90 GB/s) through the client IOD; the binding constraint vs EPYC\u2019s 12 channels.',
+        expert:'Client IOD, 2 memory controllers; the same Zen 5 CCDs as EPYC, fed by 2 channels \u2014 desktop thermals and cost, not fabric, set the ceiling.'}),
+      stageAs(FLOW.cpu.stages[1], ['cpu-iod','cpu-ccd'], 'IOD \u2192 L3', {
+        eli5:'The helper trucks data out to each neighborhood\u2019s big shared whiteboard \u2014 32 MB of L3.',
+        fifteen:'Infinity Fabric forwards the line to a CCD\u2019s 32 MB L3 \u2014 one hop through the IOD.',
+        pro:'IF links carry the line IOD \u2192 CCD into 32 MB L3; with only 2 CCDs the NUMA story is simple.',
+        expert:'Same IF protocol as SP5, far less contention \u2014 two CCDs share the IOD instead of twelve.'}),
+      stageAs(FLOW.cpu.stages[2], ['cpu-ccd'], 'L3 \u2192 L2 \u2192 Zen 5 core', {
+        eli5:'A worker copies what it needs from the whiteboard to its own notebook (L2), then does the math.',
+        fifteen:'The core pulls the line into its private 1 MB L2 and executes out-of-order \u2014 deep caches hide the DRAM wait.',
+        pro:'Zen 5 fetches into 1 MB L2, executes wide OoO with AVX-512 \u2014 the same core that scales up to EPYC.',
+        expert:'48 KB L1D \u2192 1 MB L2 \u2192 32 MB L3; Granite Ridge CCDs are the desktop bin of the server lineage.'}),
+      stageAs(FLOW.cpu.stages[3], ['cpu-ccd','cpu-iod'], 'Writeback \u2192 DDR5', {
+        eli5:'Finished work gets copied back to the whiteboard, then mailed back to the memory sticks.',
+        fifteen:'Dirty lines evict L2 \u2192 L3 \u2192 IOD \u2192 DDR5 \u2014 writeback keeps the hierarchy coherent.',
+        pro:'Writeback through the MOESI-coherent hierarchy; the client IOD commits to DDR5.',
+        expert:'Victim writebacks cascade upward; with 2 channels the writeback bandwidth is the desktop\u2019s honest limit.'})
+    ]
+  };
+  FLOW.cpu.variants['granite'] = {
+    path: scalePath(FLOW.cpu.path, 1.38, 0.92),
+    stages: [
+      stageAs(FLOW.cpu.stages[0], ['cpu-soctile'], 'DDR5 \u2192 SoC tiles', {
+        eli5:'Data arrives from twelve memory sticks into the two helper tiles at the edges.',
+        fifteen:'12-channel DDR5-6400 lands in the SoC tiles \u2014 up to 921.6 GB/s, the front door for 128 cores.',
+        pro:'DDR5-6400 across 12 channels into the SoC tiles; CXL and 96 PCIe Gen5 lanes hang off the same tiles.',
+        expert:'SoC tiles (Intel 7) host the memory controllers; compute tiles (Intel 3) are pure cores \u2014 disaggregation by function, not just yield.'}),
+      stageAs(FLOW.cpu.stages[1], ['cpu-soctile','cpu-ctile'], 'EMIB \u2192 L3', {
+        eli5:'Tiny bridges under the tiles truck data from the helpers to the three big thinking-tiles.',
+        fifteen:'EMIB bridges carry lines from SoC tiles into each compute tile\u2019s 168 MB of L3.',
+        pro:'EMIB die-to-die links forward lines into 168 MB L3 per compute tile; UPI keeps the tiles coherent.',
+        expert:'EMIB, not an interposer: dense local bridges between tiles. The mesh crosses tile boundaries at a latency cost Intel pays for modularity.'}),
+      stageAs(FLOW.cpu.stages[2], ['cpu-ctile'], 'L3 \u2192 L2 \u2192 Redwood Cove', {
+        eli5:'Workers pull from the giant shared whiteboard to their notebooks, then do the math.',
+        fifteen:'Cores pull lines into private 2 MB L2 and execute \u2014 AMX units wait for matrix work.',
+        pro:'Redwood Cove cores with 2 MB L2 each; AMX accelerates matrix math, AVX-512 the vectors.',
+        expert:'2 MB L2/core is the Granite Rapids tell \u2014 Intel doubled down on per-core cache to feed 128 cores without starving.'}),
+      stageAs(FLOW.cpu.stages[3], ['cpu-ctile','cpu-soctile'], 'Writeback \u2192 DDR5', {
+        eli5:'Finished work travels back across the little bridges to the helpers, then out to the memory sticks.',
+        fifteen:'Dirty lines evict through the compute tile\u2019s L3, across EMIB, and out the SoC tiles\u2019 memory controllers.',
+        pro:'Writeback crosses the same EMIB path in reverse; the SoC tiles commit to DDR5.',
+        expert:'Tile-crossing writebacks pay the EMIB hop twice \u2014 placement-aware software keeps hot lines tile-local.'})
+    ]
+  };
+  FLOW.cpu.variants['m4max'] = {
+    path: scalePath(FLOW.cpu.path, 0.62, 0.62),
+    stages: [
+      stageAs(FLOW.cpu.stages[0], ['cpu-umem'], 'Unified memory \u2192 SoC', {
+        eli5:'There are no memory sticks \u2014 the memory lives right next to the brain, and everyone shares it.',
+        fifteen:'128 GB of LPDDR5X sits beside the die at 546 GB/s \u2014 one pool for CPU, GPU, and Neural Engine.',
+        pro:'Unified memory: no copies between CPU and GPU pools; 546 GB/s shared by all engines.',
+        expert:'The anti-NUMA bet: a single physical pool removes the copy tax entirely \u2014 at the cost of no expansion and shared-bandwidth contention.'}),
+      stageAs(FLOW.cpu.stages[1], ['cpu-umem','cpu-soc'], 'Fabric \u2192 cache', {
+        eli5:'Data strolls across the on-chip fabric into the brain\u2019s caches.',
+        fifteen:'The on-die fabric feeds the shared cache hierarchy \u2014 no socket hops, no IOD.',
+        pro:'Monolithic die: the memory controllers talk straight to the system-level cache.',
+        expert:'No chiplet hops at all \u2014 the whole memory path is on one die. Latency wins, modularity loses.'}),
+      stageAs(FLOW.cpu.stages[2], ['cpu-soc'], 'Cache \u2192 CPU cores', {
+        eli5:'The 16 workers grab what they need and do the math \u2014 graphics and AI engines work from the same pool.',
+        fifteen:'16 CPU cores (12 performance + 4 efficiency) execute from the shared hierarchy.',
+        pro:'Heterogeneous cores: P-cores for burst, E-cores for efficiency \u2014 the scheduler, not the socket, is the NUMA.',
+        expert:'The SoC integrates what servers split across dies \u2014 the flow is short because the die is everything.'}),
+      stageAs(FLOW.cpu.stages[3], ['cpu-soc','cpu-umem'], 'Writeback \u2192 unified memory', {
+        eli5:'Finished work lands straight back in the shared pool \u2014 the GPU can read it immediately.',
+        fifteen:'Writeback commits to the unified pool; zero-copy handoff to GPU and Neural Engine.',
+        pro:'One writeback path serves every engine \u2014 the copy the discrete world pays for doesn\u2019t exist.',
+        expert:'Coherent unified memory means the writeback IS the share \u2014 no DMA, no staging, no excuses.'})
+    ]
+  };
+  FLOW.cpu.variants['bergamo'] = {
+    path: FLOW.cpu.path,
+    stages: [
+      FLOW.cpu.stages[0],
+      FLOW.cpu.stages[1],
+      stageAs(FLOW.cpu.stages[2], ['cpu-ccd'], 'L3 \u2192 L2 \u2192 Zen 4c core', {
+        eli5:'Each neighborhood has twice as many workers \u2014 smaller desks, but 128 of them.',
+        fifteen:'Zen 4c cores: 16 dense cores per CCD sharing 32 MB L3 \u2014 throughput over single-thread speed.',
+        pro:'Zen 4c halves the L2 per core and shares L3 wider \u2014 the cloud-native trade: more threads per watt.',
+        expert:'Bergamo\u2019s CCD doubles core count by shrinking structures; the flow is identical to Genoa, the density is the story.'}),
+      FLOW.cpu.stages[3]
+    ]
+  };
+  FLOW.gpu.variants['h100-nvl'] = {
+    path: scalePath(FLOW.gpu.path, 1.35, 1.0),
+    stages: [
+      FLOW.gpu.stages[0],
+      FLOW.gpu.stages[1],
+      FLOW.gpu.stages[2],
+      stageAs(FLOW.gpu.stages[3], ['gpu-hbm','gpu-nvlink'], 'HBM / NVLink bridges', {
+        eli5:'Answers go back to the towers \u2014 or zoom across the three golden bridges to the card next door, sharing 188 GB as one pool.',
+        fifteen:'Results write back to HBM \u2014 or cross the NVLink bridges at 900 GB/s to the twin card.',
+        pro:'Two 94 GB cards behave as one 188 GB pool over NVLink bridges; bridge bandwidth sets the tensor-parallel ceiling.',
+        expert:'NVL is the PCIe-friendly H100: no SXM baseboard needed, at the cost of bridge-limited GPU-to-GPU bandwidth vs NVSwitch fabrics.'})
+    ]
+  };
+  FLOW.gpu.variants['rtx4090'] = {
+    path: scalePath(FLOW.gpu.path, 1.0, 0.8),
+    stages: [
+      stageAs(FLOW.gpu.stages[0], ['gpu-gddr'], 'GDDR6X \u2192 L2', {
+        eli5:'Twelve memory chips ring the brain, dumping colors onto the shared table at a terabyte a second.',
+        fifteen:'24 GB of GDDR6X at ~1 TB/s floods the L2 \u2014 the staging ground for 128 SMs.',
+        pro:'GDDR6X on a 384-bit bus: cheaper and cooler than HBM, at a third of the bandwidth \u2014 the consumer trade.',
+        expert:'PAM4 GDDR6X at 21 Gbps/pin; no interposer, no 2.5D \u2014 the memory sits on the PCB, which is why the card is this long.'}),
+      stageAs(FLOW.gpu.stages[1], ['gpu-l2'], 'L2 \u2192 SM array', {
+        eli5:'The table hands each of the 128 teams its piece of the puzzle.',
+        fifteen:'The crossbar broadcasts tiles to 128 SMs; each SM\u2019s warps chew through them in lockstep.',
+        pro:'AD102\u2019s XBAR fans tiles to 11 GPCs; the same data-parallel story as H100, air-cooled.',
+        expert:'Monolithic AD102 \u2014 NVIDIA\u2019s biggest gaming die, still one piece of silicon.'}),
+      stageAs(FLOW.gpu.stages[2], ['gpu-gpc'], 'CUDA + Tensor compute', {
+        eli5:'16,384 tiny workers plus matrix helpers crunch the pixels and the AI math.',
+        fifteen:'128 SMs with 4th-gen Tensor Cores \u2014 the same architecture as H100, clocked for your desk.',
+        pro:'16,384 CUDA cores; Tensor Cores do the AI upscaling (DLSS) and local model work.',
+        expert:'AD102 is Hopper\u2019s gaming cousin \u2014 the flow that trains models in datacenters renders frames here.'}),
+      stageAs(FLOW.gpu.stages[3], ['gpu-l2'], 'L2 \u2192 GDDR6X / PCIe', {
+        eli5:'Finished frames go back to the memory chips \u2014 or out the PCIe slot to the rest of the PC.',
+        fifteen:'Results coalesce in L2 and write back to GDDR6X; PCIe 4.0 carries frames to the display.',
+        pro:'Writeback through L2 to GDDR6X; no NVLink \u2014 consumer cards stand alone.',
+        expert:'The PCIe 4.0 x16 link is the only way out \u2014 64 GB/s vs NVLink\u2019s 900. Local inference lives or dies on VRAM capacity.'})
+    ]
+  };
+  FLOW.gpu.variants['mi300x'] = {
+    path: FLOW.gpu.path,
+    stages: [
+      stageAs(FLOW.gpu.stages[0], ['gpu-hbm'], 'HBM3 \u2192 Infinity Cache', {
+        eli5:'Eight memory towers ring eight thinking-chiplets, dumping data into a giant shared 256 MB whiteboard.',
+        fifteen:'192 GB of HBM3 at 5.3 TB/s feeds 256 MB of Infinity Cache shared across all 8 XCDs.',
+        pro:'8 HBM3 stacks on the interposer; Infinity Cache is the bandwidth filter before the XCDs.',
+        expert:'The chiplet tax: XCD\u2194HBM paths cross the interposer and I/O dies \u2014 AMD bets Infinity Fabric hides it.'}),
+      stageAs(FLOW.gpu.stages[1], ['gpu-interposer','gpu-iod2'], 'Interposer \u2192 XCD array', {
+        eli5:'The silicon table hands each of the eight chiplets its piece \u2014 the four helpers in the middle route traffic.',
+        fifteen:'The interposer fabric broadcasts tiles to 8 XCDs; I/O dies route between compute and memory.',
+        pro:'Disaggregated GPU: no monolithic crossbar \u2014 the interposer plus IODs are the fabric.',
+        expert:'8 XCDs (5 nm) + 4 IODs (6 nm): yield and SKU flexibility vs the monolith. Coherence across chiplets is the hard part.'}),
+      stageAs(FLOW.gpu.stages[2], ['gpu-xcd'], 'CDNA3 compute', {
+        eli5:'The matrix helpers in each chiplet multiply huge grids of numbers \u2014 304 teams of them.',
+        fifteen:'304 CUs of CDNA3 crunch matrix math \u2014 built for inference at 192 GB capacity.',
+        pro:'CDNA3 matrix cores target LLM inference: capacity (192 GB) over raw FLOPS vs H100.',
+        expert:'MI300X is the inference-capacity play \u2014 the flow exists to keep 192 GB of weights streaming.'}),
+      stageAs(FLOW.gpu.stages[3], ['gpu-hbm','gpu-interposer'], 'HBM / fabric writeback', {
+        eli5:'Answers go back to the towers \u2014 or across the fabric to a neighboring GPU.',
+        fifteen:'Results write back through the interposer to HBM; Infinity Fabric links peer GPUs.',
+        pro:'Writeback via the interposer; scale-out over Ethernet/Infinity Fabric, not NVLink.',
+        expert:'No NVLink: AMD\u2019s scale story is open fabrics \u2014 the interconnect bet is philosophical, not just technical.'})
+    ]
+  };
+  FLOW.dpu.variants = {
+    'bf2': {
+      path: FLOW.dpu.path,
+      stages: [
+        FLOW.dpu.stages[0],
+        FLOW.dpu.stages[1],
+        stageAs(FLOW.dpu.stages[2], ['dpu-cores'], 'Arm cores (no DPA)', {
+          eli5:'The medium bosses handle the fiddly jobs themselves \u2014 this older mailroom has no tiny helpers.',
+          fifteen:'8 Arm A72 cores do control-plane work; fixed-function blocks own the fast path.',
+          pro:'BF2 lacks DPA cores \u2014 the A72s absorb exception and control work directly.',
+          expert:'The generational delta: BF2\u2019s Arm complex does what BF3 offloads to DPA. Same pipeline, less programmability.'}),
+        FLOW.dpu.stages[3]
+      ]
+    },
+    'e2100': {
+      path: FLOW.dpu.path,
+      stages: [
+        FLOW.dpu.stages[0],
+        stageAs(FLOW.dpu.stages[1], ['dpu-p4','dpu-crypto'], 'P4 pipeline + inline crypto', {
+          eli5:'The message runs a programmable obstacle course \u2014 unscrambled mid-flight, inspected for sneaky patterns.',
+          fifteen:'The P4-programmable pipeline parses and classifies while inline crypto decrypts \u2014 bump-in-the-wire.',
+          pro:'P4 match-action pipeline plus inline AES; the pipeline, not software, is the fast path.',
+          expert:'Mount Evans\u2019 P4 pipeline is the Intel IPU thesis: the dataplane is a program, not fixed logic.'}),
+        stageAs(FLOW.dpu.stages[2], ['dpu-p4','dpu-cores'], 'P4 + N1 complex', {
+          eli5:'The 16 medium bosses handle whatever the pipeline kicks upstairs.',
+          fifteen:'16 Neoverse N1 cores run control plane and infrastructure software \u2014 the pipeline handles the rest.',
+          pro:'N1 complex with 32 MB system cache; the Arm cores are the exception path, not the fast path.',
+          expert:'N1 vs A78: the IPU borrows server-class Arm cores for control \u2014 the pipeline does the packets.'}),
+        FLOW.dpu.stages[3]
+      ]
+    },
+    'elba': {
+      path: FLOW.dpu.path,
+      stages: [
+        FLOW.dpu.stages[0],
+        stageAs(FLOW.dpu.stages[1], ['dpu-mpu'], '144-MPU P4 grid', {
+          eli5:'The message crosses a grid of 144 tiny inspectors \u2014 each one checks a piece, all at once.',
+          fifteen:'144 P4-programmable MPUs process packets in parallel \u2014 the densest programmable dataplane here.',
+          pro:'12\u00d712 MPU grid: match-action at scale, P4-programmed. Throughput via parallelism, not clock.',
+          expert:'Elba\u2019s bet: many tiny MPUs beat few big cores for packet work \u2014 the GPU philosophy applied to networking.'}),
+        stageAs(FLOW.dpu.stages[2], ['dpu-mpu','dpu-cores'], 'MPU grid + A72s', {
+          eli5:'The grid does the stamping; 16 medium bosses supervise.',
+          fifteen:'MPUs own the dataplane; 16 A72 cores run the control plane and P4 runtime.',
+          pro:'Classic split: fixed-throughput dataplane on MPUs, control on A72s.',
+          expert:'Pensando\u2019s distributed-services card: the MPUs are why Elba offloads firewalls and crypto per-flow.'}),
+        FLOW.dpu.stages[3]
+      ]
+    },
+    'octeon10': {
+      path: FLOW.dpu.path,
+      stages: [
+        FLOW.dpu.stages[0],
+        stageAs(FLOW.dpu.stages[1], ['dpu-ai','dpu-net'], 'Inline AI + security', {
+          eli5:'Mid-flight, the message gets unscrambled and checked by a built-in AI bouncer.',
+          fifteen:'Inline crypto plus an AI block scan traffic at line rate \u2014 security without stopping.',
+          pro:'Inline AES/IPsec with AI-assisted threat detection on the 5 nm die.',
+          expert:'OCTEON\u2019s inline-AI block is the newest idea here: ML inference inside the packet pipeline, not beside it.'}),
+        stageAs(FLOW.dpu.stages[2], ['dpu-cores'], 'N2 complex', {
+          eli5:'Up to 24 speedy bosses run the whole show \u2014 operating system included.',
+          fifteen:'Arm Neoverse N2 cores (Armv9 + SVE2) run control plane and infrastructure apps.',
+          pro:'N2 with SVE2: the most general-purpose Arm complex of the DPU set \u2014 a server that happens to be a NIC.',
+          expert:'OCTEON 10 blurs DPU and server: 24 N2 cores plus a 1 Tb switch on one 5 nm die.'}),
+        FLOW.dpu.stages[3]
+      ]
     }
   };
   function flowSteps(chip){
