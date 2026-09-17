@@ -110,6 +110,23 @@ body{margin:0;background:var(--bg);color:var(--ink);
 .dpill:hover{color:var(--ink);border-color:var(--accent)}
 .dpill.on{background:var(--ink);color:#14110d;font-weight:700;border-color:var(--ink)}
 .hint{font-size:.74rem;color:var(--muted);margin-top:8px}
+/* data-flow loop mode */
+#flowbar{display:none;margin-bottom:10px;background:rgba(20,17,13,.84);border:1px solid var(--line);
+  border-radius:12px;padding:10px 16px 12px;backdrop-filter:blur(8px)}
+#flowbar.show{display:block}
+.flow-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px}
+#flow-stepname{font-size:.72rem;text-transform:uppercase;letter-spacing:.14em;color:var(--accent)}
+.flow-dots{display:flex;gap:6px}
+.flow-dots button{width:24px;height:6px;border-radius:3px;border:none;background:rgba(242,237,226,.18);cursor:pointer;padding:0}
+.flow-dots button.on{background:var(--accent)}
+.flow-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.flowcol .fchip{display:inline-block;font-size:.64rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;
+  padding:2px 8px;border-radius:999px;margin-bottom:4px}
+.flowcol.cpu .fchip{background:rgba(224,138,76,.18);color:var(--cpu)}
+.flowcol.gpu .fchip{background:rgba(88,176,166,.18);color:var(--gpu)}
+.flowcol.dpu .fchip{background:rgba(122,160,216,.18);color:var(--dpu)}
+.flowcol .fstage{font-size:.84rem;font-weight:700}
+.flowcol .fcap{margin:2px 0 0;font-size:.78rem;color:var(--muted);line-height:1.45}
 /* gl fallback */
 #gl-fallback{display:none;position:absolute;inset:0;z-index:30;align-items:center;justify-content:center;
   text-align:center;padding:40px;color:var(--muted)}
@@ -153,6 +170,29 @@ td .c{font-weight:600} td .why{display:block;color:var(--muted);font-size:.78rem
 .prov li{margin:5px 0}
 footer.site{padding:34px 0 44px;color:var(--muted);font-size:.85rem;border-top:1px solid var(--line)}
 footer.site a{color:var(--accent);text-decoration:none}
+/* ============ scale section: individual vs scaled ============ */
+#scale-sec .lede{color:var(--muted);margin:0 0 18px;max-width:760px}
+#scale-pills{margin-bottom:18px;flex-wrap:wrap;width:fit-content;max-width:100%}
+.scale-grid{display:grid;grid-template-columns:1.5fr 1fr;gap:18px;align-items:stretch}
+@media(max-width:900px){.scale-grid{grid-template-columns:1fr}}
+.scale-stage{position:relative;background:var(--bg2);border:1px solid var(--line);
+  border-radius:var(--radius);overflow:hidden;min-height:380px}
+#scale-scene{display:block;width:100%;height:440px}
+@media(max-width:700px){#scale-scene{height:320px}.scale-stage{min-height:300px}}
+.scale-legend{position:absolute;left:12px;bottom:10px;display:flex;gap:8px;flex-wrap:wrap;
+  background:rgba(20,17,13,.78);border:1px solid var(--line);border-radius:10px;padding:7px 10px}
+.scale-legend span{display:inline-flex;align-items:center;gap:6px;font-size:.72rem;color:var(--muted)}
+.scale-legend i{width:10px;height:10px;border-radius:50%;display:inline-block}
+.scale-cap{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px}
+.scale-cap h3{margin:0 0 8px;font-size:1.25rem}
+.scale-cap .why{margin:0 0 14px;color:#d8d2c6;font-size:.95rem;line-height:1.55}
+.scale-stats{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px}
+.scale-stats span{font-size:.72rem;border:1px solid var(--line);border-radius:999px;
+  padding:4px 11px;color:var(--muted);background:rgba(255,255,255,.02)}
+.scale-contrast{margin:0;padding-top:12px;border-top:1px solid var(--line);
+  font-size:.85rem;color:var(--muted);line-height:1.55}
+.scale-contrast b{color:var(--accent);font-weight:600}
+#scale-fallback{display:none;padding:40px 20px;text-align:center;color:var(--muted)}
 @media(max-width:700px){
   .stage-hero{min-height:560px}
   .ovl-title{top:8px;left:12px;right:12px;max-width:none}
@@ -166,6 +206,8 @@ footer.site a{color:var(--accent);text-decoration:none}
   .seg .cap{display:none}
   .pill{padding:4px 10px;font-size:.72rem}
   #pin{right:12px;left:12px;width:auto;bottom:178px;max-height:38%;overflow:auto}
+  .flow-grid{grid-template-columns:repeat(3,minmax(210px,1fr));overflow-x:auto;padding-bottom:2px}
+  #flowbar{padding:8px 12px 10px}
   .ovl-dock{padding:16px 12px 8px}
   .hint{display:none}
 }
@@ -212,6 +254,9 @@ footer.site a{color:var(--accent);text-decoration:none}
     <div class="seg" role="group" aria-label="Labels">
       <button class="pill on" id="label-toggle">Labels</button>
     </div>
+    <div class="seg" role="group" aria-label="Data flow loop">
+      <button class="pill" id="flow-toggle">▶ Data flow</button>
+    </div>
   </div>
 
   <div id="tip"></div>
@@ -226,6 +271,17 @@ footer.site a{color:var(--accent);text-decoration:none}
 
   <div class="ovl-dock">
     <div class="dock-in">
+      <div id="flowbar" aria-live="polite">
+        <div class="flow-head">
+          <span id="flow-stepname">Step 1 of 4</span>
+          <span class="flow-dots" id="flow-dots" role="group" aria-label="Flow step"></span>
+        </div>
+        <div class="flow-grid">
+          <div class="flowcol cpu"><span class="fchip">CPU</span><div class="fstage"></div><p class="fcap"></p></div>
+          <div class="flowcol gpu"><span class="fchip">GPU</span><div class="fstage"></div><p class="fcap"></p></div>
+          <div class="flowcol dpu"><span class="fchip">DPU</span><div class="fstage"></div><p class="fcap"></p></div>
+        </div>
+      </div>
       <div class="explode-row">
         <label for="explode">Explode</label>
         <input type="range" id="explode" min="0" max="100" value="62" aria-label="Explode amount">
@@ -248,6 +304,38 @@ footer.site a{color:var(--accent);text-decoration:none}
 
   <div id="gl-fallback">
     <p>WebGL isn't available in this browser, so the 3D stage can't render.<br>The comparison cards and spec tables below still work.</p>
+  </div>
+</section>
+
+<!-- ================= SCALE: INDIVIDUAL vs SCALED ================= -->
+<section class="section" id="scale-sec" aria-label="How chips link into networks and clusters">
+  <div class="wrap">
+    <p class="kicker" style="color:var(--accent);text-transform:uppercase;letter-spacing:.18em;font-size:.7rem;margin:0 0 6px">Scale</p>
+    <h2>From one box to a data center</h2>
+    <p class="lede">The same three chips, wired four ways. Watch the links change as you zoom out &mdash; and notice the moment the network stops being plumbing and becomes the computer.</p>
+    <div class="seg" id="scale-pills" role="group" aria-label="Scale preset">
+      <button class="pill sbtn on" data-scale="solo">Solo</button>
+      <button class="pill sbtn" data-scale="node">Node</button>
+      <button class="pill sbtn" data-scale="rack">Rack</button>
+      <button class="pill sbtn" data-scale="cluster">Cluster</button>
+    </div>
+    <div class="scale-grid">
+      <div class="scale-stage">
+        <canvas id="scale-scene"></canvas>
+        <div class="scale-legend" aria-hidden="true">
+          <span><i style="background:#2dd4bf"></i>NVLink / NVSwitch fabric</span>
+          <span><i style="background:#d9a441"></i>PCIe to host</span>
+          <span><i style="background:#5aa2ff"></i>InfiniBand / Ethernet</span>
+        </div>
+        <div id="scale-fallback"><p>WebGL isn't available, so the scale diagram can't render.<br>The captions still explain each topology.</p></div>
+      </div>
+      <aside class="scale-cap" aria-live="polite">
+        <h3 id="scale-name"></h3>
+        <p class="why" id="scale-why"></p>
+        <div class="scale-stats" id="scale-stats"></div>
+        <p class="scale-contrast" id="scale-contrast"></p>
+      </aside>
+    </div>
   </div>
 </section>
 
@@ -340,6 +428,8 @@ function setLevel(l){
     b.classList.toggle('on', b.getAttribute('data-lvl') === LEVEL);
   });
   renderPin(); renderDiff();
+  if (window.renderFlow) window.renderFlow();
+  if (window.renderScale) window.renderScale();
 }
 document.querySelectorAll('.lbtn').forEach(function(b){
   b.addEventListener('click', function(){ setLevel(b.getAttribute('data-lvl')); });
@@ -931,6 +1021,287 @@ document.getElementById('label-toggle').addEventListener('click', function(){
     addLabel('dpu-qsfp', firstQ, '2× QSFP112', {x:0,y:0.6,z:0}, 'dpu');
   })();
 
+  /* ---------------- data-flow loop mode ----------------
+     Glowing packets stream along each chip's real data path in a continuous
+     loop; the caption bar auto-advances through 4 stages × 3 chips.
+     Paths are chip-local [x, y0, e, z]; y is recomputed per frame as
+     y0 + e*T so packets ride the exploded stack.
+     Variant contract: window.__chipVariant = {cpu,gpu,dpu} (set by the
+     variant picker when it lands; defaults below). flowSteps(chip) returns a
+     variant override when one exists, else the category path. Call
+     window.refreshFlowPaths() after a variant swap. */
+  var VARIANT_SEL = {cpu:'genoa', gpu:'h100-sxm', dpu:'bf3'};
+  function selVariant(chip){
+    return (window.__chipVariant && window.__chipVariant[chip]) || VARIANT_SEL[chip];
+  }
+  var FLOW_STEP_NAMES = ['Off-chip memory \u2192 die','Into the cache / pipeline','Compute','Writeback \u00b7 ship out'];
+  var FLOW = {
+  cpu:{ color:0xe08a4c,
+    path:[[-5.2,0.55,1.0,0],[-2.7,0.55,1.0,0],[-1.2,0.7,1.6,0],[0,0.95,2.3,0],
+      [-0.9,0.95,2.3,0.3],[-1.78,0.95,2.3,0.58],[-1.78,1.2,2.3,0.58],[-1.78,1.38,2.3,0.58],
+      [-1.78,1.2,2.3,0.58],[-1.78,0.95,2.3,0.58],[-0.9,0.95,2.3,0.3],[0,0.95,2.3,0],
+      [1.5,0.7,1.6,0],[2.7,0.55,1.0,0],[5.2,0.55,1.0,0]],
+    stages:[
+    {name:'DDR5 \u2192 sIOD', parts:['cpu-iod'], cap:{
+      eli5:'Data arrives from the memory sticks into the post office in the middle of the chip.',
+      fifteen:'DDR5 data lands at the sIOD\u2019s 12 memory controllers \u2014 the front door for every byte the cores touch.',
+      pro:'460.8 GB/s across 12 DDR5-4800 channels lands in the sIOD; all off-chip data enters the CPU here.',
+      expert:'sIOD N6 PHYs, 12-ch DDR5-4800; lines queue in the memory controller before IF dispatch \u2014 ~100 ns DRAM latency is the floor everything hides.'}},
+    {name:'sIOD \u2192 L3', parts:['cpu-iod','cpu-ccd'], cap:{
+      eli5:'The post office trucks the data out to a neighborhood\u2019s big shared whiteboard \u2014 the L3 cache.',
+      fifteen:'Infinity Fabric forwards the line to the target CCD\u2019s 32 MB L3 \u2014 one hop through the sIOD.',
+      pro:'IFOP links carry the line sIOD \u2192 CCD into 32 MB L3. CCD-to-CCD traffic pays the sIOD round-trip: NUMA by construction.',
+      expert:'sIOD-star IF topology; L3 fill in the ~46-cycle class. Cross-CCD coherence traverses the sIOD \u2014 thread and memory placement measurably moves results.'}},
+    {name:'L3 \u2192 L2 \u2192 Zen 4 core', parts:['cpu-ccd'], cap:{
+      eli5:'A worker copies what it needs from the whiteboard to its own notebook (L2), then does the math.',
+      fifteen:'The core pulls the line into its private 1 MB L2 and executes out-of-order \u2014 deep caches hide the DRAM wait.',
+      pro:'Zen 4 fetches into 1 MB L2 (~14 cycles), executes wide OoO with AVX-512. The hierarchy exists because branchy code can\u2019t be prefetched.',
+      expert:'32+32 KB L1 \u2192 1 MB L2 \u2192 32 MB L3; miss penalties cascade. IPC rides on the hierarchy absorbing irregular reuse \u2014 Genoa-X triples L3 via TSV for exactly this.'}},
+    {name:'Writeback \u2192 DDR5', parts:['cpu-ccd','cpu-iod'], cap:{
+      eli5:'Finished work gets copied back up to the whiteboard, then mailed back to the memory sticks.',
+      fifteen:'Dirty lines evict L2 \u2192 L3 \u2192 sIOD \u2192 DDR5. Writeback keeps the hierarchy coherent without stalling the core.',
+      pro:'Writeback through the MOESI-coherent hierarchy; the sIOD memory controllers commit to DDR5 \u2014 latency-tolerant, bandwidth-cheap.',
+      expert:'Victim writebacks cascade upward; sIOD ordering + ECC commit closes the loop. The nuance: this whole dance exists to hide ~100 ns DRAM latency from unpredictable code \u2014 latency is the enemy.'}}]},
+  gpu:{ color:0x58b0a6,
+    path:[[-4.4,1.05,2.5,0],[-2.62,1.05,2.5,0],[-1.6,1.05,2.5,0.9],[-0.6,1.05,2.5,1.6],
+      [0,1.05,2.5,2.0],[0,1.05,2.5,1.0],[0,1.05,2.5,0],[0,1.05,2.5,1.0],[0,1.05,2.5,2.0],
+      [0,0.9,2.0,0.5],[0,0.45,0.9,-1.5],[0,0.35,0.5,-2.85],[0,0.35,0.5,-4.6],
+      [0,0.6,1.2,-4.6],[0,0.9,2.0,-3.0],[-1.3,1.05,2.5,-1.0],[-2.62,1.05,2.5,0]],
+    stages:[
+    {name:'HBM3 \u2192 L2', parts:['gpu-hbm'], cap:{
+      eli5:'The memory towers dump their colors onto the big shared table (L2) \u2014 super close, super fast.',
+      fifteen:'3.35 TB/s from 5 HBM3 stacks floods the 50 MB L2 \u2014 the staging ground for all 132 SMs.',
+      pro:'HBM3 controllers push tiles into the partitioned 50 MB L2 at multi-TB/s. The L2 is a bandwidth filter, sized for streaming reuse.',
+      expert:'1024-bit/stack HBM3 at ~6.5 Gbps/pin; L2 slices on the XBAR absorb coalesced traffic. Kernels are tiled for L2 residency \u2014 it\u2019s the last knob before HBM.'}},
+    {name:'L2 \u2192 SM array', parts:['gpu-l2','gpu-interposer'], cap:{
+      eli5:'The table hands each of the 132 teams its piece of the puzzle, all at once.',
+      fifteen:'The on-die crossbar broadcasts tiles to 132 SMs; each SM\u2019s warps chew through them in lockstep.',
+      pro:'The XBAR fans tiles out to 8 GPCs. Tensor Cores demand operands at TB/s \u2014 the fabric, not the ALUs, is the design center.',
+      expert:'All-to-all SM/L2 crossbar on one die \u2014 the reason GH100 stays monolithic. Chiplet hops would starve the Tensor Cores; bandwidth is the product.'}},
+    {name:'Tensor Cores compute', parts:['gpu-gpc'], cap:{
+      eli5:'The super-fast matrix helpers multiply huge grids of numbers \u2014 this is the AI magic.',
+      fifteen:'4th-gen Tensor Cores crunch FP8/FP16 matrix-multiply-accumulate, 4 per SM across 132 SMs.',
+      pro:'Transformer Engine: FP8 with per-tensor scaling and 4:2 structured sparsity \u2014 ~8\u00d7 the matmul throughput of CUDA cores per mm\u00b2.',
+      expert:'Systolic MMA datapaths; 4 warp schedulers per SM hide HBM latency via occupancy. Arithmetic intensity decides HBM- vs compute-bound \u2014 data never sits still.'}},
+    {name:'L2 \u2192 HBM / NVLink', parts:['gpu-l2','gpu-nvlink'], cap:{
+      eli5:'Answers go back to the towers \u2014 or zoom across golden bridges to a neighboring GPU.',
+      fifteen:'Results coalesce in L2 and write back to HBM \u2014 or cross NVLink at 900 GB/s to the next GPU splitting the model.',
+      pro:'Writeback through L2 to HBM; NVLink 4.0 carries activations and gradients to peers \u2014 8 GPUs behave as one memory pool.',
+      expert:'NVSwitch all-reduce at fabric speed; NVLink exists so interconnect never bottlenecks before HBM does. The nuance: a streaming firehose \u2014 bandwidth is everything, data never rests.'}}]},
+  dpu:{ color:0x7aa0d8,
+    path:[[0.7,0.55,0.9,-4.6],[0.7,0.55,0.9,-2.35],[0.2,0.8,1.4,-1.6],[-0.745,1.0,2.0,-0.78],
+      [0.37,1.0,2.0,-0.4],[0.37,1.0,2.0,0],[0.75,1.0,2.0,0],[1.12,1.0,2.0,0],
+      [0.4,1.0,2.0,0],[-0.37,1.0,2.0,0],[0.4,1.0,2.0,-0.4],[1.12,1.0,2.0,-0.78],
+      [1.12,0.8,1.4,0.6],[1.12,0.55,0.9,2.2],[1.12,0.55,0.9,4.6],[0.7,0.55,0.9,4.6],[0.7,0.55,0.9,-4.6]],
+    stages:[
+    {name:'QSFP \u2192 ConnectX pipeline', parts:['dpu-qsfp','dpu-net'], cap:{
+      eli5:'A message zooms in through the cable socket into the super-fast mailroom.',
+      fifteen:'400 GbE frames enter the ConnectX-7 pipeline via QSFP112 \u2014 parsed and classified in hardware.',
+      pro:'PAM4 112G SerDes into the parser and match-action tables; fixed logic owns the packet from the first bit.',
+      expert:'112G PAM4 SerDes, hardware parser, flow tables \u2014 zero CPU involvement. The pipeline, not software, is the fast path.'}},
+    {name:'Inline crypto + RegEx', parts:['dpu-crypto','dpu-regex'], cap:{
+      eli5:'Mid-flight, the message gets unscrambled and spell-checked for sneaky patterns \u2014 without stopping.',
+      fifteen:'IPsec/TLS decrypted inline while the RegEx engine scans for threats \u2014 bump-in-the-wire at line rate.',
+      pro:'Inline AES-GCM at 400G; hardware NFA/DFA for DPI/IDS. The \u201cAI cybersecurity\u201d story is this block plus the A78s.',
+      expert:'Inline vs lookaside: data never leaves the pipeline \u2014 an order-of-magnitude latency and throughput win over CPU AES-NI at 400G.'}},
+    {name:'DPA packet cores', parts:['dpu-dpa'], cap:{
+      eli5:'The mailroom helpers stamp, sort, and route each message \u2014 tiny jobs, insanely fast.',
+      fifteen:'16 hyperthreaded DPA cores handle virtio, congestion control, custom protocols \u2014 programmable, unlike the fixed blocks.',
+      pro:'Multithreaded VLIW-ish cores hide latency via thread count \u2014 classic network-processor design, exposed through DOCA.',
+      expert:'Thread-count latency hiding for I/O-bound code; the A78s handle only exceptions. Ideal control/data-plane split: fixed chores \u2192 fixed logic, variable chores \u2192 DPA.'}},
+    {name:'PCIe DMA \u2192 host', parts:['dpu-pcie'], cap:{
+      eli5:'The finished message slides into the computer\u2019s memory all by itself \u2014 the big CPU never lifts a finger.',
+      fifteen:'PCIe Gen5 DMA drops the packet into host memory. The host CPU never touches it \u2014 that\u2019s the whole point.',
+      pro:'The embedded PCIe switch (root-complex capable) DMAs through descriptor rings into host DRAM \u2014 zero host-CPU cycles per packet.',
+      expert:'Host-bypass I/O inverts the server: infrastructure owns the bus, the host is a tenant. The nuance: the packet never touched DRAM or the host CPU \u2014 ~30% \u201cinfrastructure tax\u201d reclaimed.'}}]}
+  };
+  /* Variant overrides: used when the selected variant changes the topology. */
+  FLOW.cpu.variants = {
+    'genoa-x': {
+      path:[[-5.2,0.55,1.0,0],[-2.7,0.55,1.0,0],[-1.2,0.7,1.6,0],[0,0.95,2.3,0],
+        [-0.9,0.95,2.3,0.3],[-1.78,0.95,2.3,0.58],[-1.78,1.5,3.4,0.58],[-1.78,1.7,3.4,0.58],
+        [-1.78,1.5,3.4,0.58],[-1.78,0.95,2.3,0.58],[-1.78,1.2,2.3,0.58],[-1.78,1.38,2.3,0.58],
+        [-1.78,1.2,2.3,0.58],[-1.78,0.95,2.3,0.58],[-0.9,0.95,2.3,0.3],[0,0.95,2.3,0],
+        [1.5,0.7,1.6,0],[2.7,0.55,1.0,0],[5.2,0.55,1.0,0]],
+      stages:[
+        FLOW.cpu.stages[0],
+        {name:'sIOD \u2192 stacked V-Cache', parts:['cpu-ccd'], cap:{
+          eli5:'The data rides up into a bonus memory pancake stacked right on top of each brain \u2014 64 extra megabytes, twelve times over.',
+          fifteen:'Each CCD carries a 64 MB 3D-stacked cache die on TSVs above its native 32 MB L3 \u2014 1,152 MB of L3 across the package.',
+          pro:'TSV hybrid-bonded V-Cache: 64 MB stacked per CCD over 32 MB native = 96 MB/CCD. The IF path is unchanged \u2014 the L3 just got 3\u00d7 deeper without leaving the die.',
+          expert:'SoIC stacking on the Persephone CCD; the stacked tier adds a few cycles of TSV latency \u2014 still an order below DRAM. Watch the cache dies rise above all 12 CCDs as the explosion opens.'}},
+        {name:'V-Cache \u2192 L2 \u2192 core', parts:['cpu-ccd'], cap:{
+          eli5:'Workers pull from the giant stacked whiteboard down to their notebooks \u2014 far less waiting than the trip to the memory sticks.',
+          fifteen:'The deeper L3 absorbs working sets that used to spill to DDR5 \u2014 fewer sIOD round-trips, same 96 cores.',
+          pro:'L3 per core triples; cache-friendly server workloads (databases, EDA) see the miss curve knee move decisively.',
+          expert:'The stacked tier trades a few TSV cycles for 3\u00d7 capacity \u2014 a pure win for workloads with 100\u2013900 MB reuse distances.'}},
+        FLOW.cpu.stages[3]]
+    }
+  };
+  FLOW.gpu.variants = {
+    'b200': {
+      path:[[-4.8,1.05,2.5,0],[-3.2,1.05,2.5,0],[-1.7,1.05,2.5,1.8],[-1.7,1.05,2.5,0.7],[-1.7,1.05,2.5,-0.3],
+        [0,1.05,2.5,-0.3],[1.7,1.05,2.5,-0.3],[1.7,1.05,2.5,0.7],[1.7,1.05,2.5,1.8],
+        [3.2,1.05,2.5,1.2],[4.8,1.05,2.5,0.6],[3.2,1.05,2.5,-0.8],[1.7,1.05,2.5,-1.8],
+        [-1.7,1.05,2.5,-1.8],[-3.2,1.05,2.5,-0.8],[-4.8,1.05,2.5,0]],
+      stages:[
+        {name:'HBM3E \u2192 L2', parts:['gpu-hbm'], cap:{
+          eli5:'Eight taller memory towers \u2014 192 GB total \u2014 flood the chip at 8 terabytes a second.',
+          fifteen:'8 HBM3E stacks, 192 GB at ~8 TB/s: double the capacity and over 2\u00d7 the bandwidth of H100.',
+          pro:'Four 24 GB HBM3E stacks per die, 4096-bit each \u2014 the bandwidth the doubled transistor budget needs to stay fed.',
+          expert:'HBM3E in the ~9.6 Gbps/pin class; ~4 TB/s per die of memory bandwidth, matched to the 10 TB/s NV-HBI \u2014 a balanced roofline by design.'}},
+        {name:'L2 \u2192 two Blackwell dies', parts:['gpu-l2','gpu-gpc'], cap:{
+          eli5:'The table is so big it spans two giant brains, stitched together by an invisible super-bridge.',
+          fifteen:'Two reticle-limit dies act as one GPU over NV-HBI \u2014 a 10 TB/s link keeps their caches coherent.',
+          pro:'NV-HBI die-to-die at 10 TB/s, fully cache-coherent. Each die owns 4 HBM3E stacks; SMs address all 192 GB as one pool.',
+          expert:'Partitioning returns as NV-HBI: the crossbar now spans two dies at 10 TB/s \u2014 enough for full coherence. The monolithic illusion, preserved.'}},
+        FLOW.gpu.stages[2],
+        FLOW.gpu.stages[3]]
+    }
+  };
+  function flowSteps(chip){
+    var F = FLOW[chip], v = selVariant(chip);
+    if (F.variants && F.variants[v]) return F.variants[v];
+    return F;
+  }
+
+  var FLOW_N = 50; /* per chip; 150 total, bounded pool */
+  var flowPts = [], flowGeo = null, flowPoints = null;
+  var flowOn = false, flowStep = 0, flowLast = 0, flowPrevT = 0, flowHi = null;
+  var tmpV = new THREE.Vector3();
+
+  function flowSprite(){
+    var c = document.createElement('canvas'); c.width = c.height = 64;
+    var x = c.getContext('2d');
+    var gr = x.createRadialGradient(32,32,0,32,32,32);
+    gr.addColorStop(0,'rgba(255,255,255,1)');
+    gr.addColorStop(0.35,'rgba(255,255,255,.85)');
+    gr.addColorStop(1,'rgba(255,255,255,0)');
+    x.fillStyle = gr; x.fillRect(0,0,64,64);
+    return new THREE.CanvasTexture(c);
+  }
+  function prepPath(pts){
+    var segs = [], total = 0;
+    for (var i=0;i<pts.length-1;i++){
+      var dx = pts[i+1][0]-pts[i][0], dz = pts[i+1][3]-pts[i][3];
+      var L = Math.sqrt(dx*dx+dz*dz);
+      segs.push(L); total += L;
+    }
+    return {pts:pts, segs:segs, total:total};
+  }
+  function samplePath(path, t, Tcur, out){
+    var d = ((t%1)+1)%1 * path.total, acc = 0;
+    for (var s=0;s<path.segs.length;s++){
+      var L = path.segs[s];
+      if (d <= acc+L || s === path.segs.length-1){
+        var f = L ? (d-acc)/L : 0;
+        f = Math.max(0, Math.min(1, f));
+        var a = path.pts[s], b = path.pts[s+1];
+        out.x = a[0]+(b[0]-a[0])*f;
+        out.z = a[3]+(b[3]-a[3])*f;
+        out.y = (a[1]+(b[1]-a[1])*f) + (a[2]+(b[2]-a[2])*f)*Tcur;
+        return out;
+      }
+      acc += L;
+    }
+    return out;
+  }
+  function buildFlow(){
+    var chips = ['cpu','gpu','dpu'];
+    var pos = new Float32Array(FLOW_N*3*3), col = new Float32Array(FLOW_N*3*3);
+    var c = new THREE.Color();
+    chips.forEach(function(ch, ci){
+      c.set(FLOW[ch].color);
+      for (var k=0;k<FLOW_N;k++){
+        var idx = ci*FLOW_N+k;
+        flowPts.push({chip:ch, i:idx, t:Math.random(), speed:0.05+Math.random()*0.06, path:null});
+        var v = 0.75+Math.random()*0.45;
+        col[idx*3]   = Math.min(1, c.r*v);
+        col[idx*3+1] = Math.min(1, c.g*v);
+        col[idx*3+2] = Math.min(1, c.b*v);
+        pos[idx*3+1] = -999;
+      }
+    });
+    flowGeo = new THREE.BufferGeometry();
+    flowGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    flowGeo.setAttribute('color', new THREE.BufferAttribute(col, 3));
+    var m = new THREE.PointsMaterial({size:0.34, map:flowSprite(), vertexColors:true,
+      transparent:true, opacity:0.95, depthWrite:false, blending:THREE.AdditiveBlending});
+    flowPoints = new THREE.Points(flowGeo, m);
+    flowPoints.frustumCulled = false;
+    flowPoints.visible = false;
+    scene.add(flowPoints);
+    refreshFlowPaths();
+    var dots = document.getElementById('flow-dots');
+    for (var d=0; d<4; d++){
+      (function(di){
+        var b = document.createElement('button');
+        b.setAttribute('aria-label','Go to flow step '+(di+1));
+        b.addEventListener('click', function(){
+          flowStep = di; flowLast = performance.now(); onFlowStep();
+        });
+        dots.appendChild(b);
+      })(d);
+    }
+  }
+  function refreshFlowPaths(){
+    flowPts.forEach(function(p){ p.path = prepPath(flowSteps(p.chip).path); });
+  }
+  window.refreshFlowPaths = refreshFlowPaths;
+  function onFlowStep(){
+    var hi = {};
+    ['cpu','gpu','dpu'].forEach(function(ch){
+      flowSteps(ch).stages[flowStep].parts.forEach(function(pid){ hi[pid] = 1; });
+    });
+    flowHi = hi;
+    renderFlow();
+  }
+  function renderFlow(){
+    if (!flowOn) return;
+    document.getElementById('flow-stepname').textContent =
+      'Step '+(flowStep+1)+' of 4 \u00b7 '+FLOW_STEP_NAMES[flowStep];
+    var cols = document.querySelectorAll('#flowbar .flowcol');
+    ['cpu','gpu','dpu'].forEach(function(ch, ci){
+      var st = flowSteps(ch).stages[flowStep];
+      cols[ci].querySelector('.fstage').textContent = st.name;
+      cols[ci].querySelector('.fcap').textContent = st.cap[LEVEL] || st.cap.pro;
+    });
+    var dots = document.getElementById('flow-dots').children;
+    for (var i=0;i<dots.length;i++) dots[i].classList.toggle('on', i===flowStep);
+  }
+  window.renderFlow = renderFlow;
+  function tickFlow(){
+    if (!flowOn) return;
+    var now = performance.now();
+    if (now-flowLast > 4500){ flowLast = now; flowStep = (flowStep+1)%4; onFlowStep(); }
+    var dt = Math.min(0.06, Math.max(0.0005, (now-flowPrevT)/1000));
+    flowPrevT = now;
+    var pos = flowGeo.attributes.position.array;
+    for (var i=0;i<flowPts.length;i++){
+      var p = flowPts[i];
+      p.t = (p.t + p.speed*dt) % 1;
+      var g = chipGroups[p.chip];
+      if (!g.visible){ pos[p.i*3+1] = -999; continue; }
+      samplePath(p.path, p.t, T, tmpV);
+      pos[p.i*3]   = tmpV.x + g.position.x;
+      pos[p.i*3+1] = tmpV.y + g.position.y;
+      pos[p.i*3+2] = tmpV.z + g.position.z;
+    }
+    flowGeo.attributes.position.needsUpdate = true;
+  }
+  document.getElementById('flow-toggle').addEventListener('click', function(){
+    flowOn = !flowOn;
+    this.classList.toggle('on', flowOn);
+    this.textContent = flowOn ? '\u23F8 Data flow' : '\u25B6 Data flow';
+    document.getElementById('flowbar').classList.toggle('show', flowOn);
+    flowPoints.visible = flowOn;
+    if (flowOn){
+      flowStep = 0; flowLast = performance.now(); flowPrevT = flowLast;
+      onFlowStep();
+    } else { flowHi = null; }
+  });
+  buildFlow();
+
   /* ---------------- state & interaction ---------------- */
   var T = 0.62, targetT = 0.62;
   var focus = 'all', tx = 0, ty = 2.4, cx = 0, cy = 2.4;
@@ -1073,6 +1444,7 @@ document.getElementById('label-toggle').addEventListener('click', function(){
   function animate(){
     requestAnimationFrame(animate);
     T += (targetT-T)*0.12;
+    tickFlow();
     layers.forEach(function(o){ o.position.y = o.userData.baseY + o.userData.explode*T; });
     cx += (tx-cx)*0.08; cy += (ty-cy)*0.08;
     var wantR = baseRadius * (focus === 'all' ? 1 : 0.62);
@@ -1083,16 +1455,19 @@ document.getElementById('label-toggle').addEventListener('click', function(){
       radius*Math.sin(phi)*Math.cos(theta)
     );
     camera.lookAt(cx, cy, 0);
-    // diff dimming
+    // diff dimming (+ data-flow step highlight)
     Object.keys(partMats).forEach(function(pid){
       var p = PARTS[pid];
       var match = !diffClass || (p && p.cls.indexOf(diffClass) >= 0);
+      var fhi = flowOn && flowHi && flowHi[pid];
       partMats[pid].forEach(function(mt){
-        var to = match ? mt.userData.top : 0.06;
+        var to = (match || fhi) ? mt.userData.top : 0.06;
         mt.opacity += (to-mt.opacity)*0.15;
-        var te = match ? (diffClass ? 0.9 : mt.userData.topei) : 0.05;
-        if (diffClass) mt.emissiveIntensity += (te-mt.emissiveIntensity)*0.15;
-        else mt.emissiveIntensity += (mt.userData.topei-mt.emissiveIntensity)*0.15;
+        var te;
+        if (fhi) te = 1.7;
+        else if (diffClass) te = match ? 0.9 : 0.05;
+        else te = mt.userData.topei;
+        mt.emissiveIntensity += (te-mt.emissiveIntensity)*0.15;
       });
     });
     renderer.render(scene, camera);
@@ -1100,6 +1475,225 @@ document.getElementById('label-toggle').addEventListener('click', function(){
   }
   // initial focus button state
   document.querySelector('[data-focus="all"]').classList.add('on');
+/* ================= scale: individual vs scaled ================= */
+(function(){
+  var canvas = document.getElementById('scale-scene');
+  if (!canvas || !window.THREE){
+    document.getElementById('scale-fallback').style.display='block';
+    canvas.style.display='none';
+    window.renderScale = function(){ renderScaleCap(); };
+    renderScaleCap();
+    return;
+  }
+  var LINKC = {nvlink:0x2dd4bf, pcie:0xd9a441, ib:0x5aa2ff};
+  var CPUC=0xe08a4c, GPUC=0x58b0a6, DPUC=0x7aa0d8, SWC=0x9d7bff,
+      BOARDC=0x101216, RACKC=0x24425e, TORC=0x9aa0a8, RAILC=0x2a2d33;
+  function B(x,y,z,w,h,d,c){ return {p:[x,y,z], s:[w,h,d], c:c}; }
+  function top(b){ return [b.p[0], b.p[1]+b.s[1]/2, b.p[2]]; }
+  function LK(a,b,t){ return {a:a, b:b, t:t}; } // a,b are [x,y,z] triples
+  var PRESETS = {
+  solo:{
+    name:'Solo \u2014 the workstation',
+    stats:['1 CPU','1\u20132 GPUs','PCIe Gen5 \u00d716','No network fabric'],
+    contrast:'<b>The contrast:</b> local training is a couple of GPUs and no real network \u2014 NVLink/PCIe only. Nothing here prepares you for what the fabric demands at scale.',
+    cap:{
+      eli5:'One computer, one or two GPUs, short wires inside the box. The work never leaves the desk, so there is no network to think about.',
+      fifteen:'A workstation: one CPU plus one or two GPUs hanging off PCIe. Perfect for inference and small training runs, where the whole model fits on a card or two.',
+      pro:'Single-node PCIe topology: ~64 GB/s each way per GPU, one NUMA domain. Works while model + batch fit in 24\u201380 GB of VRAM. The moment a model must span boxes, this topology has no answer \u2014 there is no fabric.',
+      expert:'No collective offload, no RDMA, no adaptive routing \u2014 the network is not a bottleneck because there is no network. Contrast with scale-out: every byte that leaves this box would pay a PCIe\u2192NIC\u2192fabric tax this design never budgeted for.'},
+    cam:{pos:[0,13,23], tgt:[0,1.5,0]},
+    build:function(){
+      var board=B(0,-0.15,0, 11,0.3,7, BOARDC),
+          cpu=B(-3.6,0.75,0, 3,1.5,3, CPUC),
+          g1=B(2.8,0.75,-1.7, 2.6,1.5,2.6, GPUC),
+          g2=B(2.8,0.75,1.7, 2.6,1.5,2.6, GPUC),
+          c=top(cpu), t1=top(g1), t2=top(g2);
+      return {boxes:[board,cpu,g1,g2],
+        links:[LK(c,t1,'pcie'), LK(c,t2,'pcie')]};
+    }},
+  node:{
+    name:'Node \u2014 DGX / HGX class',
+    stats:['2 CPUs','8 GPUs','NVLink 900 GB/s','2\u00d7 400G DPUs'],
+    contrast:'<b>The contrast:</b> this is the largest unit that still behaves like one machine. Beyond it, collectives cross a real network \u2014 and that is exactly why every node gets a DPU.',
+    cap:{
+      eli5:'A supercomputer building block: eight GPUs gossiping over golden bridges, two CPUs in charge, and two DPUs handling all the mail to the outside world.',
+      fifteen:'The AI workhorse: 8 GPUs fully meshed through NVSwitch, 2 host CPUs, and DPUs for networking. Trains models far too big for one GPU \u2014 while still behaving like a single machine.',
+      pro:'NVSwitch gives 8 GPUs a shared memory pool at 900 GB/s per GPU \u2014 the largest unit that still feels like one computer. The 2 DPUs own everything off-node: storage, control plane, scale-out traffic \u2014 so host CPUs never burn cycles on networking.',
+      expert:'8-GPU NVL domain: ~4.8 TB/s of NVLink bisection via NVSwitch; SHARP-capable InfiniBand hangs off the DPUs, not the host. This is the boundary of \u201cone machine\u201d \u2014 beyond it, collectives cross a real network and latency stops being free.'},
+    cam:{pos:[0,17,31], tgt:[0,1.5,0]},
+    build:function(){
+      var boxes=[B(0,-0.15,0, 19.5,0.3,11.5, BOARDC)],
+          links=[],
+          cpus=[B(-8.1,0.85,-2.75, 2.2,1.7,2.4, CPUC), B(-8.1,0.85,2.75, 2.2,1.7,2.4, CPUC)],
+          gpus=[];
+      [-5.7,-1.9,1.9,5.7].forEach(function(x){
+        [-2.9,2.9].forEach(function(z){ gpus.push(B(x,0.85,z, 2.9,1.7,2.5, GPUC)); });
+      });
+      var nvs=B(0,0.85,0, 2.4,1.7,2.4, SWC),
+          dpus=[B(8.1,0.85,-2.75, 2.2,1.7,2.4, DPUC), B(8.1,0.85,2.75, 2.2,1.7,2.4, DPUC)];
+      boxes=boxes.concat(cpus,gpus,[nvs],dpus);
+      var nt=top(nvs);
+      gpus.forEach(function(g){ var t=top(g); links.push(LK(t,nt,'nvlink')); });
+      cpus.forEach(function(c,i){ var t=top(c), g=top(gpus[i*2]); links.push(LK(t,g,'pcie')); });
+      dpus.forEach(function(d,i){ var t=top(d), g=top(gpus[6+i]); links.push(LK(t,g,'pcie'));
+        links.push(LK(t,[11.8,4.5,t[2]*1.6],'ib')); });
+      return {boxes:boxes, links:links};
+    }},
+  rack:{
+    name:'Rack \u2014 nodes + top-of-rack switch',
+    stats:['4 nodes','32 GPUs','ToR leaf switch','IB / Ethernet uplink'],
+    contrast:'<b>The contrast:</b> oversubscription starts here \u2014 the ToR uplink bandwidth decides how painful cross-rack collectives get. Each node\u2019s DPU terminates its own RDMA connections; the host never sees the fabric.',
+    cap:{
+      eli5:'Stack several supercomputer boxes in a tall closet and plug them all into one big hallway switch.',
+      fifteen:'A rack wires multiple DGX-class nodes into a top-of-rack switch. Traffic inside the rack is one hop; the ToR uplinks carry everything headed to the rest of the data center.',
+      pro:'The ToR (leaf) switch aggregates 32+ GPUs. Oversubscription starts here: uplink bandwidth out of the rack decides how painful cross-rack collectives get. Every DPU terminates its own RDMA connections \u2014 the host never sees the fabric.',
+      expert:'Rack = power + cooling + failure + network domain. Leaf-spine begins here: ECMP spreads flows across uplinks, DCQCN keeps congestion honest. One ToR failure takes the rack with it \u2014 which is why jobs checkpoint.'},
+    cam:{pos:[0,13,25], tgt:[0,5,0]},
+    build:function(){
+      var boxes=[B(-2.7,5.2,0, 0.25,10.6,3.9, RAILC), B(2.7,5.2,0, 0.25,10.6,3.9, RAILC)],
+          links=[];
+      [1.0,3.3,5.6,7.9].forEach(function(y,i){
+        boxes.push(B(0,y,0, 5,1.7,3.5, i%2?0x1d5f5c:0x1f6f6a));
+        links.push(LK([0,y+0.85,1.4],[0,9.4,1.0],'ib'));
+      });
+      boxes.push(B(0,9.9,0, 5,1.0,2.2, TORC));
+      return {boxes:boxes, links:links};
+    }},
+  cluster:{
+    name:'Cluster \u2014 spine-leaf fabric, thousands of GPUs',
+    stats:['100s of racks','1,000s of GPUs','Spine-leaf IB fabric','In-network collectives'],
+    contrast:'<b>The contrast:</b> at this scale the network IS the computer \u2014 all-reduce traffic across thousands of GPUs makes fabric bandwidth the binding constraint. That is exactly why every node gets a DPU: collectives, encryption and storage, offloaded from saturated hosts.',
+    cap:{
+      eli5:'Rows of closets full of GPUs, all gossiping through hallway switches, training one giant brain together.',
+      fifteen:'Spine-leaf: every rack switch connects to every spine switch, so any GPU reaches any other in two hops. Thousands of GPUs train one model; the network constantly ferries gradients between them.',
+      pro:'At this scale the network IS the computer: all-reduce traffic across thousands of GPUs makes fabric bandwidth the binding constraint on training time. That is exactly why every node gets a DPU \u2014 it offloads collectives, encryption, and storage from hosts that are already saturated feeding GPUs.',
+      expert:'Non-blocking (or deliberately oversubscribed) fat-tree with adaptive routing and SHARP in-network aggregation on the DPU NICs. Local training is a PCIe problem; large-scale training is a networking problem wearing a GPU costume \u2014 hence a DPU per node, terminating thousands of RDMA connections the host OS never touches.'},
+    cam:{pos:[0,17,32], tgt:[0,4,0]},
+    build:function(){
+      var boxes=[], links=[];
+      [-9,-3,3,9].forEach(function(x){ boxes.push(B(x,3.2,0, 4.2,6.4,3.2, RACKC)); });
+      var spines=[B(-3,9.2,-3.5, 3,1,2, TORC), B(3,9.2,-3.5, 3,1,2, TORC)];
+      boxes=boxes.concat(spines);
+      [-9,-3,3,9].forEach(function(x){
+        spines.forEach(function(s){
+          links.push(LK([x,6.4,0],[s.p[0],8.7,-3.5],'ib'));
+        });
+      });
+      return {boxes:boxes, links:links};
+    }}
+  };
+
+  var scaleKey='solo';
+  var renderer, scene, camera, root, pktPts, packets=[], clock;
+  function disposeObj(o){
+    o.traverse(function(n){
+      if(n.geometry) n.geometry.dispose();
+      if(n.material){ (Array.isArray(n.material)?n.material:[n.material]).forEach(function(m){ m.dispose(); }); }
+    });
+  }
+  function buildScale(){
+    while(root.children.length){ var o=root.children[0]; root.remove(o); disposeObj(o); }
+    packets=[];
+    var def=PRESETS[scaleKey], bd=def.build(), curves=[];
+    bd.boxes.forEach(function(b){
+      var g=new THREE.BoxGeometry(b.s[0],b.s[1],b.s[2]),
+          m=new THREE.MeshStandardMaterial({color:b.c, roughness:.55, metalness:.35}),
+          mesh=new THREE.Mesh(g,m);
+      mesh.position.set(b.p[0],b.p[1],b.p[2]); root.add(mesh);
+      var e=new THREE.LineSegments(new THREE.EdgesGeometry(g),
+        new THREE.LineBasicMaterial({color:0xffffff, transparent:true, opacity:.13}));
+      e.position.copy(mesh.position); root.add(e);
+    });
+    bd.links.forEach(function(l){
+      var a=new THREE.Vector3(l.a[0],l.a[1],l.a[2]),
+          b=new THREE.Vector3(l.b[0],l.b[1],l.b[2]),
+          mid=a.clone().add(b).multiplyScalar(0.5); mid.y+=1.6;
+      var curve=new THREE.QuadraticBezierCurve3(a,mid,b);
+      var lg=new THREE.BufferGeometry().setFromPoints(curve.getPoints(24));
+      root.add(new THREE.Line(lg,
+        new THREE.LineBasicMaterial({color:LINKC[l.t], transparent:true, opacity:.5})));
+      curves.push({curve:curve, type:l.t});
+    });
+    var per={nvlink:4, pcie:3, ib:4}, n=0;
+    curves.forEach(function(c){ n+=per[c.type]||2; });
+    var pos=new Float32Array(n*3), col=new Float32Array(n*3), ci=0;
+    curves.forEach(function(c){
+      var k=per[c.type]||2, cc=new THREE.Color(LINKC[c.type]);
+      for(var i=0;i<k;i++){
+        packets.push({curve:c.curve, t:Math.random(), speed:.22+Math.random()*.3});
+        col[ci*3]=cc.r; col[ci*3+1]=cc.g; col[ci*3+2]=cc.b; ci++;
+      }
+    });
+    var pg=new THREE.BufferGeometry();
+    pg.setAttribute('position', new THREE.BufferAttribute(pos,3));
+    pg.setAttribute('color', new THREE.BufferAttribute(col,3));
+    pktPts=new THREE.Points(pg, new THREE.PointsMaterial({size:.42, vertexColors:true,
+      transparent:true, opacity:.95, depthWrite:false}));
+    pktPts.frustumCulled=false;
+    root.add(pktPts);
+    camera.position.set(def.cam.pos[0],def.cam.pos[1],def.cam.pos[2]);
+    camera.lookAt(def.cam.tgt[0],def.cam.tgt[1],def.cam.tgt[2]);
+  }
+  function renderScaleCap(){
+    var p=PRESETS[scaleKey];
+    document.getElementById('scale-name').textContent=p.name;
+    document.getElementById('scale-why').textContent=p.cap[LEVEL]||p.cap.pro;
+    document.getElementById('scale-stats').innerHTML=
+      p.stats.map(function(s){ return '<span>'+s+'</span>'; }).join('');
+    document.getElementById('scale-contrast').innerHTML=p.contrast;
+  }
+  window.renderScale=function(){ renderScaleCap(); };
+
+  try{
+    renderer=new THREE.WebGLRenderer({canvas:canvas, antialias:true});
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+    renderer.setClearColor(0x1b1712,1);
+  }catch(e){
+    document.getElementById('scale-fallback').style.display='block';
+    canvas.style.display='none';
+    renderScaleCap();
+    return;
+  }
+  scene=new THREE.Scene();
+  camera=new THREE.PerspectiveCamera(45,1,.1,200);
+  scene.add(new THREE.AmbientLight(0xfff2e0,.85));
+  var dl=new THREE.DirectionalLight(0xffffff,.7); dl.position.set(8,16,10); scene.add(dl);
+  root=new THREE.Group(); scene.add(root);
+  clock=new THREE.Clock();
+  function sizeScale(){
+    var w=canvas.clientWidth||canvas.parentNode.clientWidth, h=canvas.clientHeight||440;
+    renderer.setSize(w,h,false);
+    camera.aspect=w/h; camera.updateProjectionMatrix();
+  }
+  window.addEventListener('resize', sizeScale);
+  document.querySelectorAll('.sbtn').forEach(function(b){
+    b.addEventListener('click', function(){
+      scaleKey=b.getAttribute('data-scale');
+      document.querySelectorAll('.sbtn').forEach(function(x){ x.classList.toggle('on', x===b); });
+      buildScale(); renderScaleCap();
+    });
+  });
+  var tmpV=new THREE.Vector3();
+  (function animateScale(){
+    requestAnimationFrame(animateScale);
+    var dt=Math.min(.05, clock.getDelta());
+    root.rotation.y+=dt*.1;
+    if(pktPts){
+      var arr=pktPts.geometry.attributes.position.array;
+      for(var i=0;i<packets.length;i++){
+        var p=packets[i];
+        p.t=(p.t+p.speed*dt)%1;
+        p.curve.getPoint(p.t,tmpV);
+        // counter-rotate: packets live inside rotating root, so transform local point
+        arr[i*3]=tmpV.x; arr[i*3+1]=tmpV.y; arr[i*3+2]=tmpV.z;
+      }
+      pktPts.geometry.attributes.position.needsUpdate=true;
+    }
+    renderer.render(scene,camera);
+  })();
+  sizeScale(); buildScale(); renderScaleCap();
+})();
+
   resize(); animate();
 })();
 </script>
