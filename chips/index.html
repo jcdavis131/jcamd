@@ -267,8 +267,25 @@ footer.site a{color:var(--accent);text-decoration:none}
     background:linear-gradient(rgba(14,12,9,.88),transparent)}
   .seg{flex:0 0 auto;padding:3px}
   .seg .cap{display:none}
-  .pill{padding:4px 10px;font-size:.72rem}
+  .pill{padding:6px 14px;font-size:.78rem;min-height:44px;box-sizing:border-box}
+  .seg.variants .vbtn{min-height:44px;padding:8px 14px;font-size:.78rem}
+  .dpill{min-height:44px;padding:10px 18px}
+  .mitem{padding:12px 16px;min-height:44px;flex-shrink:0}
+  .flow-dots{display:flex}
+  .flow-dots button{position:relative}
+  .flow-dots button::after{content:"";position:absolute;left:-10px;right:-10px;top:-19px;bottom:-19px}
+  #pin .close,#vchange .close{min-width:44px;min-height:44px;display:inline-flex;align-items:center;justify-content:center}
+  /* horizontal scrollers: snap + right-edge fade so users can tell they scroll */
+  .vpills,.diff-row,.ovl-ctrl,.flow-grid{scroll-snap-type:x proximity;
+    scrollbar-width:none;
+    -webkit-mask-image:linear-gradient(90deg,#000 88%,transparent);
+    mask-image:linear-gradient(90deg,#000 88%,transparent)}
+  .vpills::-webkit-scrollbar,.diff-row::-webkit-scrollbar,.ovl-ctrl::-webkit-scrollbar,.flow-grid::-webkit-scrollbar{display:none}
+  .vpills>*,.diff-row>*,.ovl-ctrl>*,.flow-grid>*{scroll-snap-align:start}
   #pin{right:12px;left:12px;width:auto;bottom:178px;max-height:38%;overflow:auto}
+  #vchange{left:12px;bottom:178px;width:auto;max-width:calc(100vw - 24px)}
+  body{overflow-x:hidden}
+  #tip,#build-tip{max-width:min(78vw,250px);font-size:.85rem}
   .flow-grid{grid-template-columns:repeat(3,minmax(210px,1fr));overflow-x:auto;padding-bottom:2px}
   #flowbar{padding:8px 12px 10px}
   .ovl-dock{padding:16px 12px 8px}
@@ -560,7 +577,7 @@ footer.site a{color:var(--accent);text-decoration:none}
         <li><b>Xeon 6980P “Granite Rapids”</b> — 128C/256T, 504 MB L3, 3 compute tiles + 2 SoC tiles on EMIB, 12-ch DDR5-6400, 96× PCIe Gen5/CXL, LGA-7529, 500 W. Intel Xeon 6 product brief.</li>
         <li><b>Apple M4 Max</b> — up to 16 CPU cores, 40 GPU cores, 16-core Neural Engine, 128 GB unified LPDDR5X, 546 GB/s. Apple M4 Max tech specs.</li>
         <li><b>Ryzen 9 9950X</b> — 16C/32T Zen 5 (Granite Ridge), 4.3/5.7 GHz, 64 MB L3 + 16 MB L2, 2-ch DDR5, PCIe Gen5, 2-CU RDNA2 iGPU, AM5 LGA-1718, 170 W. <a href="https://www.techpowerup.com/cpu-specs/ryzen-9-9950x.c3649">TechPowerUp specs</a>.</li>
-        <li><b>H100 NVL</b> — paired PCIe cards joined by 3 NVLink bridges, 94 GB HBM3 per card (188 GB pooled), ~3.9 TB/s per card, 350–400 W per card. NVIDIA H100 NVL product brief.</li>
+        <li><b>H100 NVL</b> — paired PCIe cards joined by 3 NVLink bridges, 94 GB HBM3 per card (188 GB across the pair), ~3.9 TB/s per card, 350–400 W per card. NVIDIA H100 NVL product brief.</li>
         <li><b>B200 “Blackwell”</b> — 2 dies, 8× HBM3E stacks, 192 GB, ~8 TB/s, 10 TB/s NV-HBI die link, NVLink 5 at 1.8 TB/s. NVIDIA Blackwell architecture brief.</li>
         <li><b>RTX 4090</b> — AD102, 128 SMs / 16,384 CUDA, 24 GB GDDR6X on 384-bit (~1.01 TB/s), PCIe 4.0 ×16, 450 W. NVIDIA GeForce RTX 4090 specs; TechPowerUp GPU database.</li>
         <li><b>Instinct MI300X</b> — 8× 5 nm XCD chiplets + 4× 6 nm I/O dies, 8 HBM3 stacks, 192 GB, 5.3 TB/s, 256 MB Infinity Cache, 750 W OAM. <a href="https://www.tomshardware.com/pc-components/cpus/amd-unveils-instinct-mi300x-gpu-and-mi300a-apu-claims-up-to-16x-lead-over-nvidias-competing-gpus">Tom's Hardware</a>; <a href="https://www.amd.com/content/dam/amd/en/documents/advancing-ai-keynote.pdf">AMD Advancing AI keynote (PDF)</a>.</li>
@@ -750,7 +767,7 @@ var PARTS = {
  eli5:'A modest bookshelf for the DPU’s own notes — nowhere near as big as the computer’s memory, because packets don’t sit around.',
  fifteen:'One DDR5 controller feeding 16–32 GB of soldered on-card memory — plenty for an OS and control software, tiny next to a server’s terabytes.',
  pro:'Single DRAM controller, 16/32 GB DDR5-5200/5600 soldered. Sized for control-plane + buffering; the data plane streams through, it doesn’t live here.',
- expert:'Memory bandwidth ~5× BlueField-2 per NVIDIA; still an order below server DDR5 subsystems — by design, since bulk data bypasses DRAM via accelerators.'},
+ expert:'Memory bandwidth ~5× BlueField-2 (est.); still an order below server DDR5 subsystems — by design, since bulk data bypasses DRAM via accelerators.'},
 'dpu-qsfp':{chip:'dpu',cls:['network'],name:'QSFP112 cages',
  spec:['2× 400G ports','Hot-pluggable optics','Front of card'],
  eli5:'The two chunky sockets where the fat network cables plug in — the DPU’s front doors.',
@@ -786,8 +803,8 @@ var PARTS = {
  spec:['DDR5-6400 controllers','PCIe Gen5 / CXL','2 tiles flanking compute'],
  eli5:'The helper-tiles on the ends — they handle the memory sticks and the wires to the outside world, like the post office in Genoa.',
  fifteen:'Intel 7 SoC tile: DDR5-6400 memory controllers and PCIe Gen5/CXL lanes, flanking the compute tiles and linked by EMIB bridges.',
- pro:'2× SoC tiles carry the 12 DDR5-6400 channels (921.6 GB/s) and 96 PCIe Gen5/CXL lanes. I/O on the older, cheaper Intel 7 node — the economic logic of disaggregation.',
- expert:'Node partitioning: compute on Intel 3, I/O on Intel 7. EMIB bridges replace the sIOD star; bandwidth per socket doubles Genoa via DDR5-6400.'},
+ pro:'2× SoC tiles carry the 12 DDR5-6400 channels (614.4 GB/s) and 96 PCIe Gen5/CXL lanes. I/O on the older, cheaper Intel 7 node — the economic logic of disaggregation.',
+ expert:'Node partitioning: compute on Intel 3, I/O on Intel 7. EMIB bridges replace the sIOD star; bandwidth per socket grows ~1.3× over Genoa (460.8 → 614.4 GB/s).'},
 'cpu-emib':{chip:'cpu',cls:['interconnect'],name:'EMIB bridges',
  spec:['Silicon bridge in substrate','Die-to-die links','~GB/s per bridge class'],
  eli5:'Tiny silicon bridges buried in the package floor, carrying messages between the tiles — like secret tunnels under the floorboards.',
@@ -942,11 +959,11 @@ PVAR['gpu-hbm'] = {
   pro:'HBM3E at ~9.6 Gbps/pin class, 4096-bit per stack pair. The bandwidth the doubled transistor budget needs to stay fed.',
   expert:'~4 TB/s per die of memory bandwidth, matched to the 10 TB/s NV-HBI — a balanced roofline by design.'},
  'h100-nvl':{name:'HBM3 stacks (per card)',
-  spec:['94 GB / card','~3.9 TB/s / card','188 GB pooled'],
+  spec:['94 GB / card','~3.9 TB/s / card','188 GB across the pair'],
   eli5:'Each card’s own memory towers — 94 gigabytes per card, 188 when the twins pool together.',
   fifteen:'Per-card HBM3: 94 GB at ~3.9 TB/s. Two cards pool to 188 GB for big-model inference over the NVLink bridges.',
-  pro:'94 GB HBM3 per GPU, ~3.9 TB/s each. Capacity (188 GB pooled) over SXM’s bandwidth — the inference SKU tradeoff.',
-  expert:'Same HBM3 generation as SXM, more capacity per card. The pooled 188 GB targets tensor-parallel LLM serving.'},
+  pro:'94 GB HBM3 per GPU, ~3.9 TB/s each. Capacity (188 GB across the pair) over SXM’s bandwidth — the inference SKU tradeoff.',
+  expert:'Same HBM3 generation as SXM, more capacity per card. The 188 GB across the pair targets tensor-parallel LLM serving \u2014 each card still keeps its 94 GB local.'},
  'mi300x':{name:'HBM3 stacks',
   spec:['8× stacks','192 GB total','5.3 TB/s'],
   eli5:'Eight memory towers ringed around the chiplets — 192 gigabytes for giant AI models.',
@@ -1112,7 +1129,7 @@ PVAR['dpu-pcie'] = {
   spec:['PCIe 4.0','Host + devices','DMA'],
   eli5:'The older, slower slide to the computer — PCIe 4 instead of 5.',
   fifteen:'PCIe Gen4: BF2’s host interface and device switch. Half the per-lane speed of Gen5.',
-  pro:'Gen4 ×16: 256 GB/s each way. Enough for 200G line rate with headroom — the balanced BF2 design.',
+  pro:'Gen4 ×16: ~32 GB/s each way. Enough for 200G line rate with headroom — the balanced BF2 design.',
   expert:'Gen4 matches the 200G network: no wasted SERDES. The BF3 jump to Gen5 pairs with 400G.'},
  'e2100':{name:'PCIe 4.0 ×16',
   spec:['PCIe 4.0 ×16','Host interface','NVMe-oF initiator'],
@@ -1130,7 +1147,7 @@ PVAR['dpu-pcie'] = {
   spec:['PCIe 5.0','Host + devices','400G+ headroom'],
   eli5:'The newest, fastest slide — PCIe 5, ready for 400-gigabit traffic and more.',
   fifteen:'PCIe 5.0 ×16: OCTEON 10’s host link, with headroom past 400G.',
-  pro:'Gen5 ×16: 512 GB/s each way — headroom for 400G plus devices. The modern I/O pairing for a 5 nm DPU.',
+  pro:'Gen5 ×16: ~64 GB/s each way — headroom for 400G plus devices. The modern I/O pairing for a 5 nm DPU.',
   expert:'Gen5 matches the 400G network with margin. The 5 nm SoC gets the 5th-gen I/O it deserves.'}
 };
 PVAR['dpu-qsfp'] = {
@@ -1157,7 +1174,7 @@ PVAR['dpu-qsfp'] = {
   eli5:'The newest, biggest fiber doors — up to 400 gigabits.',
   fifteen:'QSFP-DD: up to 400 GbE pluggable optics for the OCTEON 10.',
   pro:'QSFP-DD at 400G: the current datacenter standard. Pluggable keeps the DPU fiber-agnostic.',
-  expert:'QSFP-DD doubles QSFP56’s density/speed. 400G today, 800G-capable connector for tomorrow.'}
+  expert:'QSFP-DD doubles QSFP56’s lane count in the same cage. 400G today, 800G-capable connector for tomorrow.'}
 };
 var CHIP_MODEL = {cpu:'AMD EPYC 9654 “Genoa”', gpu:'NVIDIA H100 SXM5 “GH100”', dpu:'NVIDIA BlueField-3'};
 
@@ -1254,15 +1271,15 @@ var VARIANTS = { cpu: {
 'granite':{
   name:'Intel Xeon 6980P “Granite Rapids”', short:'Xeon 6980P',
   cmp:{dies:'3× compute tiles + 2× SoC tiles · 128C/256T', cache:'504 MB L3 (168 MB/tile) + 256 MB L2',
-    mem:'12-ch DDR5-6400 · 921.6 GB/s', io:'EMIB bridges · 6× UPI · 96× PCIe Gen5/CXL',
+    mem:'12-ch DDR5-6400 · 614.4 GB/s', io:'EMIB bridges · 6× UPI · 96× PCIe Gen5/CXL',
     net:'— none on die', accel:'AMX + AVX-512', pkg:'LGA-7529 · 500 W'},
-  glance:{compute:'128× Redwood Cove', cache:'256 MB L2 + 504 MB L3', memory:'12-ch DDR5-6400, 922 GB/s',
+  glance:{compute:'128× Redwood Cove', cache:'256 MB L2 + 504 MB L3', memory:'12-ch DDR5-6400, 614 GB/s',
     interconnect:'EMIB + UPI mesh', network:'— none on die', accel:'AMX + AVX-512', package:'LGA-7529, 500 W'},
   note:{
     eli5:'Intel builds its giant differently: three big thinking-tiles plus two helper-tiles for memory and wires, stitched together with tiny bridges.',
     fifteen:'Granite Rapids splits the CPU into 3 Intel 3 compute tiles (44 cores each) and 2 Intel 7 SoC tiles, stitched by EMIB bridges — tiles in a row, not chiplets around an I/O die.',
-    pro:'Disaggregated differently than EPYC: compute tiles on Intel 3, I/O on Intel 7, EMIB die-to-die. 504 MB L3, 12-ch DDR5-6400 (922 GB/s), 96 PCIe Gen5/CXL lanes, 500 W.',
-    expert:'Tile architecture: 3× ~44-core compute tiles + 2 SoC tiles; EMIB replaces the sIOD star. Memory bandwidth doubles Genoa’s (DDR5-6400); TDP hits 500 W on LGA-7529.'},
+    pro:'Disaggregated differently than EPYC: compute tiles on Intel 3, I/O on Intel 7, EMIB die-to-die. 504 MB L3, 12-ch DDR5-6400 (614 GB/s), 96 PCIe Gen5/CXL lanes, 500 W.',
+    expert:'Tile architecture: 3× ~44-core compute tiles + 2 SoC tiles; EMIB replaces the sIOD star. Memory bandwidth ~1.3× Genoa’s (614.4 vs 460.8 GB/s); TDP hits 500 W on LGA-7529.'},
   pulse:['cpu-ctile','cpu-soctile','cpu-emib'],
   geo:{sub:[6.8,4.8], pads:'lga', padsN:[80,42], tim:true,
     tiles:[
@@ -1484,15 +1501,15 @@ VARIANTS.gpu = {
 'h100-nvl':{
   name:'NVIDIA H100 NVL (PCIe pair)', short:'H100 NVL',
   cmp:{dies:'2× GH100-class dies · paired cards', cache:'50 MB shared L2 per GPU',
-    mem:'94 GB HBM3 per GPU · 188 GB pooled · ~3.9 TB/s each', io:'3× NVLink bridges between cards',
+    mem:'94 GB HBM3 per GPU · 188 GB across the pair · ~3.9 TB/s each', io:'3× NVLink bridges between cards',
     net:'— GPU-to-GPU NVLink, no network', accel:'4th-gen Tensor Cores per GPU', pkg:'2× PCIe cards · 350–400 W each'},
-  glance:{compute:'132 SMs × 2 cards', cache:'50 MB L2 per GPU', memory:'188 GB pooled HBM3',
+  glance:{compute:'132 SMs × 2 cards', cache:'50 MB L2 per GPU', memory:'188 GB across the pair HBM3',
     interconnect:'3× NVLink bridges', network:'— none on die', accel:'4th-gen Tensor Cores × 2', package:'PCIe pair, 350–400 W/card'},
   note:{
-    eli5:'Two H100 cards sold as twins, holding hands with three golden bridges on top so they share one giant 188 GB memory.',
+    eli5:'Two H100 cards sold as twins, holding hands with three golden bridges on top \u2014 each keeps its own 94 GB.',
     fifteen:'H100 NVL is a PCIe pair: two cards, three NVLink bridges across the top, 94 GB HBM3 each — built for LLM inference where SXM boards won’t fit.',
     pro:'Dual-GPU PCIe product: full GH100-class dies, ~3.9 TB/s HBM3 each, 350–400 W per card. The bridges give GPU-direct bandwidth without NVSwitch.',
-    expert:'Inference SKU: capacity (188 GB pooled) over SXM’s bandwidth; NVLink bridges provide the all-reduce path for tensor-parallel serving across the pair.'},
+    expert:'Inference SKU: capacity (188 GB across the pair) over SXM’s bandwidth; NVLink bridges provide the all-reduce path for tensor-parallel serving across the pair.'},
   pulse:['gpu-nvlink','gpu-hbm'],
   geo:{kind:'dualcard', pads:'pcie',
     cards:[{x:-4.7},{x:4.7}], cardW:7.5, cardD:4.5,
@@ -1619,7 +1636,7 @@ var VDIFF = {
   eli5:'Sixteen slimmer workers per neighborhood instead of eight — 128 workers total.',
   fifteen:'Zen 4c: 16 efficiency-tuned cores per CCD × 8 CCDs = 128C/256T. Same SP5 platform, denser compute.',
   pro:'Zen 4c trades per-core muscle for density: 16 cores share 32 MB L3. Perf/socket and perf/watt up, perf/core down.',
-  expert:'Zen 4c trims structures (smaller L2, lower clocks) for area. The cloud-native core: throughput per socket is the metric.'
+  expert:'Zen 4c trims structures (denser SRAM, lower clocks) for area. The cloud-native core: throughput per socket is the metric.'
  },
  'granite':{
   eli5:'128 workers too — but built from three big compute tiles instead of twelve small chiplets.',
@@ -1716,7 +1733,7 @@ var VDIFF = {
  'octeon10':{
   eli5:'The newest, fastest slide — PCIe 5, ready for 400-gigabit traffic.',
   fifteen:'PCIe 5.0 ×16: OCTEON 10’s host link, with headroom past 400G.',
-  pro:'Gen5 ×16: 512 GB/s each way — headroom for 400G plus devices. The modern pairing for a 5 nm DPU.',
+  pro:'Gen5 ×16: ~64 GB/s each way — headroom for 400G plus devices. The modern pairing for a 5 nm DPU.',
   expert:'Gen5 matches 400G with margin. The 5 nm SoC gets the 5th-gen I/O it deserves.'
  },
 },
@@ -1847,7 +1864,7 @@ var VDIFF = {
   eli5:'The newest, biggest fiber doors — up to 400 gigabits.',
   fifteen:'QSFP-DD: up to 400 GbE pluggable optics for the OCTEON 10.',
   pro:'QSFP-DD at 400G: the current datacenter standard. 800G-capable connector for tomorrow.',
-  expert:'QSFP-DD doubles QSFP56’s density/speed. The forward path to 800G.'
+  expert:'QSFP-DD doubles QSFP56’s lane count in the same cage. The forward path to 800G.'
  },
 },
 'network':{
@@ -2022,7 +2039,7 @@ accel:{
   dpu:{how:'Inline crypto (bump-in-the-wire IPsec/TLS), RegEx for IDS/DPI, NVMe-oF offload, DPA for programmable data-path.',why:'Each engine maps to a hyperscaler tax line-item: encryption, security scanning, storage virtualization. Fixed logic = line-rate at milliwatts per Gb/s.'}},
  expert:{what:'Accelerators as economic instruments: each block exists because its workload’s $/op on general cores exceeded the NRE of fixed logic.',
   cpu:{how:'Zen 4 AVX-512: 256-bit physical datapath, 2-cycle 512-bit ops; VNNI-INT8, BF16 convert. Kept in-core to preserve x86’s unified memory/ISA model.',why:'AMD chose compatibility over a separate matrix block (unlike Intel AMX) — the bet that in-core vectors suffice for CPU-attached AI inference.'},
-  gpu:{how:'Tensor Core 4th gen: 256×256×? systolic MMA, FP8 E4M3/E5M2, sparsity 2:4 with metadata, Transformer Engine auto-scales precision per tensor.',why:'Matmul is >90% of training FLOPs; a dedicated datapath yields ~10× perf/area over SIMT. DPX hints at the next domain: dynamic programming.'},
+  gpu:{how:'Tensor Core 4th gen: systolic MMA array, FP8 E4M3/E5M2, sparsity 2:4 with metadata, Transformer Engine auto-scales precision per tensor.',why:'Matmul is >90% of training FLOPs; a dedicated datapath yields ~10× perf/area over SIMT. DPX hints at the next domain: dynamic programming.'},
   dpu:{how:'Crypto: inline AES-GCM at 400G; RegEx: NFA/DFA in HW for Morpheus IDS; NVMe-oF: full target/initiator; DPA covers the programmable remainder.',why:'Amdahl for infrastructure: fixed chores → fixed logic at line rate; variable chores → DPA cores. The A78s only handle exceptions — the ideal division.'}}},
 package:{
  title:'📦 Package',
@@ -2847,7 +2864,7 @@ document.getElementById('label-toggle').addEventListener('click', function(){
     stages: [
       stageAs(FLOW.cpu.stages[0], ['cpu-soctile'], 'DDR5 \u2192 SoC tiles', {
         eli5:'Data arrives from twelve memory sticks into the two helper tiles at the edges.',
-        fifteen:'12-channel DDR5-6400 lands in the SoC tiles \u2014 up to 921.6 GB/s, the front door for 128 cores.',
+        fifteen:'12-channel DDR5-6400 lands in the SoC tiles \u2014 up to 614.4 GB/s, the front door for 128 cores.',
         pro:'DDR5-6400 across 12 channels into the SoC tiles; CXL and 96 PCIe Gen5 lanes hang off the same tiles.',
         expert:'SoC tiles (Intel 7) host the memory controllers; compute tiles (Intel 3) are pure cores \u2014 disaggregation by function, not just yield.'}),
       stageAs(FLOW.cpu.stages[1], ['cpu-soctile','cpu-ctile'], 'EMIB \u2192 L3', {
@@ -2900,7 +2917,7 @@ document.getElementById('label-toggle').addEventListener('click', function(){
       stageAs(FLOW.cpu.stages[2], ['cpu-ccd'], 'L3 \u2192 L2 \u2192 Zen 4c core', {
         eli5:'Each neighborhood has twice as many workers \u2014 smaller desks, but 128 of them.',
         fifteen:'Zen 4c cores: 16 dense cores per CCD sharing 32 MB L3 \u2014 throughput over single-thread speed.',
-        pro:'Zen 4c halves the L2 per core and shares L3 wider \u2014 the cloud-native trade: more threads per watt.',
+        pro:'Zen 4c keeps the 1 MB L2 per core, then shrinks the core ~35% with denser SRAM and lower clocks \u2014 the cloud-native trade: more threads per watt.',
         expert:'Bergamo\u2019s CCD doubles core count by shrinking structures; the flow is identical to Genoa, the density is the story.'}),
       FLOW.cpu.stages[3]
     ]
@@ -2912,9 +2929,9 @@ document.getElementById('label-toggle').addEventListener('click', function(){
       FLOW.gpu.stages[1],
       FLOW.gpu.stages[2],
       stageAs(FLOW.gpu.stages[3], ['gpu-hbm','gpu-nvlink'], 'HBM / NVLink bridges', {
-        eli5:'Answers go back to the towers \u2014 or zoom across the three golden bridges to the card next door, sharing 188 GB as one pool.',
-        fifteen:'Results write back to HBM \u2014 or cross the NVLink bridges at 900 GB/s to the twin card.',
-        pro:'Two 94 GB cards behave as one 188 GB pool over NVLink bridges; bridge bandwidth sets the tensor-parallel ceiling.',
+        eli5:'Answers go back to the towers, or zoom across the three golden bridges to the card next door — the twins team up like one big 188 GB workspace, but each card\u2019s half of the memory stays on its own card.',
+        fifteen:'Results write back to HBM \u2014 or cross the NVLink bridges at 600 GB/s to the twin card.',
+        pro:'Two 94 GB cards behave as one 188 GB workspace over NVLink bridges; bridge bandwidth sets the tensor-parallel ceiling.',
         expert:'NVL is the PCIe-friendly H100: no SXM baseboard needed, at the cost of bridge-limited GPU-to-GPU bandwidth vs NVSwitch fabrics.'})
     ]
   };
@@ -2929,7 +2946,7 @@ document.getElementById('label-toggle').addEventListener('click', function(){
       stageAs(FLOW.gpu.stages[1], ['gpu-l2'], 'L2 \u2192 SM array', {
         eli5:'The table hands each of the 128 teams its piece of the puzzle.',
         fifteen:'The crossbar broadcasts tiles to 128 SMs; each SM\u2019s warps chew through them in lockstep.',
-        pro:'AD102\u2019s XBAR fans tiles to 11 GPCs; the same data-parallel story as H100, air-cooled.',
+        pro:'AD102\u2019s XBAR fans tiles to the GPCs; the same data-parallel story as H100, air-cooled.',
         expert:'Monolithic AD102 \u2014 NVIDIA\u2019s biggest gaming die, still one piece of silicon.'}),
       stageAs(FLOW.gpu.stages[2], ['gpu-gpc'], 'CUDA + Tensor compute', {
         eli5:'16,384 tiny workers plus matrix helpers crunch the pixels and the AI math.',
@@ -3322,19 +3339,43 @@ document.getElementById('label-toggle').addEventListener('click', function(){
   var v3 = new THREE.Vector3();
   function updateLabels(){
     var w = canvas.clientWidth, h = canvas.clientHeight;
+    var perChipCount = mobile ? {cpu:0, gpu:0, dpu:0} : null; /* narrow: cap labels/chip */
+    var placedHero = mobile ? [] : null; /* narrow: vertical de-collision */
     labels.forEach(function(L){
       var show = labelsOn && chipGroups[L.chip] && chipGroups[L.chip].visible;
       if (show && diffClass){
         var p = PARTS[L.part];
         show = !!(p && p.cls.indexOf(diffClass) >= 0);
       }
+      if (mobile && show){
+        /* narrow screen: hide non-focused chips' labels, cap at 8/chip in
+           creation (DOM) order so they stop stacking on each other */
+        if (focus !== 'all' && L.chip !== focus){ show = false; }
+        else if (perChipCount[L.chip] >= 8){ show = false; }
+        else perChipCount[L.chip]++;
+      }
       if (!show){ L.el.style.display='none'; return; }
       L.obj.getWorldPosition(v3); v3.x+=L.off.x; v3.y+=L.off.y; v3.z+=L.off.z;
       v3.project(camera);
       if (v3.z > 1 || v3.z < -1){ L.el.style.display='none'; return; }
+      var lx=((v3.x*0.5+0.5)*w), ly=((-v3.y*0.5+0.5)*h);
+      if (mobile){
+        /* .label sits above its anchor via translate(-50%,-130%); drop any
+           label whose box overlaps an already-placed one by >50% */
+        var lw=L.el.offsetWidth||90, lh=(L.el.offsetHeight||20)+14;
+        var bx=lx-lw/2, by=ly-lh, keep=true;
+        for (var pi=0; keep && pi<placedHero.length; pi++){
+          var pp=placedHero[pi];
+          var ix=Math.min(bx+lw,pp.x+pp.w)-Math.max(bx,pp.x);
+          var iy=Math.min(by+lh,pp.y+pp.h)-Math.max(by,pp.y);
+          if (ix>0 && iy>0 && (ix*iy)>0.5*lw*lh) keep=false;
+        }
+        if (!keep){ L.el.style.display='none'; return; }
+        placedHero.push({x:bx, y:by, w:lw, h:lh});
+      }
       L.el.style.display='block';
-      L.el.style.left = ((v3.x*0.5+0.5)*w)+'px';
-      L.el.style.top = ((-v3.y*0.5+0.5)*h)+'px';
+      L.el.style.left = lx+'px';
+      L.el.style.top = ly+'px';
       L.el.classList.toggle('dim', false);
     });
   }
@@ -3416,8 +3457,8 @@ document.getElementById('label-toggle').addEventListener('click', function(){
     cap:{
       eli5:'A supercomputer building block: eight GPUs gossiping over golden bridges, two CPUs in charge, and two DPUs handling all the mail to the outside world.',
       fifteen:'The AI workhorse: 8 GPUs fully meshed through NVSwitch, 2 host CPUs, and DPUs for networking. Trains models far too big for one GPU \u2014 while still behaving like a single machine.',
-      pro:'NVSwitch gives 8 GPUs a shared memory pool at 900 GB/s per GPU \u2014 the largest unit that still feels like one computer. The 2 DPUs own everything off-node: storage, control plane, scale-out traffic \u2014 so host CPUs never burn cycles on networking.',
-      expert:'8-GPU NVL domain: ~4.8 TB/s of NVLink bisection via NVSwitch; SHARP-capable InfiniBand hangs off the DPUs, not the host. This is the boundary of \u201cone machine\u201d \u2014 beyond it, collectives cross a real network and latency stops being free.'},
+      pro:'NVSwitch gives 8 GPUs all-to-all NVLink at 900 GB/s per GPU \u2014 the largest unit that still feels like one computer, though each GPU keeps its own memory. The 2 DPUs own everything off-node: storage, control plane, scale-out traffic \u2014 so host CPUs never burn cycles on networking.',
+      expert:'8-GPU NVL domain: ~3.6 TB/s of NVLink bisection via NVSwitch; SHARP-capable InfiniBand hangs off the DPUs, not the host. This is the boundary of \u201cone machine\u201d \u2014 beyond it, collectives cross a real network and latency stops being free.'},
     cam:{pos:[0,17,31], tgt:[0,1.5,0]},
     build:function(){
       var boxes=[B(0,-0.15,0, 19.5,0.3,11.5, BOARDC)],
@@ -3465,7 +3506,7 @@ document.getElementById('label-toggle').addEventListener('click', function(){
       eli5:'Rows of closets full of GPUs, all gossiping through hallway switches, training one giant brain together.',
       fifteen:'Spine-leaf: every rack switch connects to every spine switch, so any GPU reaches any other in two hops. Thousands of GPUs train one model; the network constantly ferries gradients between them.',
       pro:'At this scale the network IS the computer: all-reduce traffic across thousands of GPUs makes fabric bandwidth the binding constraint on training time. That is exactly why every node gets a DPU \u2014 it offloads collectives, encryption, and storage from hosts that are already saturated feeding GPUs.',
-      expert:'Non-blocking (or deliberately oversubscribed) fat-tree with adaptive routing and SHARP in-network aggregation on the DPU NICs. Local training is a PCIe problem; large-scale training is a networking problem wearing a GPU costume \u2014 hence a DPU per node, terminating thousands of RDMA connections the host OS never touches.'},
+      expert:'Non-blocking (or deliberately oversubscribed) fat-tree with adaptive routing and SHARP reduction trees inside the switches. Local training is a PCIe problem; large-scale training is a networking problem wearing a GPU costume \u2014 hence a DPU per node, terminating thousands of RDMA connections the host OS never touches.'},
     cam:{pos:[0,17,32], tgt:[0,4,0]},
     build:function(){
       var boxes=[], links=[];
@@ -3808,7 +3849,7 @@ document.getElementById('label-toggle').addEventListener('click', function(){
     }},
   dc:{
     name:'4 · Data center — the hall',
-    stats:['10s of MW','N+1 everywhere','3 lifelines'],
+    stats:['10s of MW','2N power \u00b7 N+1 cooling','3 lifelines'],
     contrast:'<b>The punchline:</b> the chips are the smallest line item. Power, cooling, and networking — and the redundancy for each — are what a data center actually is.',
     cap:{
       eli5:'A warehouse full of closets, with its own backup power, giant air conditioners, and water pipes — because thousands of GPUs make as much heat as a small town. Toggle the Power, Cooling, and Network buttons to see each lifeline.',
@@ -4203,13 +4244,30 @@ document.getElementById('label-toggle').addEventListener('click', function(){
       t[2]+(camBase.pos[2]-t[2])*zoom);
     camera.lookAt(t[0],t[1],t[2]);
     var w=canvas.clientWidth, h=canvas.clientHeight;
+    var narrowBuild = w < 700; /* narrow: thin labels + de-collide */
+    var placedBuild = narrowBuild ? [] : null;
     labels.forEach(function(L){
       if(L.el.style.display==='none') return;
       L.obj.getWorldPosition(v3); v3.y+=L.dy;
       v3.project(camera);
       if(v3.z>1||v3.z<-1){ L.el.style.display='none'; return; }
-      L.el.style.left=((v3.x*0.5+0.5)*w)+'px';
-      L.el.style.top=((-v3.y*0.5+0.5)*h)+'px';
+      var bx=((v3.x*0.5+0.5)*w), by=((-v3.y*0.5+0.5)*h);
+      if (narrowBuild){
+        /* .label sits above its anchor via translate(-50%,-130%); drop any
+           label whose box overlaps an already-placed one by >50% */
+        var lw=L.el.offsetWidth||90, lh=(L.el.offsetHeight||20)+14;
+        var lxl=bx-lw/2, lyt=by-lh, keep=placedBuild.length<10;
+        for (var pi=0; keep && pi<placedBuild.length; pi++){
+          var pp=placedBuild[pi];
+          var ix=Math.min(lxl+lw,pp.x+pp.w)-Math.max(lxl,pp.x);
+          var iy=Math.min(lyt+lh,pp.y+pp.h)-Math.max(lyt,pp.y);
+          if (ix>0 && iy>0 && (ix*iy)>0.5*lw*lh) keep=false;
+        }
+        if (!keep){ L.el.style.display='none'; return; }
+        placedBuild.push({x:lxl, y:lyt, w:lw, h:lh});
+      }
+      L.el.style.left=bx+'px';
+      L.el.style.top=by+'px';
     });
     renderer.render(scene,camera);
   })();
