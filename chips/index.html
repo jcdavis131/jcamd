@@ -250,6 +250,12 @@ footer.site a{color:var(--accent);text-decoration:none}
 .seg .ybtn.on[data-layer="network"]{background:#5aa2ff;color:#14110d;font-weight:700}
 .seg .ybtn:not(.on){opacity:.45}
 .build-jump{display:inline-block;margin-top:4px;font-size:.82rem;color:var(--accent);text-decoration:none}
+/* open-standards disclosure in the physical build-up tab */
+.ocp-note{margin:2px 0 0;border:1px dashed var(--line);border-radius:10px;
+  padding:9px 13px;font-size:.78rem;color:var(--muted);line-height:1.55}
+.ocp-note summary{cursor:pointer;color:var(--accent);font-weight:600;font-size:.8rem}
+.ocp-note ul{margin:8px 0 2px;padding-left:18px;display:flex;flex-direction:column;gap:5px}
+.ocp-note li::marker{color:var(--accent)}
 @media(max-width:700px){
   .stage-hero{min-height:560px}
   .ovl-title{top:8px;left:12px;right:12px;max-width:none}
@@ -308,7 +314,7 @@ footer.site a{color:var(--accent);text-decoration:none}
       <button class="pill" data-focus="gpu">GPU</button>
       <button class="pill" data-focus="dpu">DPU</button>
     </div>
-    <div class="seg variants" role="group" aria-label="CPU variant">
+    <div class="seg variants" data-vgroup="cpu" role="group" aria-label="CPU variant">
       <span class="cap">CPU</span>
       <div class="vpills">
         <button class="pill vbtn on" data-chip="cpu" data-variant="genoa">9654</button>
@@ -319,7 +325,7 @@ footer.site a{color:var(--accent);text-decoration:none}
         <button class="pill vbtn" data-chip="cpu" data-variant="ryzen">9950X</button>
       </div>
     </div>
-    <div class="seg variants" role="group" aria-label="GPU variant">
+    <div class="seg variants" data-vgroup="gpu" role="group" aria-label="GPU variant">
       <span class="cap">GPU</span>
       <div class="vpills">
         <button class="pill vbtn on" data-chip="gpu" data-variant="h100-sxm">H100 SXM</button>
@@ -329,7 +335,7 @@ footer.site a{color:var(--accent);text-decoration:none}
         <button class="pill vbtn" data-chip="gpu" data-variant="mi300x">MI300X</button>
       </div>
     </div>
-    <div class="seg variants" role="group" aria-label="DPU variant">
+    <div class="seg variants" data-vgroup="dpu" role="group" aria-label="DPU variant">
       <span class="cap">DPU</span>
       <div class="vpills">
         <button class="pill vbtn on" data-chip="dpu" data-variant="bf3">BlueField-3</button>
@@ -466,6 +472,15 @@ footer.site a{color:var(--accent);text-decoration:none}
         <div id="build-pin" aria-live="polite"></div>
         <div class="manifest" id="build-manifest"></div>
         <p class="scale-contrast" id="build-contrast"></p>
+        <details class="ocp-note">
+          <summary>Open standards</summary>
+          <ul>
+            <li>This tab shows traditional enterprise gear: 19&Prime; 42U EIA racks, in-server redundant PSUs, rack PDU strips.</li>
+            <li>The Open Compute Project's Open Rack V3 instead specifies a 21&Prime; rack with centralized power shelves feeding a 48V-class busbar &mdash; no traditional PDUs &mdash; plus modular DC-MHS server sleds and standardized liquid-cooling specs.</li>
+            <li>Shared with open practice: N+1 redundant power, spine-leaf fabric, hot/cold-aisle layout, liquid cooling for dense AI racks.</li>
+            <li>These models are generic-industry illustrations, not OCP-certified designs.</li>
+          </ul>
+        </details>
       </aside>
     </div>
     </div>
@@ -3173,6 +3188,28 @@ document.getElementById('label-toggle').addEventListener('click', function(){
   slider.addEventListener('input', function(){
     targetT = slider.value/100; sval.textContent = slider.value + '%';
   });
+  /* variant pill groups follow the chip-type selector: CPU shows only CPU
+     variants, GPU only GPU, DPU only DPU; 'All three' shows all groups.
+     Each chip keeps its own selected variant, so switching types can never
+     strand the page on a variant from another type — as a guard, if the
+     focused chip's stored selection is ever stale we fall back to that
+     chip's first variant. */
+  function syncVariantGroups(){
+    document.querySelectorAll('.seg.variants').forEach(function(g){
+      var ch = g.getAttribute('data-vgroup');
+      g.style.display = (focus === 'all' || focus === ch) ? '' : 'none';
+    });
+    if (focus === 'all') return;
+    var v = selVariant(focus);
+    if (!VARIANTS[focus] || !VARIANTS[focus][v]){
+      var first = VARIANTS[focus] ? Object.keys(VARIANTS[focus])[0] : null;
+      if (first) window.swapVariant(focus, first, false);
+      v = selVariant(focus);
+    }
+    document.querySelectorAll('.vpills .vbtn[data-chip="'+focus+'"]').forEach(function(x){
+      x.classList.toggle('on', x.getAttribute('data-variant') === v);
+    });
+  }
   document.querySelectorAll('[data-focus]').forEach(function(b){
     b.addEventListener('click', function(){
       focus = b.getAttribute('data-focus');
@@ -3182,6 +3219,7 @@ document.getElementById('label-toggle').addEventListener('click', function(){
       ['cpu','gpu','dpu'].forEach(function(ch){
         chipGroups[ch].visible = (focus === 'all' || focus === ch);
       });
+      syncVariantGroups();
       if (mobile) {
         ty = focus === 'all' ? -7.5 : chipGroups[focus].position.y + 2.4;
         tx = 0;
