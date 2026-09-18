@@ -83,6 +83,11 @@ body{margin:0;background:var(--bg);color:var(--ink);
   padding:8px 12px;font-size:.8rem;backdrop-filter:blur(6px)}
 #tip b{display:block;font-size:.85rem;margin-bottom:2px}
 #tip .tag{font-size:.65rem;text-transform:uppercase;letter-spacing:.1em}
+/* hover tooltip for the physical build-up stage */
+#build-tip{position:absolute;z-index:20;pointer-events:none;display:none;max-width:250px;
+  background:rgba(20,17,13,.94);border:1px solid var(--line);border-radius:10px;
+  padding:8px 12px;font-size:.8rem;backdrop-filter:blur(6px)}
+#build-tip b{display:block;font-size:.85rem;margin-bottom:2px}
 /* pinned detail card — overlays stage, never displaces it */
 #pin{position:absolute;z-index:15;right:22px;bottom:158px;width:min(340px,calc(100vw - 44px));
   background:rgba(30,25,19,.96);border:1px solid var(--line);border-radius:var(--radius);
@@ -218,6 +223,33 @@ footer.site a{color:var(--accent);text-decoration:none}
   font-size:.85rem;color:var(--muted);line-height:1.55}
 .scale-contrast b{color:var(--accent);font-weight:600}
 #scale-fallback{display:none;padding:40px 20px;text-align:center;color:var(--muted)}
+/* ============ scale: physical build-up tab ============ */
+#scale-tabs{margin-bottom:18px}
+#build-pills{margin-bottom:18px;flex-wrap:wrap;width:fit-content;max-width:100%}
+#build-scene{display:block;width:100%;height:440px}
+.build-note{font-size:.75rem;color:var(--muted);margin:10px 2px 0}
+@media(max-width:700px){#build-scene{height:320px}}
+#build-labels{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:5}
+#build-labels .label{font-size:10px}
+#build-fallback{display:none;padding:40px 20px;text-align:center;color:var(--muted)}
+#build-pin{margin:0 0 12px;padding:10px 14px;border:1px solid var(--line);border-radius:10px;
+  background:rgba(217,164,65,.06);font-size:.85rem;line-height:1.5;display:none}
+#build-pin.show{display:block}
+#build-pin b{color:var(--accent)}
+.manifest{margin:0 0 14px;display:flex;flex-direction:column;gap:7px;max-height:300px;overflow-y:auto}
+.mitem{border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-size:.82rem;
+  cursor:pointer;transition:border-color .2s,background .2s}
+.mitem b{display:block;font-size:.85rem;margin-bottom:2px}
+.mitem span{color:var(--muted);line-height:1.45}
+.mitem:hover{border-color:var(--accent)}
+.mitem.on{border-color:var(--accent);background:rgba(217,164,65,.07)}
+.mitem.off{display:none}
+#build-layers{flex-wrap:wrap;width:fit-content;max-width:100%}
+.seg .ybtn.on[data-layer="power"]{background:#d9a441;color:#14110d;font-weight:700}
+.seg .ybtn.on[data-layer="cooling"]{background:#2dd4bf;color:#14110d;font-weight:700}
+.seg .ybtn.on[data-layer="network"]{background:#5aa2ff;color:#14110d;font-weight:700}
+.seg .ybtn:not(.on){opacity:.45}
+.build-jump{display:inline-block;margin-top:4px;font-size:.82rem;color:var(--accent);text-decoration:none}
 @media(max-width:700px){
   .stage-hero{min-height:560px}
   .ovl-title{top:8px;left:12px;right:12px;max-width:none}
@@ -377,6 +409,11 @@ footer.site a{color:var(--accent);text-decoration:none}
     <p class="kicker" style="color:var(--accent);text-transform:uppercase;letter-spacing:.18em;font-size:.7rem;margin:0 0 6px">Scale</p>
     <h2>From one box to a data center</h2>
     <p class="lede">The same three chips, wired four ways. Watch the links change as you zoom out &mdash; and notice the moment the network stops being plumbing and becomes the computer.</p>
+    <div class="seg" id="scale-tabs" role="group" aria-label="Scale view">
+      <button class="pill tbtn on" data-tab="compute">Compute scale</button>
+      <button class="pill tbtn" data-tab="build">Physical build-up</button>
+    </div>
+    <div id="tab-compute">
     <div class="seg" id="scale-pills" role="group" aria-label="Scale preset">
       <button class="pill sbtn on" data-scale="solo">Solo</button>
       <button class="pill sbtn" data-scale="node">Node</button>
@@ -399,6 +436,38 @@ footer.site a{color:var(--accent);text-decoration:none}
         <div class="scale-stats" id="scale-stats"></div>
         <p class="scale-contrast" id="scale-contrast"></p>
       </aside>
+    </div>
+    </div>
+    <div id="tab-build" style="display:none">
+    <div class="seg" id="build-pills" role="group" aria-label="Build stage">
+      <button class="pill bbtn on" data-build="chip">1 · Chip</button>
+      <button class="pill bbtn" data-build="server">2 · Server</button>
+      <button class="pill bbtn" data-build="rack">3 · Rack</button>
+      <button class="pill bbtn" data-build="dc">4 · Data center</button>
+    </div>
+    <p class="build-note">Schematic models — sizes, counts, and specs are illustrative, not to scale. Hover or tap any component for its story.</p>
+    <div class="scale-grid">
+      <div class="scale-stage">
+        <canvas id="build-scene"></canvas>
+        <div id="build-labels" aria-hidden="true"></div>
+        <div id="build-tip"></div>
+        <div class="scale-legend" id="build-legend" aria-hidden="true"></div>
+        <div id="build-fallback"><p>WebGL isn't available, so the build-up diagram can't render.<br>The captions and component list still explain each stage.</p></div>
+      </div>
+      <aside class="scale-cap" aria-live="polite">
+        <h3 id="build-name"></h3>
+        <p class="why" id="build-why"></p>
+        <div class="scale-stats" id="build-stats"></div>
+        <div class="seg" id="build-layers" style="display:none;margin:0 0 14px" role="group" aria-label="Infrastructure layer">
+          <button class="pill ybtn on" data-layer="power">Power</button>
+          <button class="pill ybtn on" data-layer="cooling">Cooling</button>
+          <button class="pill ybtn on" data-layer="network">Network</button>
+        </div>
+        <div id="build-pin" aria-live="polite"></div>
+        <div class="manifest" id="build-manifest"></div>
+        <p class="scale-contrast" id="build-contrast"></p>
+      </aside>
+    </div>
     </div>
   </div>
 </section>
@@ -509,6 +578,7 @@ function setLevel(l){
   if (lastVChange && window.renderVChange) window.renderVChange(lastVChange.chip, lastVChange.oldV, lastVChange.v);
   if (window.renderFlow) window.renderFlow();
   if (window.renderScale) window.renderScale();
+  if (window.renderBuild) window.renderBuild();
 }
 document.querySelectorAll('.lbtn').forEach(function(b){
   b.addEventListener('click', function(){ setLevel(b.getAttribute('data-lvl')); });
@@ -3482,6 +3552,630 @@ document.getElementById('label-toggle').addEventListener('click', function(){
     renderer.render(scene,camera);
   })();
   sizeScale(); buildScale(); renderScaleCap();
+})();
+
+/* ============ scale: physical build-up tab ============ */
+(function(){
+  var canvas = document.getElementById('build-scene');
+  var labelLayer = document.getElementById('build-labels');
+  var buildKey = 'chip';
+  var layersOn = {power:true, cooling:true, network:true};
+
+  function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
+
+  var CPUC=0xe08a4c, GPUC=0x58b0a6, DPUC=0x7aa0d8, SWC=0x9d7bff,
+      BOARDC=0x101216, RACKC=0x24425e, TORC=0x9aa0a8, RAILC=0x2a2d33,
+      PCBC=0x14401f, DIMMC=0x2f9e6e, PSC=0x4a4f55, FANC=0x1c1f24,
+      PWC=0xd9a441, CLC=0x2dd4bf, NTC=0x5aa2ff;
+  var LINKC = {pcie:PWC, ib:NTC, power:PWC, cool:CLC, net:NTC};
+  function B(x,y,z,w,h,d,c,part,label,layer){ return {p:[x,y,z],s:[w,h,d],c:c,part:part||null,label:label||null,layer:layer||null}; }
+  function LK(a,b,t,layer){ return {a:a,b:b,t:t,layer:layer||null}; }
+  function top(b){ return [b.p[0], b.p[1]+b.s[1]/2, b.p[2]]; }
+
+  var STAGES = {
+  chip:{
+    name:'1 · Chip — the ingredients',
+    stats:['3 chip classes','1 server needs all three','~10× budget per level'],
+    contrast:'<b>The through-line:</b> nothing new gets invented above this level — servers, racks, and halls are just these three chips, repackaged with more power, more cooling, and more network.',
+    cap:{
+      eli5:'Three kinds of silicon are the ingredients for everything above: CPUs do the thinking, GPUs do the math, DPUs do the talking. Scroll up to take them apart — then come back and watch them become a server.',
+      fifteen:'The bill of materials starts with three chip classes: a host CPU for control, GPUs for parallel math, and a DPU that owns the network. Every server, rack, and data center below is just these three, packaged and powered at increasing scale.',
+      pro:'The physical stack-up starts at the die: host CPU (control plane), accelerators (data plane), DPU (network/storage offload). Packaging, power delivery, and thermals are solved once per chip — then re-solved at every level above.',
+      expert:'Chip → package → board → chassis → rack → hall: each level re-solves power, cooling, and interconnect with ~10× the budget of the last. The DPU exists because the network problem outgrew the host CPU at the server level and never looked back.'},
+    legend:'<span><i style="background:#e08a4c"></i>CPU</span><span><i style="background:#58b0a6"></i>GPU</span><span><i style="background:#7aa0d8"></i>DPU</span>',
+    cam:{pos:[0,11,23], tgt:[0,0.5,0]},
+    jump:true,
+    manifest:[
+      {part:'cpu-pkg', name:'CPU package', w:{
+        eli5:'The boss chip: runs the operating system and tells everyone what to do.',
+        fifteen:'Host processor: runs the OS, drivers, and orchestration; feeds work to the GPUs.',
+        pro:'Control plane: the host CPU runs the OS and job scheduler; every GPU kernel is launched from here.',
+        expert:'Host CPU: control plane + PCIe root complex. Kept out of the data path by design — the DPU takes the network so the host never becomes the bottleneck.'}},
+      {part:'gpu-pkg', name:'GPU package', w:{
+        eli5:'The muscle: does thousands of math problems at the same time.',
+        fifteen:'Parallel math engine: thousands of cores crunching the matrix math behind AI.',
+        pro:'Data plane: ~100+ TFLOPS of dense math per GPU — the reason the whole server exists.',
+        expert:'Accelerator: tensor cores, HBM3, NVLink. ~700 W each — the thermal and power design center of every level above.'}},
+      {part:'dpu-pkg', name:'DPU package', w:{
+        eli5:'The mailman: handles all the talking so the boss can keep thinking.',
+        fifteen:'Infrastructure processor: owns networking, storage, and security offload.',
+        pro:'Infrastructure offload: RDMA, encryption, and storage — off the host CPU and off the critical path.',
+        expert:'DPU/IPU: a data-plane OS for the fabric. One per node is the tax for cluster-scale training.'}}],
+    build:function(){
+      var boxes=[B(0,-0.25,0, 22,0.5,11, BOARDC)];
+      boxes.push(B(-7,0.35,0, 4.6,0.4,4.6, 0x8a5a2e,'cpu-pkg','CPU — the thinker'));
+      [[-1.15,-1.15],[1.15,-1.15],[-1.15,1.15],[1.15,1.15]].forEach(function(o){
+        boxes.push(B(-7+o[0],0.85,o[1], 1.5,0.5,1.5, CPUC,'cpu-ccd')); });
+      boxes.push(B(-7,0.85,0, 1.3,0.5,1.3, 0xc47b3a,'cpu-iod'));
+      boxes.push(B(0,0.35,0, 5.2,0.4,4.2, 0x2a6b5e,'gpu-pkg','GPU — the muscle'));
+      boxes.push(B(0,0.9,0, 2.8,0.55,2.8, GPUC,'gpu-die'));
+      [[-1.85,-1.35],[1.85,-1.35],[-1.85,1.35],[1.85,1.35]].forEach(function(o){
+        boxes.push(B(o[0],0.9,o[1], 1.0,0.55,1.0, 0x3fd0a8,'gpu-hbm')); });
+      boxes.push(B(7,0.35,0, 4.2,0.4,3.6, 0x3a5a8a,'dpu-pkg','DPU — the talker'));
+      boxes.push(B(7,0.9,0, 2.2,0.55,2.2, DPUC,'dpu-soc'));
+      boxes.push(B(6.2,0.9,2.25, 1.0,0.55,0.7, TORC,'dpu-qsfp'));
+      boxes.push(B(7.8,0.9,2.25, 1.0,0.55,0.7, TORC,'dpu-qsfp'));
+      return {boxes:boxes, links:[]};
+    }},
+  server:{
+    name:'2 · Server — one GPU machine',
+    stats:['2 CPUs','8 GPUs','1 DPU','1+1 PSUs'],
+    contrast:'<b>Why it looks like this:</b> the GPUs are the furnace and the paycheck — everything else (power, cooling, memory bandwidth) is sized so they never wait.',
+    cap:{
+      eli5:'A pizza-box computer stuffed with parts: two CPUs in charge, memory sticks feeding them, eight GPUs doing the heavy math, a DPU handling all the talking, fans blowing the heat out, and two power supplies in case one dies. Click any part.',
+      fifteen:'A 4U GPU server: dual CPUs, banks of DDR5, eight GPUs on a baseboard, a DPU for networking, NVMe for fast storage, a fan wall for airflow, and redundant PSUs. Click any part to see why it is there.',
+      pro:'The standard AI building block: 2× host CPUs, DDR5 banks, 8 GPUs on an NVLink baseboard, a DPU owning storage and fabric, NVMe bays, N+1 fans, 1+1 PSUs, and a BMC for out-of-band management. Every part below exists to keep the GPUs fed.',
+      expert:'4U node: dual-socket host, 12-ch DDR5 per socket, 8× SXM GPUs on NVSwitch, DPU for GPUDirect storage + RDMA, U.2 NVMe, counter-rotating fan wall, 1+1 titanium PSUs, BMC/Redfish. Power and thermals are sized for worst-case all-reduce, not average load.'},
+    legend:'<span><i style="background:#d9a441"></i>PCIe Gen5</span><span><i style="background:#e08a4c"></i>CPU</span><span><i style="background:#58b0a6"></i>GPU</span><span><i style="background:#7aa0d8"></i>DPU</span>',
+    cam:{pos:[0,15,25], tgt:[0,0.8,0]},
+    manifest:[
+      {part:'srv-chassis', name:'4U chassis', w:{
+        eli5:'The metal box that holds everything and slides into the closet.',
+        fifteen:'19-inch rack-mount enclosure — the mechanical and airflow unit.',
+        pro:'4U chassis: structural, EMI, and airflow boundary; hot-swap sled design.',
+        expert:'4U chassis: defines the rack-unit math, airflow impedance, and front/rear service model.'}},
+      {part:'srv-board', name:'Motherboard', w:{
+        eli5:'The big green board everything plugs into.',
+        fifteen:'Mainboard: routes power and signals between CPU, memory, and PCIe slots.',
+        pro:'12+ layer PCB carrying PCIe Gen5, DDR5, and power planes.',
+        expert:'High-layer-count PCB; Gen5/CXL signal integrity at these trace lengths is a first-order constraint.'}},
+      {part:'srv-socket', name:'2× CPU sockets', w:{
+        eli5:'Two boss chips instead of one, so nothing waits for instructions.',
+        fifteen:'Dual-socket host: more cores, more memory channels, more PCIe lanes.',
+        pro:'2× sockets: doubles the memory bandwidth and PCIe lanes feeding the GPUs.',
+        expert:'Dual NUMA nodes; GPU affinity to the nearest socket avoids cross-NUMA PCIe hops.'}},
+      {part:'srv-dimm', name:'DDR5 DIMMs', w:{
+        eli5:'The desk the boss works on — fast, but small.',
+        fifteen:'System memory: banks of DDR5 feeding the CPUs.',
+        pro:'12 channels per socket of DDR5; host memory stages data for the GPUs.',
+        expert:'DDR5 RDIMMs; capacity for datasets and checkpoints, bandwidth for host-side preprocessing.'}},
+      {part:'srv-gpu', name:'8× GPUs', w:{
+        eli5:'Eight muscle chips doing the AI math together.',
+        fifteen:'The compute: 8 GPUs fully meshed — where training actually happens.',
+        pro:'8× SXM GPUs on NVLink/NVSwitch: the training engine; ~5.6 kW of the power budget.',
+        expert:'8-GPU NVL domain: HBM capacity sets max model size, NVLink bisection sets all-reduce speed.'}},
+      {part:'srv-dpu', name:'DPU card', w:{
+        eli5:'The mailman card: all network and storage talk goes through here.',
+        fifteen:'Offloads networking, storage, and encryption from the CPUs.',
+        pro:'GPUDirect storage + RDMA with zero host-CPU involvement.',
+        expert:'High-speed NIC with data-path OS; isolates noisy infrastructure from the training job.'}},
+      {part:'srv-nvme', name:'NVMe bays', w:{
+        eli5:'Super-fast filing cabinets for data and saved work.',
+        fifteen:'Fast local storage: datasets, checkpoints, logs.',
+        pro:'U.2 NVMe: checkpoint writes must never stall training.',
+        expert:'Gen5 NVMe; checkpoint bandwidth sized so multi-GB dumps finish in seconds.'}},
+      {part:'srv-fan', name:'Fan wall', w:{
+        eli5:'Big fans blowing the hot air out the back.',
+        fifteen:'Counter-rotating fans pulling air front-to-back across the GPUs.',
+        pro:'N+1 fan wall: ~5 kW of heat has to leave the box somehow.',
+        expert:'Hot-swap counter-rotating fans; static pressure sized for dense fin stacks.'}},
+      {part:'srv-psu', name:'Redundant PSUs', w:{
+        eli5:'Two plugs, so the computer stays on if one breaks.',
+        fifteen:'1+1 power supplies: one can fail with zero downtime.',
+        pro:'Titanium 1+1 PSUs: ~5–8 kW per server, no single point of failure.',
+        expert:'CRPS titanium, 1+1; hold-up time rides through transfer-switch events.'}},
+      {part:'srv-bmc', name:'BMC', w:{
+        eli5:'A tiny helper chip that lets engineers fix the server from far away.',
+        fifteen:'Baseboard management controller: remote power, console, sensors.',
+        pro:'Out-of-band management: Redfish/IPMI even when the host is down.',
+        expert:'BMC/Redfish: fleet telemetry, firmware, and power capping across 10k+ nodes.'}}],
+    build:function(){
+      var boxes=[
+        B(0,0.2,0, 16,0.4,10, 0x23262c,'srv-chassis','4U chassis'),
+        B(-7.9,1.5,0, 0.25,2.6,10, 0x2e3238), B(7.9,1.5,0, 0.25,2.6,10, 0x2e3238),
+        B(-0.8,0.55,0, 13,0.18,8.8, PCBC,'srv-board','Motherboard'),
+        B(-4.9,1.05,-2.3, 1.9,0.75,1.9, CPUC,'srv-socket','2× CPU sockets'),
+        B(-4.9,1.05,2.3, 1.9,0.75,1.9, CPUC,'srv-socket'),
+        B(6.1,1.15,0, 1.7,1.15,2.8, DPUC,'srv-dpu','DPU'),
+        B(-2.9,1.1,4.35, 2.5,1.25,1.3, PSC,'srv-psu','Redundant PSUs'),
+        B(2.9,1.1,4.35, 2.5,1.25,1.3, PSC,'srv-psu'),
+        B(-0.8,0.8,3.95, 0.95,0.3,0.95, SWC,'srv-bmc','BMC')];
+      [-6.6,-3.2].forEach(function(x){
+        for(var i=0;i<6;i++){
+          var z=-2.5+i*1.0;
+          boxes.push(B(x,1.15,z, 0.32,1.3,0.55, DIMMC,'srv-dimm',(x===-6.6&&i===0)?'DDR5 DIMMs':null));
+        }});
+      [0.4,3.2].forEach(function(x){
+        [-3.4,-1.15,1.15,3.4].forEach(function(z){
+          boxes.push(B(x,1.2,z, 2.3,1.35,1.95, GPUC,'srv-gpu',(x===0.4&&z===-3.4)?'8× GPUs':null));
+        });});
+      for(var n=0;n<4;n++) boxes.push(B(-1.6+n*1.05,0.95,-4.35, 0.85,0.85,0.55, PSC,'srv-nvme',n===0?'NVMe bays':null));
+      for(var f=0;f<6;f++) boxes.push(B(-1.1,1.35,-3.5+f*1.4, 0.75,1.9,1.15, FANC,'srv-fan',f===0?'Fan wall':null));
+      var links=[
+        LK([-4.9,1.45,-2.3],[0.4,1.9,-3.4],'pcie'), LK([-4.9,1.45,-2.3],[0.4,1.9,-1.15],'pcie'),
+        LK([-4.9,1.45,2.3],[0.4,1.9,1.15],'pcie'), LK([-4.9,1.45,2.3],[0.4,1.9,3.4],'pcie'),
+        LK([-4.9,1.45,0],[6.1,1.75,0],'pcie')];
+      return {boxes:boxes, links:links};
+    }},
+  rack:{
+    name:'3 · Rack — 42U of servers',
+    stats:['42U','4 GPU servers','32 GPUs','ToR leaf switch'],
+    contrast:'<b>The step change:</b> inside the rack, traffic is one hop. The moment a packet leaves the ToR, it pays the oversubscription tax — this is where “the network” first becomes a real thing.',
+    cap:{
+      eli5:'A tall metal closet holding several pizza-box computers. A switch at the top connects them all, power strips run down the sides, and a water box cools the hottest ones.',
+      fifteen:'The 42U rack: four GPU servers, a top-of-rack switch tying them together, PDUs feeding power down both sides, and a CDU circulating coolant for liquid-cooled sleds.',
+      pro:'Rack = power + cooling + network + failure domain. 4 GPU sleds, ToR leaf switch, dual PDUs, cable management, and a CDU for direct-to-chip liquid cooling. The ToR uplinks are the first oversubscription point in the fabric.',
+      expert:'42U, ~30–100 kW per AI rack: dual power feeds, in-rack CDUs for DLC, ToR leaf with 400G+ uplinks. One ToR or PDU failure takes the rack — jobs checkpoint accordingly.'},
+    legend:'<span><i style="background:#5aa2ff"></i>Network (IB)</span><span><i style="background:#d9a441"></i>Power</span><span><i style="background:#2dd4bf"></i>Cooling</span>',
+    cam:{pos:[0,12,27], tgt:[0,7,0]},
+    manifest:[
+      {part:'rack-frame', name:'42U frame', w:{
+        eli5:'The tall metal closet everything bolts into.',
+        fifteen:'Standard 19-inch, 42-unit frame: the unit of floor planning.',
+        pro:'42U EIA frame: defines density, weight limits (over a ton loaded), and airflow.',
+        expert:'42U/48U; floor loading, seismic bracing, and aisle containment all key off this box.'}},
+      {part:'rack-server', name:'GPU servers ×4', w:{
+        eli5:'Four pizza-box computers stacked up.',
+        fifteen:'4 GPU sleds = 32 GPUs per rack.',
+        pro:'Compute density: 32 GPUs sharing power, cooling, and one ToR.',
+        expert:'4× 8-GPU sleds; the rack is the unit of deployment, power provisioning, and failure.'}},
+      {part:'rack-tor', name:'ToR leaf switch', w:{
+        eli5:'The hallway switch connecting the four computers.',
+        fifteen:'Top-of-rack switch: every server plugs in here; uplinks go to the spines.',
+        pro:'Leaf switch: first aggregation point; uplink oversubscription starts here.',
+        expert:'ToR leaf, 400/800G; ECMP across uplinks, DCQCN for congestion. One ToR = one failure domain.'}},
+      {part:'rack-pdu', name:'PDUs', w:{
+        eli5:'Giant power strips running down the sides.',
+        fifteen:'Power distribution units: metered outlets feeding every sled.',
+        pro:'Dual PDUs (A/B feeds): per-outlet metering and remote switching.',
+        expert:'Intelligent PDUs: per-phase metering, A/B redundancy, branch-circuit monitoring.'}},
+      {part:'rack-cable', name:'Cable management', w:{
+        eli5:'Tidy trays so the wires never become spaghetti.',
+        fifteen:'Cable arms and trays: serviceability without unplugging the rack.',
+        pro:'Structured cabling: bend radius and airflow matter at 400G.',
+        expert:'Fiber bend radius and copper weight add up; sloppy cabling measurably hurts airflow and repair time.'}},
+      {part:'rack-cdu', name:'CDU — liquid cooling', w:{
+        eli5:'A water box that carries heat away from the hottest computers.',
+        fifteen:'Coolant distribution unit: pumps facility water to cold plates in the sleds.',
+        pro:'In-rack CDU: isolates the facility water loop from the electronics loop.',
+        expert:'CDU: heat exchanger + N+1 pumps; the air-to-liquid handoff that makes 100 kW racks possible.'}}],
+    build:function(){
+      var boxes=[B(0,-0.25,0, 12,0.5,7, 0x14161a)];
+      [[-4.3,-2.4],[4.3,-2.4],[-4.3,2.4],[4.3,2.4]].forEach(function(o,i){
+        boxes.push(B(o[0],10.5,o[1], 0.35,21,0.35, RAILC,'rack-frame',i===0?'42U frame':null)); });
+      var sledY=[3.2,5.6,8.0,10.4], links=[];
+      sledY.forEach(function(y,i){
+        boxes.push(B(0,y,0, 8,1.9,4.4, 0x1d5f5c,'rack-server',i===0?'4× GPU servers':null));
+        links.push(LK([0,y+0.95,1.8],[0,12.6,1.4],'ib')); });
+      boxes.push(B(0,13.2,0, 8,1.2,3.2, TORC,'rack-tor','ToR leaf switch'));
+      boxes.push(B(-4.3,10.5,1.2, 0.6,18,0.9, 0x8a6a2f,'rack-pdu','PDUs'));
+      boxes.push(B(4.3,10.5,1.2, 0.6,18,0.9, 0x8a6a2f,'rack-pdu'));
+      boxes.push(B(0,12.2,2.8, 8,0.35,0.9, 0x2e3238,'rack-cable','Cable management'));
+      boxes.push(B(6.2,2.2,0, 2.2,4.4,3.2, 0x1f8a8a,'rack-cdu','CDU — liquid cooling'));
+      links.push(LK([-4.3,18,1.2],[-3.5,11,1.2],'power'));
+      links.push(LK([4.3,18,1.2],[3.5,11,1.2],'power'));
+      links.push(LK([5.1,3,0],[3,4,0],'cool'));
+      links.push(LK([5.1,3,2],[3,8,2],'cool'));
+      return {boxes:boxes, links:links};
+    }},
+  dc:{
+    name:'4 · Data center — the hall',
+    stats:['10s of MW','N+1 everywhere','3 lifelines'],
+    contrast:'<b>The punchline:</b> the chips are the smallest line item. Power, cooling, and networking — and the redundancy for each — are what a data center actually is.',
+    cap:{
+      eli5:'A warehouse full of closets, with its own backup power, giant air conditioners, and water pipes — because thousands of GPUs make as much heat as a small town. Toggle the Power, Cooling, and Network buttons to see each lifeline.',
+      fifteen:'The hall: rows of racks under spine switches, kept alive by three lifelines — power (utility, generators, UPS), cooling (chillers, towers, CRAH, liquid loops), and network (spine-leaf fabric, core routers, fiber to other halls). Toggle each layer to see what it takes.',
+      pro:'A training hall is three infrastructures sharing a building: power (utility → substation → UPS → generators → busway → rack PDUs), cooling (chillers → towers → CRAH/CDU → liquid loops), and network (spine-leaf → core routers → inter-hall fiber). Each is sized for the hall at full load, with N+1 redundancy.',
+      expert:'AI hall design: tens of MW, low PUE with liquid cooling, 2N UPS + N+1 gens, N+1 chillers and CRAH, non-blocking fat-tree with ECMP + DCQCN. Toggle the layers: every box is a single point of failure that money was spent to duplicate.'},
+    legend:'<span><i style="background:#d9a441"></i>Power</span><span><i style="background:#2dd4bf"></i>Cooling</span><span><i style="background:#5aa2ff"></i>Network</span>',
+    cam:{pos:[0,21,42], tgt:[0,2,0]},
+    hasLayers:true,
+    manifest:[
+      {part:'dc-rack', name:'Rack rows', w:{
+        eli5:'Rows of closets, all humming together.',
+        fifteen:'Rows of GPU racks: the compute floor.',
+        pro:'Compute rows: hot/cold aisle layout, ~30–100 kW per rack.',
+        expert:'Rack rows on 600 mm tiles; containment, floor loading, and cable trays planned per row.'}},
+      {part:'dc-spine', name:'Spine switches', w:{
+        eli5:'The big switches connecting all the closet switches.',
+        fifteen:'Spine layer: every ToR connects to every spine — two hops anywhere.',
+        pro:'Spine switches: the fat-tree core; bisection bandwidth lives here.',
+        expert:'High-radix spines, non-blocking within the pod; the priciest cables in the building terminate here.'}},
+      {part:'dc-utility', name:'Utility feed', layer:'power', w:{
+        eli5:'The giant plug from the city power grid.',
+        fifteen:'Grid connection: tens of megawatts from the utility.',
+        pro:'Utility feed: dual substations, MW-scale service entrance.',
+        expert:'Often 2N feeds from separate substations; power availability gates site selection.'}},
+      {part:'dc-sub', name:'Substation', layer:'power', w:{
+        eli5:'Steps the city power down to a size the building can use.',
+        fifteen:'On-site substation: transforms transmission voltage down.',
+        pro:'Substation: MV→LV transformation, switchgear, protection.',
+        expert:'Dedicated substation: the most expensive long-lead item on site.'}},
+      {part:'dc-ups', name:'UPS room', layer:'power', w:{
+        eli5:'Giant batteries that keep everything on during a blackout.',
+        fifteen:'Uninterruptible power: bridging the gap until generators start.',
+        pro:'UPS: rides through sags and the generator start gap.',
+        expert:'Battery/flywheel UPS at 2N; sized for full hall load during transfer.'}},
+      {part:'dc-gen', name:'Diesel generators', layer:'power', w:{
+        eli5:'Backup engines that roar to life if the city power dies.',
+        fifteen:'On-site generators: full hall power for days.',
+        pro:'N+1 gensets: on-site fuel for extended outages; tested monthly under load.',
+        expert:'N+1 diesel; the reason training survives grid events. Fuel logistics is a real ops discipline.'}},
+      {part:'dc-bus', name:'Busway', layer:'power', w:{
+        eli5:'Power highways running above the closets.',
+        fifteen:'Overhead busway: tap-off boxes feed each rack row.',
+        pro:'Busway: flexible MW distribution; racks tap in anywhere.',
+        expert:'Busbar trunking: rows re-provisioned without pulling new conduit.'}},
+      {part:'dc-chiller', name:'Chillers', layer:'cooling', w:{
+        eli5:'Giant fridges that make cold water.',
+        fifteen:'Chillers: the refrigeration plant making chilled water.',
+        pro:'Chiller plant: N+1, the thermodynamic heart of the site.',
+        expert:'Centrifugal chillers; a chiller failure is a site-level event.'}},
+      {part:'dc-tower', name:'Cooling towers', layer:'cooling', w:{
+        eli5:'Big steamy boxes that dump heat into the sky.',
+        fifteen:'Towers reject heat to the atmosphere by evaporating water.',
+        pro:'Cooling towers: evaporative heat rejection; water usage is the trade.',
+        expert:'Open towers: approach temperature sets chiller lift; water treatment is an ops reality.'}},
+      {part:'dc-crah', name:'CRAH units', layer:'cooling', w:{
+        eli5:'Room-sized air conditioners blowing cold air at the closets.',
+        fifteen:'Computer-room air handlers: chilled-water coils + fans per row.',
+        pro:'CRAH: sensible cooling for air-cooled racks; N+1 per row.',
+        expert:'CRAH with EC fans; containment + placement decides bypass airflow.'}},
+      {part:'dc-cdu', name:'Row CDUs', layer:'cooling', w:{
+        eli5:'Water boxes for each row of hot closets.',
+        fifteen:'Row-level coolant distribution for liquid-cooled racks.',
+        pro:'Row CDUs: facility-water to technology-water handoff per row.',
+        expert:'Row CDUs enable 100 kW+ racks; leak detection and isolation valves per row.'}},
+      {part:'dc-core', name:'Core routers', layer:'network', w:{
+        eli5:'The front doors where data enters and leaves the building.',
+        fifteen:'Core/border routers: connect the hall to the outside world.',
+        pro:'Border routers: peering, ingress/egress, DDoS scrubbing.',
+        expert:'Core: BGP peering, optical transport; the hall is an AS on the internet.'}},
+      {part:'dc-hallb', name:'Hall B — fiber interconnect', layer:'network', w:{
+        eli5:'A second warehouse across the yard, joined by threads of light.',
+        fifteen:'Second hall linked by fiber: campuses scale hall by hall.',
+        pro:'Inter-hall fiber (DCI): jobs can span halls at a latency cost.',
+        expert:'DCI: DWDM fiber between halls; cross-hall all-reduce is budgeted like a WAN.'}}],
+    build:function(){
+      var boxes=[B(0,-0.3,0, 48,0.6,34, 0x14161a)];
+      [-15,-5,5,15].forEach(function(x){
+        [-5,5].forEach(function(z){
+          boxes.push(B(x,2.2,z, 6,4.4,4.2, RACKC,'dc-rack',(x===-15&&z===-5)?'Rack rows (8 shown)':null)); }); });
+      boxes.push(B(-4,7.5,-10, 3.2,1.3,2.2, SWC,'dc-spine','Spine switches'));
+      boxes.push(B(4,7.5,-10, 3.2,1.3,2.2, SWC,'dc-spine'));
+      /* power */
+      boxes.push(B(-22,1.6,8, 2.2,3.2,2.2, PWC,'dc-utility','Utility feed','power'));
+      boxes.push(B(-18,1.3,8, 3.2,2.6,3.2, PWC,'dc-sub','Substation','power'));
+      boxes.push(B(-13.5,1.1,10, 2.6,2.2,2.6, PWC,'dc-gen','Diesel generators','power'));
+      boxes.push(B(-10,1.1,10, 2.6,2.2,2.6, PWC,'dc-gen',null,'power'));
+      boxes.push(B(-5.5,1.3,8, 3.4,2.6,2.8, PWC,'dc-ups','UPS room','power'));
+      boxes.push(B(0,6.8,0, 42,0.4,0.7, PWC,'dc-bus','Busway','power'));
+      /* cooling */
+      boxes.push(B(15,1.3,11, 3.2,2.6,2.8, CLC,'dc-chiller','Chillers','cooling'));
+      boxes.push(B(19,1.3,11, 3.2,2.6,2.8, CLC,'dc-chiller',null,'cooling'));
+      boxes.push(B(22.5,2,7, 2.6,4,2.6, CLC,'dc-tower','Cooling towers','cooling'));
+      [-12,0,12].forEach(function(x){
+        boxes.push(B(x,1.6,-14.5, 3.2,3.2,1.6, CLC,'dc-crah',x===-12?'CRAH units':null,'cooling')); });
+      boxes.push(B(11,1.1,4, 2.2,2.2,2.2, CLC,'dc-cdu','Row CDUs','cooling'));
+      /* network */
+      boxes.push(B(-4,2.2,-14.5, 3.2,2.2,2.2, NTC,'dc-core','Core routers','network'));
+      boxes.push(B(4,2.2,-14.5, 3.2,2.2,2.2, NTC,'dc-core',null,'network'));
+      boxes.push(B(0,0.8,17, 22,0.35,9, 0x1a2030,'dc-hallb','Hall B — fiber interconnect','network'));
+      var links=[
+        LK([-20.9,2.5,8],[-19.6,2,8],'power','power'),
+        LK([-16.4,2,8],[-14.8,1.8,10],'power','power'),
+        LK([-12.2,1.8,10],[-7.2,2,8],'power','power'),
+        LK([-8.7,1.8,10],[-7.2,2,8],'power','power'),
+        LK([-3.8,2.2,8],[-1,6.8,2],'power','power'),
+        LK([-8,6.8,0],[-8,4.6,-3],'power','power'),
+        LK([8,6.8,0],[8,4.6,3],'power','power'),
+        LK([16.6,2,11],[21.2,2.5,8],'cool','cooling'),
+        LK([15,2.4,9.6],[12,2.5,4.5],'cool','cooling'),
+        LK([0,3.2,-13.7],[0,3,-7],'cool','cooling'),
+        LK([-12,3.2,-13.7],[-12,3,-7],'cool','cooling'),
+        LK([11,2.2,2.9],[8,2.5,3.2],'cool','cooling'),
+        LK([-4,8.2,-10],[-4,3.3,-13.4],'net','network'),
+        LK([4,8.2,-10],[4,3.3,-13.4],'net','network'),
+        LK([-4,2.5,-13.4],[-4,1,12.5],'net','network'),
+        LK([4,2.5,-13.4],[4,1,12.5],'net','network')];
+      return {boxes:boxes, links:links};
+    }}
+  };
+
+  var renderer, scene, camera, root, pktPts, packets=[], labels=[], partMats={}, clickables=[], clock;
+  var rotY=0, dragging=false, lx=0, ly=0, moved=0, zoom=1;
+  var camBase={pos:[0,11,23], tgt:[0,0.5,0]};
+
+  function disposeObj(o){
+    o.traverse(function(n){
+      if(n.geometry) n.geometry.dispose();
+      if(n.material){ (Array.isArray(n.material)?n.material:[n.material]).forEach(function(m){ m.dispose(); }); }
+    });
+  }
+  function clearLabels(){ labelLayer.innerHTML=''; labels=[]; }
+
+  function findManifest(part){
+    var m=STAGES[buildKey].manifest;
+    for(var i=0;i<m.length;i++) if(m[i].part===part) return m[i];
+    return null;
+  }
+  function renderManifest(){
+    var html='';
+    STAGES[buildKey].manifest.forEach(function(it){
+      if(it.layer && !layersOn[it.layer]) return;
+      html+='<div class="mitem" data-part="'+it.part+'"><b>'+esc(it.name)+'</b><span>'+esc(it.w[LEVEL]||it.w.pro)+'</span></div>';
+    });
+    document.getElementById('build-manifest').innerHTML=html;
+    Array.prototype.forEach.call(document.querySelectorAll('#build-manifest .mitem'), function(el){
+      el.addEventListener('click', function(){
+        var p=el.getAttribute('data-part');
+        pinPart(p); pulsePart(p);
+      });
+    });
+  }
+  function pinPart(part){
+    var pin=document.getElementById('build-pin'), item=part&&findManifest(part);
+    if(!item){ pin.classList.remove('show'); pin.innerHTML=''; 
+      Array.prototype.forEach.call(document.querySelectorAll('#build-manifest .mitem'), function(x){ x.classList.remove('on'); });
+      return; }
+    pin.innerHTML='<b>'+esc(item.name)+'</b> — '+esc(item.w[LEVEL]||item.w.pro);
+    pin.classList.add('show');
+    Array.prototype.forEach.call(document.querySelectorAll('#build-manifest .mitem'), function(x){
+      x.classList.toggle('on', x.getAttribute('data-part')===part); });
+  }
+  function pulsePart(part){
+    (partMats[part]||[]).forEach(function(mt){
+      mt.emissive=new THREE.Color(0xd9a441); mt.emissiveIntensity=2.2;
+      setTimeout(function(){ mt.emissiveIntensity=0; }, 750);
+    });
+  }
+  function renderBuildCap(){
+    var st=STAGES[buildKey];
+    document.getElementById('build-name').textContent=st.name;
+    document.getElementById('build-why').innerHTML=esc(st.cap[LEVEL]||st.cap.pro)+
+      (st.jump?' <a class="build-jump" href="#stage-hero">↑ Explore the chips up close</a>':'');
+    document.getElementById('build-stats').innerHTML=st.stats.map(function(s){ return '<span>'+esc(s)+'</span>'; }).join('');
+    document.getElementById('build-contrast').innerHTML=st.contrast;
+    document.getElementById('build-legend').innerHTML=st.legend;
+    document.getElementById('build-layers').style.display=st.hasLayers?'flex':'none';
+    pinPart(null);
+    renderManifest();
+  }
+  window.renderBuild=function(){ renderBuildCap(); };
+
+  function buildPackets(curves){
+    if(pktPts){ root.remove(pktPts); pktPts.geometry.dispose(); pktPts.material.dispose(); pktPts=null; }
+    packets=[];
+    var vis=curves.filter(function(c){ return c.visible; });
+    var per=3, n=vis.length*per;
+    if(!n) return;
+    var pos=new Float32Array(n*3), col=new Float32Array(n*3), ci=0;
+    vis.forEach(function(c){
+      var cc=new THREE.Color(LINKC[c.userData.type]);
+      for(var i=0;i<per;i++){
+        packets.push({curve:c.userData.curve, t:Math.random(), speed:.25+Math.random()*.3});
+        col[ci*3]=cc.r; col[ci*3+1]=cc.g; col[ci*3+2]=cc.b; ci++;
+      }
+    });
+    var pg=new THREE.BufferGeometry();
+    pg.setAttribute('position', new THREE.BufferAttribute(pos,3));
+    pg.setAttribute('color', new THREE.BufferAttribute(col,3));
+    pktPts=new THREE.Points(pg, new THREE.PointsMaterial({size:.4, vertexColors:true, transparent:true, opacity:.95, depthWrite:false}));
+    pktPts.frustumCulled=false;
+    root.add(pktPts);
+  }
+
+  function buildBuild(){
+    while(root.children.length){ var o=root.children[0]; root.remove(o); disposeObj(o); }
+    clearLabels();
+    packets=[]; partMats={}; clickables=[];
+    var st=STAGES[buildKey], bd=st.build(), curves=[];
+    bd.boxes.forEach(function(b){
+      var vis=!b.layer||layersOn[b.layer];
+      var g=new THREE.BoxGeometry(b.s[0],b.s[1],b.s[2]);
+      var m=new THREE.MeshStandardMaterial({color:b.c, roughness:.55, metalness:.35});
+      var mesh=new THREE.Mesh(g,m);
+      mesh.position.set(b.p[0],b.p[1],b.p[2]);
+      mesh.visible=vis;
+      mesh.userData={part:b.part, layer:b.layer};
+      root.add(mesh);
+      var e=new THREE.LineSegments(new THREE.EdgesGeometry(g),
+        new THREE.LineBasicMaterial({color:0xffffff, transparent:true, opacity:.13}));
+      e.position.copy(mesh.position); e.visible=vis; e.userData={layer:b.layer};
+      root.add(e);
+      if(b.part){ (partMats[b.part]=partMats[b.part]||[]).push(m); clickables.push(mesh); }
+      if(b.label){
+        var d=document.createElement('div');
+        d.className='label'; d.textContent=b.label;
+        d.style.display=vis?'block':'none';
+        labelLayer.appendChild(d);
+        labels.push({el:d, obj:mesh, layer:b.layer, dy:b.s[1]/2+0.4});
+      }
+    });
+    bd.links.forEach(function(l){
+      var vis=!l.layer||layersOn[l.layer];
+      var a=new THREE.Vector3(l.a[0],l.a[1],l.a[2]), b2=new THREE.Vector3(l.b[0],l.b[1],l.b[2]);
+      var mid=a.clone().add(b2).multiplyScalar(0.5);
+      mid.y+=Math.max(1.0, a.distanceTo(b2)*0.15);
+      var curve=new THREE.QuadraticBezierCurve3(a,mid,b2);
+      var lg=new THREE.BufferGeometry().setFromPoints(curve.getPoints(20));
+      var line=new THREE.Line(lg, new THREE.LineBasicMaterial({color:LINKC[l.t], transparent:true, opacity:.55}));
+      line.visible=vis; line.userData={layer:l.layer, curve:curve, type:l.t};
+      root.add(line); curves.push(line);
+    });
+    buildPackets(curves);
+    camBase=st.cam; zoom=1;
+    camera.position.set(st.cam.pos[0],st.cam.pos[1],st.cam.pos[2]);
+    camera.lookAt(st.cam.tgt[0],st.cam.tgt[1],st.cam.tgt[2]);
+    renderBuildCap();
+  }
+
+  function applyLayers(){
+    root.children.forEach(function(o){
+      var L=o.userData&&o.userData.layer;
+      if(L) o.visible=!!layersOn[L];
+    });
+    labels.forEach(function(L){
+      L.el.style.display=(!L.layer||layersOn[L.layer])?'block':'none';
+    });
+    var curves=[];
+    root.children.forEach(function(o){
+      if(o.isLine&&o.userData.curve&&o.visible) curves.push(o);
+    });
+    buildPackets(curves);
+    renderManifest();
+  }
+
+  try{
+    renderer=new THREE.WebGLRenderer({canvas:canvas, antialias:true});
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+    renderer.setClearColor(0x1b1712,1);
+  }catch(e){
+    document.getElementById('build-fallback').style.display='block';
+    canvas.style.display='none';
+    window.renderBuild=function(){ renderBuildCap(); };
+    renderBuildCap();
+    return;
+  }
+  scene=new THREE.Scene();
+  camera=new THREE.PerspectiveCamera(45,1,.1,300);
+  scene.add(new THREE.AmbientLight(0xfff2e0,.85));
+  var dl=new THREE.DirectionalLight(0xffffff,.7); dl.position.set(8,16,10); scene.add(dl);
+  root=new THREE.Group(); scene.add(root);
+  clock=new THREE.Clock();
+
+  function sizeBuild(){
+    var w=canvas.clientWidth||canvas.parentNode.clientWidth, h=canvas.clientHeight||440;
+    renderer.setSize(w,h,false);
+    camera.aspect=w/h; camera.updateProjectionMatrix();
+  }
+  window.addEventListener('resize', sizeBuild);
+
+  document.querySelectorAll('.tbtn').forEach(function(b){
+    b.addEventListener('click', function(){
+      var tab=b.getAttribute('data-tab');
+      document.querySelectorAll('.tbtn').forEach(function(x){ x.classList.toggle('on', x===b); });
+      document.getElementById('tab-compute').style.display=tab==='compute'?'block':'none';
+      document.getElementById('tab-build').style.display=tab==='build'?'block':'none';
+      if(tab==='build') sizeBuild();
+    });
+  });
+  document.querySelectorAll('.bbtn').forEach(function(b){
+    b.addEventListener('click', function(){
+      buildKey=b.getAttribute('data-build');
+      document.querySelectorAll('.bbtn').forEach(function(x){ x.classList.toggle('on', x===b); });
+      rotY=0; zoom=1;
+      buildBuild();
+    });
+  });
+  document.querySelectorAll('.ybtn').forEach(function(b){
+    b.addEventListener('click', function(){
+      var L=b.getAttribute('data-layer');
+      layersOn[L]=!layersOn[L];
+      b.classList.toggle('on', layersOn[L]);
+      applyLayers();
+    });
+  });
+
+  canvas.addEventListener('pointerdown', function(e){
+    dragging=true; lx=e.clientX; ly=e.clientY; moved=0;
+    try{ canvas.setPointerCapture(e.pointerId); }catch(_){}
+  });
+  canvas.addEventListener('pointermove', function(e){
+    if(dragging){
+      var dx=e.clientX-lx, dy=e.clientY-ly;
+      moved+=Math.abs(dx)+Math.abs(dy);
+      rotY+=dx*0.006; lx=e.clientX; ly=e.clientY;
+    } else { hoverBuild(e); }
+  });
+  function endBuildDrag(e){
+    if(dragging&&moved<7) tapBuild(e);
+    dragging=false;
+  }
+  canvas.addEventListener('pointerup', endBuildDrag);
+  canvas.addEventListener('pointercancel', function(){ dragging=false; });
+  canvas.addEventListener('wheel', function(e){
+    e.preventDefault();
+    zoom=Math.max(0.5, Math.min(2.4, zoom*(1+e.deltaY*0.001)));
+  }, {passive:false});
+
+  var ray=new THREE.Raycaster(), ptr=new THREE.Vector2();
+  function castBuild(e){
+    var r=canvas.getBoundingClientRect();
+    ptr.x=((e.clientX-r.left)/r.width)*2-1;
+    ptr.y=-((e.clientY-r.top)/r.height)*2+1;
+    ray.setFromCamera(ptr, camera);
+    var hits=ray.intersectObjects(clickables.filter(function(m){ return m.visible; }), false);
+    return hits.length?hits[0].object.userData.part:null;
+  }
+  function tapBuild(e){
+    var part=castBuild(e);
+    if(part){ pinPart(part); pulsePart(part); }
+    else pinPart(null);
+  }
+  var btip=document.getElementById('build-tip'), hoverBRaf=false;
+  function hoverBuild(e){
+    if(hoverBRaf) return; hoverBRaf=true;
+    requestAnimationFrame(function(){
+      hoverBRaf=false;
+      var part=castBuild(e), item=part&&findManifest(part);
+      var r=canvas.getBoundingClientRect();
+      if(item){
+        btip.innerHTML='<b>'+esc(item.name)+'</b>'+esc(item.w[LEVEL]||item.w.pro);
+        btip.style.display='block';
+        btip.style.left=Math.min(e.clientX-r.left+16, r.width-260)+'px';
+        btip.style.top=(e.clientY-r.top+14)+'px';
+        canvas.style.cursor='pointer';
+      } else { btip.style.display='none'; canvas.style.cursor='grab'; }
+    });
+  }
+  canvas.addEventListener('pointerleave', function(){ btip.style.display='none'; });
+
+  var v3=new THREE.Vector3(), tmpV=new THREE.Vector3();
+  (function animateBuild(){
+    requestAnimationFrame(animateBuild);
+    if(!canvas.clientWidth) return;
+    var dt=Math.min(.05, clock.getDelta());
+    if(!dragging) rotY+=dt*0.1;
+    root.rotation.y=rotY;
+    if(pktPts){
+      var arr=pktPts.geometry.attributes.position.array;
+      for(var i=0;i<packets.length;i++){
+        var p=packets[i];
+        p.t=(p.t+p.speed*dt)%1;
+        p.curve.getPoint(p.t,tmpV);
+        arr[i*3]=tmpV.x; arr[i*3+1]=tmpV.y; arr[i*3+2]=tmpV.z;
+      }
+      pktPts.geometry.attributes.position.needsUpdate=true;
+    }
+    var t=camBase.tgt;
+    camera.position.set(
+      t[0]+(camBase.pos[0]-t[0])*zoom,
+      t[1]+(camBase.pos[1]-t[1])*zoom,
+      t[2]+(camBase.pos[2]-t[2])*zoom);
+    camera.lookAt(t[0],t[1],t[2]);
+    var w=canvas.clientWidth, h=canvas.clientHeight;
+    labels.forEach(function(L){
+      if(L.el.style.display==='none') return;
+      L.obj.getWorldPosition(v3); v3.y+=L.dy;
+      v3.project(camera);
+      if(v3.z>1||v3.z<-1){ L.el.style.display='none'; return; }
+      L.el.style.left=((v3.x*0.5+0.5)*w)+'px';
+      L.el.style.top=((-v3.y*0.5+0.5)*h)+'px';
+    });
+    renderer.render(scene,camera);
+  })();
+  sizeBuild(); buildBuild();
 })();
 
   resize(); animate();
