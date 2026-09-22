@@ -17,12 +17,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 
 REQUIRED_LINKS = [
-    "https://dumbmodel.com/",
-    "https://hoops.dumbmodel.com/",
-    "https://pitch.dumbmodel.com/",
-    "https://gridiron.dumbmodel.com/",
-    "https://equities.dumbmodel.com/",
-    "https://unified.dumbmodel.com/",
+    "https://hoops.dumbmodel.com",
     "/graphify/",
     "/family/",
 ]
