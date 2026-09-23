@@ -228,7 +228,6 @@ html:not(.js) .copy { display: none; }
 .d-end .endcard__title { letter-spacing: 0.01em; }
 .d-end__links { margin-top: var(--sp-4); display: flex; align-items: center; flex-wrap: wrap; justify-content: center; gap: var(--sp-4); }
 .endcard .d-end__links .btn { margin-top: 0; }
-.soon { display: inline-flex; align-items: center; gap: var(--sp-3); min-height: 48px; padding: 0 var(--sp-6); border: 1px dashed var(--line-strong); color: var(--muted); font: 500 var(--t-xs)/1 var(--font-display); letter-spacing: 0.22em; text-transform: uppercase; }
 
 /* the opening's first-load pass: short, never blocks, never under reduced motion */
 @media (prefers-reduced-motion: no-preference) {
@@ -437,7 +436,7 @@ html:not(.js) .copy { display: none; }
         <ul class="facts">
           <li><b>Advisory means logged and shown</b><span>Learned and System One answers are recorded next to the heuristic's and displayed. They do not change the tier until a checkpoint passes the gate and a human stamps it.</span></li>
           <li><b>The last recorded comparison</b><span>In the latest evaluation report (August 2026), the learned candidate and the heuristic both scored 83.6% on 61 measured held-out goals. A tie does not pass the gate, which requires strictly beating the heuristic, so the heuristic stayed.</span></li>
-          <li><b>Traces feed the next model</b><span>Routing traces from real harness runs feed a training loop on the GPU host. Unifying scout and jarvisd on this one policy is in progress.</span></li>
+          <li><b>Traces feed the next model</b><span>scout and jarvisd now route through this one policy, and every routed goal is recorded as a trace. Real traces feed the training loop (<code>scout router pack</code>, <code>train</code>, <code>eval</code>, <code>promote</code>), which runs on the GPU host.</span></li>
         </ul>
       </div>
     </div>
@@ -658,15 +657,15 @@ html:not(.js) .copy { display: none; }
             <li><b>The heuristic router</b>MoMA-lite over five tiers, authoritative in the harness.</li>
             <li><b>The System One contract</b>Frozen <code>jev-decision-schema-1.0.0</code> and a typed <code>/decide</code> server.</li>
             <li><b>Gates as code</b><code>dottie-loop</code>: evaluation gates, promotion and rollback records that can stop an advance.</li>
+            <li><b>One router</b>A single policy in <code>dottie-loop</code> for scout and jarvisd, with heuristic, learned MLP and System One backends. The heuristic decides; the others are advisory.</li>
+            <li><b>The console</b><a href="https://os.jcamd.com" rel="noopener">os.jcamd.com</a>: Conductor and Pair for dottie-os. They show offline until paired with a running jarvisd.</li>
           </ul>
         </section>
         <section class="is-progress" aria-labelledby="st-progress">
           <h3 id="st-progress"><i aria-hidden="true"></i>In progress</h3>
           <ul>
-            <li><b>One router</b>A single policy in <code>dottie-loop</code> for scout and jarvisd, with heuristic, learned MLP and System One backends.</li>
             <li><b>System One checkpoints</b>A small model with LoRA and pointer heads. None has passed the gate.</li>
-            <li><b>The training loop</b>Real routing traces into training on the GPU host.</li>
-            <li><b>The console</b>A web console for dottie-os, planned at os.jcamd.com.</li>
+            <li><b>The training loop</b>The commands are in; the first training run on real traces happens on the GPU host.</li>
             <li><b>The hive</b>Designed; not yet built.</li>
           </ul>
         </section>
@@ -691,7 +690,7 @@ html:not(.js) .copy { display: none; }
       <p class="endcard__text">MIT licensed, solo, built on public and free-tier tools. Read the code; when this page and the code disagree, the code is right.</p>
       <div class="d-end__links">
         <a class="btn btn--accent" href="https://github.com/jcdavis131/dottie" rel="noopener">github.com/jcdavis131/dottie</a>
-        <span class="soon">Console <span aria-hidden="true">·</span> coming soon</span>
+        <a class="btn" href="https://os.jcamd.com" rel="noopener">Open the console</a>
       </div>
     </div>
   </section>
