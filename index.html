@@ -2,20 +2,31 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>JC Davis — Builds AI products</title>
 <meta name="description" content="JC Davis is an independent builder in Austin, Texas. Embedding Atlas, Dottie, and the vector game suite — AI products on real data.">
 <link rel="canonical" href="https://jcamd.com/">
+<script>(function(r){r.classList.add('js');try{var t=localStorage.getItem('jcamd-theme');if(t==='light'||t==='dark')r.setAttribute('data-theme',t);if(!matchMedia('(prefers-reduced-motion: reduce)').matches&&!sessionStorage.getItem('jcamd-intro')){r.classList.add('intro');sessionStorage.setItem('jcamd-intro','1')}}catch(e){}})(document.documentElement)</script>
+<link rel="preload" href="/assets/fonts/jost-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
 <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
-<meta name="theme-color" content="#171410">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<meta name="theme-color" content="#f3f1ec">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0c0b0a">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="JC Davis">
 <meta property="og:title" content="JC Davis — Builds AI products">
 <meta property="og:description" content="JC Davis is an independent builder in Austin, Texas. Embedding Atlas, Dottie, and the vector game suite — AI products on real data.">
 <meta property="og:url" content="https://jcamd.com/">
-<meta name="twitter:card" content="summary">
+<meta property="og:image" content="https://jcamd.com/assets/og/og-home.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="JC Davis — Builds AI products. Austin, Texas.">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="JC Davis — Builds AI products">
 <meta name="twitter:description" content="JC Davis is an independent builder in Austin, Texas. Embedding Atlas, Dottie, and the vector game suite — AI products on real data.">
+<meta name="twitter:image" content="https://jcamd.com/assets/og/og-home.png">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -23,168 +34,238 @@
   "name": "JC Davis",
   "url": "https://jcamd.com/",
   "jobTitle": "Independent AI builder",
+  "address": { "@type": "PostalAddress", "addressLocality": "Austin", "addressRegion": "TX", "addressCountry": "US" },
   "sameAs": ["https://github.com/jcdavis131"]
 }
 </script>
+<link rel="stylesheet" href="/assets/frame.css">
 <link rel="stylesheet" href="/assets/portfolio.css">
 </head>
 <body>
-<header class="top">
-  <div class="wrap top-in">
-    <a class="brand" href="#top">JC Davis</a>
-    <nav>
-      <a href="#work">Work</a>
-      <a href="#timeline">Timeline</a>
-      <a href="#craft">Craft</a>
-      <a href="/chips/">Chips</a>
-      <a href="#lab">Lab</a>
-      <a href="#uses">Uses</a>
-      <a href="#contact">Contact</a>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="chrome">
+  <div class="chrome__in">
+    <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Menu">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><line class="l1" x1="4" y1="8" x2="20" y2="8"/><line class="l2" x1="4" y1="16" x2="20" y2="16"/></svg>
+    </button>
+    <a class="chrome__brand" href="#top" aria-label="JC Davis, top of page">JC Davis</a>
+    <nav class="chrome__nav" id="primary-nav" aria-label="Primary">
+      <ul class="chrome__list chrome__list--l">
+        <li><a href="#work">Work</a></li>
+        <li><a href="#lab">Lab</a></li>
+        <li><a href="/chips/">Chips</a></li>
+      </ul>
+      <ul class="chrome__list chrome__list--r">
+        <li><a href="#craft">Craft</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
     </nav>
+    <button class="theme-toggle" type="button" aria-label="Switch theme">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.25"/><path class="half" d="M12 3.5a8.5 8.5 0 0 1 0 17z"/></svg>
+    </button>
   </div>
 </header>
 
-<main id="top">
-  <section class="hero">
-    <div class="wrap">
-      <p class="kicker">Austin, Texas</p>
-      <h1>JC Davis</h1>
-      <p class="lede">I build AI products — embedding systems, forecasting models, and the games and tools that sit on top of them. Real data, full scale, shipped.</p>
-      <div class="cta-row">
-        <a class="btn solid" href="#work">See the work</a>
-        <a class="btn ghost" href="https://github.com/jcdavis131" rel="noopener">GitHub</a>
+<main id="main">
+
+  <!-- Opening card -->
+  <section class="opening" id="top" aria-labelledby="name">
+    <svg class="opening__field" viewBox="0 0 1600 1000" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+      <g fill="none" stroke="currentColor" stroke-width="1" vector-effect="non-scaling-stroke">
+        <path d="M0 0 800 500M1600 0 800 500M0 1000 800 500M1600 1000 800 500M800 0v1000M0 500h1600"/>
+        <rect x="80" y="45" width="1440" height="910"/>
+        <rect x="224" y="140" width="1152" height="720"/>
+        <rect x="368" y="230" width="864" height="540"/>
+        <rect x="512" y="320" width="576" height="360"/>
+        <rect x="620" y="387.5" width="360" height="225"/>
+      </g>
+    </svg>
+    <span class="crop crop--tl" aria-hidden="true"></span><span class="crop crop--tr" aria-hidden="true"></span>
+    <span class="crop crop--bl" aria-hidden="true"></span><span class="crop crop--br" aria-hidden="true"></span>
+
+    <div class="opening__card">
+      <p class="label opening__place">Austin, Texas</p>
+      <h1 class="opening__name" id="name"><span>JC</span> <span>Davis</span></h1>
+      <hr class="rule opening__rule">
+      <p class="opening__lede">I build AI products — embedding systems, forecasting models, and the games and tools that sit on top of them. Real data, full scale, shipped.</p>
+      <div class="opening__cta">
+        <a class="btn btn--accent" href="#work">See the work</a>
+        <a class="btn" href="https://github.com/jcdavis131" rel="noopener">GitHub</a>
       </div>
     </div>
+
+    <a class="opening__cue" href="#work"><span class="label">The work</span><span class="opening__cue-line" aria-hidden="true"></span></a>
   </section>
 
-  <section id="work" class="section">
+  <!-- The work: a sequence of frames -->
+  <section id="work" class="work" aria-labelledby="work-title">
+    <header class="section-head" data-reveal>
+      <p class="label label--accent">Flagship work</p>
+      <h2 class="title" id="work-title">Built and shipped</h2>
+      <p class="section-head__sub">Six things I've built and shipped, in sequence.</p>
+    </header>
+
+    <ol class="frames">
+      <li class="frame" id="atlas">
+        <div class="frame__bar" aria-hidden="true"><span>01</span><span class="frame__bar-rule"></span><span>06</span></div>
+        <div class="frame__body" data-reveal>
+          <svg class="plate" viewBox="0 0 96 96" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="1"><circle cx="48" cy="48" r="36"/><ellipse cx="48" cy="48" rx="14" ry="36"/><ellipse cx="48" cy="48" rx="28" ry="36"/><path d="M12 48h72M17 30h62M17 66h62"/></g><circle class="plate__dot" cx="62" cy="30" r="3"/></svg>
+          <p class="label frame__host">eye.jcamd.com</p>
+          <h3 class="frame__title">Embedding Atlas</h3>
+          <p class="frame__text">One 3D map, many layers — jobs, places, water, climate, companies, client datasets — plus a constructs world: every jurisdiction, district, watershed and ecoregion over a point, joined back to the physical layers by location.</p>
+          <p class="frame__links">
+            <a class="tlink" href="https://eye.jcamd.com" rel="noopener">Live view <span aria-hidden="true">→</span></a>
+            <a class="tlink" href="https://github.com/jcdavis131/gods-eye-view" rel="noopener">Repository <span aria-hidden="true">→</span></a>
+          </p>
+        </div>
+      </li>
+
+      <li class="frame" id="dottie">
+        <div class="frame__bar" aria-hidden="true"><span>02</span><span class="frame__bar-rule"></span><span>06</span></div>
+        <div class="frame__body" data-reveal>
+          <svg class="plate" viewBox="0 0 96 96" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="1"><circle cx="48" cy="48" r="36"/><circle cx="48" cy="48" r="24"/><circle cx="48" cy="48" r="12"/><path d="M48 6v18M48 72v18M6 48h18M72 48h18"/></g><circle class="plate__dot" cx="48" cy="48" r="3"/></svg>
+          <p class="label frame__host">github.com/jcdavis131/dottie</p>
+          <h3 class="frame__title">Dottie</h3>
+          <p class="frame__text">A multipurpose AI harness for deep work — coding, research, inbox and CI triage — wired into the team's operations channel with goal tracking.</p>
+          <p class="frame__links">
+            <a class="tlink" href="https://github.com/jcdavis131/dottie" rel="noopener">Repository <span aria-hidden="true">→</span></a>
+          </p>
+        </div>
+      </li>
+
+      <li class="frame" id="hoops">
+        <div class="frame__bar" aria-hidden="true"><span>03</span><span class="frame__bar-rule"></span><span>06</span></div>
+        <div class="frame__body" data-reveal>
+          <svg class="plate" viewBox="0 0 96 96" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="1"><path d="M10 78h76"/><path d="M18 78a30 30 0 0 1 60 0"/><path d="M36 78V58h24v20"/><circle cx="48" cy="58" r="10"/></g><circle class="plate__dot" cx="48" cy="24" r="3"/></svg>
+          <p class="label frame__host">hoops.dumbmodel.com</p>
+          <h3 class="frame__title">Vector Hoops</h3>
+          <p class="frame__text">A basketball strategy game played on a live 3D embedding map of 12,966 player-seasons. Daily guessing games, pack battles, twenty-questions mode.</p>
+          <p class="frame__links">
+            <a class="tlink" href="https://hoops.dumbmodel.com" rel="noopener">Play it live <span aria-hidden="true">→</span></a>
+            <a class="tlink" href="https://github.com/jcdavis131/vector-hoops" rel="noopener">Repository <span aria-hidden="true">→</span></a>
+          </p>
+        </div>
+      </li>
+
+      <li class="frame" id="suite">
+        <div class="frame__bar" aria-hidden="true"><span>04</span><span class="frame__bar-rule"></span><span>06</span></div>
+        <div class="frame__body" data-reveal>
+          <svg class="plate" viewBox="0 0 96 96" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="1"><rect x="14" y="14" width="30" height="30"/><rect x="52" y="14" width="30" height="30"/><rect x="14" y="52" width="30" height="30"/><rect x="52" y="52" width="30" height="30"/></g><circle class="plate__dot" cx="67" cy="67" r="3"/></svg>
+          <p class="label frame__host">One geometry, many games</p>
+          <h3 class="frame__title">Vector game suite</h3>
+          <p class="frame__text">The same embedding-map engine across football, soccer, markets, and arcade play — one geometry, many games.</p>
+          <p class="frame__links">
+            <a class="tlink" href="https://github.com/jcdavis131/vector-gridiron" rel="noopener">Gridiron <span aria-hidden="true">→</span></a>
+            <a class="tlink" href="https://github.com/jcdavis131/vector-pitch" rel="noopener">Pitch <span aria-hidden="true">→</span></a>
+            <a class="tlink" href="https://github.com/jcdavis131/vector-equities" rel="noopener">Equities <span aria-hidden="true">→</span></a>
+            <a class="tlink" href="https://github.com/jcdavis131/vector-arcade" rel="noopener">Arcade <span aria-hidden="true">→</span></a>
+          </p>
+        </div>
+      </li>
+
+      <li class="frame" id="scout">
+        <div class="frame__bar" aria-hidden="true"><span>05</span><span class="frame__bar-rule"></span><span>06</span></div>
+        <div class="frame__body" data-reveal>
+          <svg class="plate" viewBox="0 0 96 96" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="1"><rect x="10" y="18" width="76" height="60"/><path d="M10 30h76M24 46l10 8-10 8"/></g><rect class="plate__dot" x="42" y="59" width="14" height="4"/></svg>
+          <p class="label frame__host">github.com/jcdavis131/scout-cli</p>
+          <h3 class="frame__title">scout-cli</h3>
+          <p class="frame__text">A command-line orchestrator for agent swarms — jobs, runs, and handoffs from the terminal, with an always-on operator tempo.</p>
+          <p class="frame__links">
+            <a class="tlink" href="https://github.com/jcdavis131/scout-cli" rel="noopener">Repository <span aria-hidden="true">→</span></a>
+          </p>
+        </div>
+      </li>
+
+      <li class="frame" id="arxiviq">
+        <div class="frame__bar" aria-hidden="true"><span>06</span><span class="frame__bar-rule"></span><span>06</span></div>
+        <div class="frame__body" data-reveal>
+          <svg class="plate" viewBox="0 0 96 96" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="1"><rect x="30" y="10" width="46" height="60"/><rect x="24" y="18" width="46" height="60" fill="var(--bg)"/><rect x="18" y="26" width="46" height="60" fill="var(--bg)"/><path d="M26 42h30M26 50h30M26 58h20"/></g><circle class="plate__dot" cx="54" cy="70" r="3"/></svg>
+          <p class="label frame__host">arxiviq.com</p>
+          <h3 class="frame__title">Arxiviq</h3>
+          <p class="frame__text">arXiv paper discovery, reimagined — search and browse research papers through a fast, visual interface.</p>
+          <p class="frame__links">
+            <a class="tlink" href="https://www.arxiviq.com" rel="noopener">Live site <span aria-hidden="true">→</span></a>
+          </p>
+        </div>
+      </li>
+    </ol>
+  </section>
+
+  <!-- Ledger -->
+  <section id="timeline" class="band" aria-labelledby="timeline-title">
+    <div class="wrap ledger">
+      <header class="ledger__head" data-reveal>
+        <p class="label label--accent">Timeline</p>
+        <h2 class="title" id="timeline-title">Shipped</h2>
+        <p class="ledger__year" aria-label="Year 2026">2026</p>
+      </header>
+      <ol class="ledger__list">
+        <li data-reveal><span class="ledger__n">01</span><h3>Vector Hoops</h3><p>Embedding-map basketball strategy game — 12,966 player-seasons, MTNN v5 champion model, with daily games, pack battles, and a twenty-questions mode.</p></li>
+        <li data-reveal><span class="ledger__n">02</span><h3>Embedding Atlas</h3><p>One 3D map, many layers — aircraft, ships, satellites, earthquakes, launches — plus jobs &amp; wages across 393 US metros on real labor data.</p></li>
+        <li data-reveal><span class="ledger__n">03</span><h3>Dottie</h3><p>Multipurpose AI harness for deep work — coding, research, inbox and CI triage — wired into the team ops channel with goal tracking.</p></li>
+        <li data-reveal><span class="ledger__n">04</span><h3>Vector game suite</h3><p>The same embedding-map engine across gridiron, pitch, equities, and arcade — one geometry, many games.</p></li>
+        <li data-reveal><span class="ledger__n">05</span><h3>Arxiviq</h3><p>arXiv paper discovery, reimagined — search and browse research papers through a fast, visual interface.</p></li>
+        <li data-reveal><span class="ledger__n">06</span><h3>scout-cli</h3><p>Terminal orchestrator for agent swarms — jobs, runs, and handoffs from the command line, with an always-on operator tempo.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- Craft -->
+  <section id="craft" class="section" aria-labelledby="craft-title">
     <div class="wrap">
-      <p class="kicker">Flagship work</p>
-      <h2>Things I've built and shipped.</h2>
-      <div class="grid">
-        <article class="card">
-          <h3>Embedding Atlas</h3>
-          <p>One 3D map, many layers — jobs, places, water, climate, companies, client datasets — plus a constructs world: every jurisdiction, district, watershed and ecoregion over a point, joined back to the physical layers by location.</p>
-          <div class="links">
-            <a href="https://github.com/jcdavis131/gods-eye-view" rel="noopener">Repository</a>
-            <a href="https://eye.jcamd.com" rel="noopener">Live view</a>
-          </div>
-        </article>
-        <article class="card">
-          <h3>Dottie</h3>
-          <p>A multipurpose AI harness for deep work — coding, research, inbox and CI triage — wired into the team's operations channel with goal tracking.</p>
-          <div class="links">
-            <a href="https://github.com/jcdavis131/dottie" rel="noopener">Repository</a>
-          </div>
-        </article>
-        <article class="card">
-          <h3>Vector Hoops</h3>
-          <p>A basketball strategy game played on a live 3D embedding map of 12,966 player-seasons. Daily guessing games, pack battles, twenty-questions mode.</p>
-          <div class="links">
-            <a href="https://hoops.dumbmodel.com" rel="noopener">Play it live</a>
-            <a href="https://github.com/jcdavis131/vector-hoops" rel="noopener">Repository</a>
-          </div>
-        </article>
-        <article class="card">
-          <h3>Vector game suite</h3>
-          <p>The same embedding-map engine across football, soccer, markets, and arcade play — one geometry, many games.</p>
-          <div class="links">
-            <a href="https://github.com/jcdavis131/vector-gridiron" rel="noopener">Gridiron</a>
-            <a href="https://github.com/jcdavis131/vector-pitch" rel="noopener">Pitch</a>
-            <a href="https://github.com/jcdavis131/vector-equities" rel="noopener">Equities</a>
-            <a href="https://github.com/jcdavis131/vector-arcade" rel="noopener">Arcade</a>
-          </div>
-        </article>
-        <article class="card">
-          <h3>scout-cli</h3>
-          <p>A command-line orchestrator for agent swarms — jobs, runs, and handoffs from the terminal, with an always-on operator tempo.</p>
-          <div class="links">
-            <a href="https://github.com/jcdavis131/scout-cli" rel="noopener">Repository</a>
-          </div>
-        </article>
-        <article class="card">
-          <h3>Arxiviq</h3>
-          <p>arXiv paper discovery, reimagined — search and browse research papers through a fast, visual interface.</p>
-          <div class="links">
-            <a href="https://www.arxiviq.com" rel="noopener">Live site</a>
-          </div>
-        </article>
-      </div>
+      <header class="section-head" data-reveal>
+        <p class="label label--accent">Craft</p>
+        <h2 class="title" id="craft-title">How I work</h2>
+      </header>
+      <ol class="principles">
+        <li data-reveal><span class="principles__n">I</span><h3>Real data, full scale.</h3><p>No synthetic demos, no mock results. If it can't run on production data, it doesn't ship.</p></li>
+        <li data-reveal style="--d:120ms"><span class="principles__n">II</span><h3>Held-out evaluation.</h3><p>Challengers earn promotion with measured wins on unseen data — never on vibes.</p></li>
+        <li data-reveal><span class="principles__n">III</span><h3>QA at every step.</h3><p>Pipelines with gates: a failure stops the line, it doesn't get papered over.</p></li>
+        <li data-reveal style="--d:120ms"><span class="principles__n">IV</span><h3>Products, not decks.</h3><p>The proof is something people can touch — a game, a map, a tool.</p></li>
+      </ol>
     </div>
   </section>
 
-  <section id="timeline" class="section">
-    <div class="wrap narrow">
-      <p class="kicker">Timeline</p>
-      <h2>Shipped.</h2>
-      <h3 class="tl-year">2026</h3>
-      <ul class="timeline">
-        <li class="tl-item">
-          <h3>Vector Hoops</h3>
-          <p>Embedding-map basketball strategy game — 12,966 player-seasons, MTNN v5 champion model, with daily games, pack battles, and a twenty-questions mode.</p>
-        </li>
-        <li class="tl-item">
-          <h3>Embedding Atlas</h3>
-          <p>One 3D map, many layers — aircraft, ships, satellites, earthquakes, launches — plus jobs &amp; wages across 393 US metros on real labor data.</p>
-        </li>
-        <li class="tl-item">
-          <h3>Dottie</h3>
-          <p>Multipurpose AI harness for deep work — coding, research, inbox and CI triage — wired into the team ops channel with goal tracking.</p>
-        </li>
-        <li class="tl-item">
-          <h3>Vector game suite</h3>
-          <p>The same embedding-map engine across gridiron, pitch, equities, and arcade — one geometry, many games.</p>
-        </li>
-        <li class="tl-item">
-          <h3>Arxiviq</h3>
-          <p>arXiv paper discovery, reimagined — search and browse research papers through a fast, visual interface.</p>
-        </li>
-        <li class="tl-item">
-          <h3>scout-cli</h3>
-          <p>Terminal orchestrator for agent swarms — jobs, runs, and handoffs from the command line, with an always-on operator tempo.</p>
-        </li>
-      </ul>
-    </div>
-  </section>
-
-  <section id="craft" class="section alt">
-    <div class="wrap narrow">
-      <p class="kicker">Craft</p>
-      <h2>How I work.</h2>
-      <ul class="principles">
-        <li><strong>Real data, full scale.</strong> No synthetic demos, no mock results. If it can't run on production data, it doesn't ship.</li>
-        <li><strong>Held-out evaluation.</strong> Challengers earn promotion with measured wins on unseen data — never on vibes.</li>
-        <li><strong>QA at every step.</strong> Pipelines with gates: a failure stops the line, it doesn't get papered over.</li>
-        <li><strong>Products, not decks.</strong> The proof is something people can touch — a game, a map, a tool.</li>
-      </ul>
-    </div>
-  </section>
-
-  <section id="lab" class="section">
+  <!-- Lab -->
+  <section id="lab" class="section band" aria-labelledby="lab-title">
     <div class="wrap">
-      <p class="kicker">Lab</p>
-      <h2>Experiments.</h2>
-      <div class="grid two">
-        <article class="card">
+      <header class="section-head" data-reveal>
+        <p class="label label--accent">Lab</p>
+        <h2 class="title" id="lab-title">Experiments</h2>
+      </header>
+      <ul class="lab">
+        <li class="lab__item" data-reveal>
+          <p class="label">jcamd.com/family</p>
           <h3>Family Neural Architecture</h3>
           <p>A side project mapping family systems thinking onto neural architecture — with a working client-side chart tool. Your data never leaves your browser.</p>
-          <div class="links"><a href="/family/">Open</a></div>
-        </article>
-        <article class="card">
+          <a class="tlink lab__open" href="/family/">Open <span aria-hidden="true">→</span><span class="visually-hidden"> Family Neural Architecture</span></a>
+        </li>
+        <li class="lab__item" data-reveal style="--d:120ms">
+          <p class="label">jcamd.com/graphify</p>
           <h3>Knowledge graph viewer</h3>
           <p>A static, explorable viewer for knowledge graphs — browse entities and relationships in the browser.</p>
-          <div class="links"><a href="/graphify/">Open</a></div>
-        </article>
-      </div>
+          <a class="tlink lab__open" href="/graphify/">Open <span aria-hidden="true">→</span><span class="visually-hidden"> knowledge graph viewer</span></a>
+        </li>
+        <li class="lab__item" data-reveal style="--d:240ms">
+          <p class="label">jcamd.com/chips</p>
+          <h3>CPU · GPU · DPU, exploded</h3>
+          <p>Three processors exploded in interactive 3D: EPYC 9654, H100, BlueField-3. Every block labeled, every difference explained — ELI5 to expert.</p>
+          <a class="tlink lab__open" href="/chips/">Open <span aria-hidden="true">→</span><span class="visually-hidden"> CPU, GPU and DPU exploded view</span></a>
+        </li>
+      </ul>
     </div>
   </section>
 
-  <section id="uses" class="section">
-    <div class="wrap narrow">
-      <p class="kicker">Uses</p>
-      <h2>The stack.</h2>
-      <dl class="uses-list">
-        <div><dt>Python (stdlib-first)</dt><dd>pipelines, models, tooling</dd></div>
+  <!-- Uses -->
+  <section id="uses" class="section" aria-labelledby="uses-title">
+    <div class="wrap">
+      <header class="section-head" data-reveal>
+        <p class="label label--accent">Uses</p>
+        <h2 class="title" id="uses-title">The stack</h2>
+      </header>
+      <dl class="stack" data-reveal>
+        <div><dt>Python <span>stdlib-first</span></dt><dd>pipelines, models, tooling</dd></div>
         <div><dt>TypeScript + Next.js</dt><dd>product surfaces</dd></div>
         <div><dt>Vercel + GitHub Actions</dt><dd>shipping</dd></div>
         <div><dt>PyTorch</dt><dd>GPU training box</dd></div>
@@ -194,23 +275,32 @@
     </div>
   </section>
 
-  <section id="contact" class="section alt">
-    <div class="wrap narrow center">
-      <p class="kicker">Contact</p>
-      <h2>The best way to reach me is GitHub.</h2>
-      <p class="muted">Open an issue or discussion on any repository — I read everything. For advisory work, see <a href="https://alamost.com">Alamo St Advisors</a>.</p>
-      <div class="cta-row center">
-        <a class="btn solid" href="https://github.com/jcdavis131" rel="noopener">github.com/jcdavis131</a>
-      </div>
+  <!-- End card -->
+  <section id="contact" class="endcard" aria-labelledby="contact-title">
+    <div class="endcard__in" data-reveal>
+      <p class="label label--accent">Contact</p>
+      <h2 class="endcard__title" id="contact-title">The best way to reach me is GitHub.</h2>
+      <p class="endcard__text prose">Open an issue or discussion on any repository — I read everything. For advisory work, see <a href="https://alamost.com">Alamo St Advisors</a>.</p>
+      <a class="btn btn--accent" href="https://github.com/jcdavis131" rel="noopener">github.com/jcdavis131</a>
     </div>
   </section>
 </main>
 
-<footer>
-  <div class="wrap foot-in">
-    <span>© 2026 JC Davis · Austin, Texas</span>
-    <span><a href="https://alamost.com">Alamo St Advisors</a></span>
-  </div>
+<footer class="colophon">
+  <svg class="colophon__mark" viewBox="0 0 40 40" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="1"><rect x="0.5" y="0.5" width="39" height="39"/><rect x="10.5" y="10.5" width="19" height="19"/><path d="M.5.5l10 10M39.5.5l-10 10M.5 39.5l10-10M39.5 39.5l-10-10"/></g><circle cx="20" cy="20" r="2.5" fill="var(--accent)"/></svg>
+  <p class="colophon__name">JC Davis</p>
+  <p class="label">Austin, Texas</p>
+  <ul class="colophon__links">
+    <li><a href="#work">Work</a></li>
+    <li><a href="/family/">Family</a></li>
+    <li><a href="/graphify/">Graph</a></li>
+    <li><a href="/chips/">Chips</a></li>
+    <li><a href="https://github.com/jcdavis131" rel="noopener">GitHub</a></li>
+    <li><a href="https://alamost.com">Alamo St Advisors</a></li>
+  </ul>
+  <p class="label colophon__legal">© 2026 JC Davis</p>
 </footer>
+
+<script src="/assets/frame.js" defer></script>
 </body>
 </html>
