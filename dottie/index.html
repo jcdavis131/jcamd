@@ -1,0 +1,732 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dottie — scout, the router and System One | JC Davis</title>
+<meta name="description" content="Dottie is an orchestration platform built around a measured loop: the scout CLI, one router that picks the cheapest tier that can do the work, and System One, a typed decision model served locally by dottie-os.">
+<link rel="canonical" href="https://jcamd.com/dottie/">
+<script>(function(r){r.classList.add('js');try{var t=localStorage.getItem('jcamd-theme');if(t==='light'||t==='dark')r.setAttribute('data-theme',t)}catch(e){}})(document.documentElement)</script>
+<link rel="preload" href="/assets/fonts/jost-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<meta name="theme-color" content="#f3f1ec">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0c0b0a">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="JC Davis">
+<meta property="og:title" content="Dottie — scout, the router and System One">
+<meta property="og:description" content="An orchestration platform built around a measured loop. The scout CLI, one router, and System One: typed questions answered as Choice, Score and Noul.">
+<meta property="og:url" content="https://jcamd.com/dottie/">
+<meta property="og:image" content="https://jcamd.com/assets/og/og-dottie.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Dottie. scout, the router and System One.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Dottie — scout, the router and System One">
+<meta name="twitter:description" content="An orchestration platform built around a measured loop. The scout CLI, one router, and System One: typed questions answered as Choice, Score and Noul.">
+<meta name="twitter:image" content="https://jcamd.com/assets/og/og-dottie.png">
+<link rel="stylesheet" href="/assets/frame.css">
+<link rel="stylesheet" href="/assets/portfolio.css">
+<style>
+/* /dottie/ — page composition on top of frame.css tokens and the home page's
+   opening + frame bar vocabulary (portfolio.css). */
+.d-open { min-height: calc(92svh - var(--header-h)); }
+.d-open .opening__name { letter-spacing: 0.34em; margin-right: -0.34em; }
+.d-open .opening__lede { max-width: 44ch; }
+
+/* chapter index: a strip of stations under the title card */
+.index { border-block: 1px solid var(--line); background: var(--surface); }
+.index ol {
+  list-style: none; margin: 0 auto; padding: 0 var(--gutter);
+  max-width: var(--grid-max);
+  display: grid; grid-template-columns: repeat(7, 1fr);
+}
+.index li + li { border-left: 1px solid var(--line); }
+.index a {
+  display: grid; justify-items: center; gap: var(--sp-1);
+  min-height: 64px; padding: var(--sp-3) var(--sp-2); align-content: center;
+  font: 500 var(--t-2xs)/1.3 var(--font-display); letter-spacing: 0.2em; text-transform: uppercase;
+  text-decoration: none; color: var(--muted); text-align: center;
+  transition: color var(--dur-1) var(--ease), background-color var(--dur-1) var(--ease);
+}
+.index a b { font-weight: 500; color: var(--accent); letter-spacing: 0.16em; }
+.index a:hover { color: var(--ink); background: var(--accent-wash); }
+@media (max-width: 860px) {
+  .index ol { grid-template-columns: repeat(4, 1fr); }
+  .index li:nth-child(5) { border-left: 0; }
+  .index li:nth-child(n+5) { border-top: 1px solid var(--line); }
+}
+@media (max-width: 480px) {
+  .index ol { grid-template-columns: repeat(2, 1fr); padding: 0; }
+  .index li { border-top: 1px solid var(--line); }
+  .index li:nth-child(-n+2) { border-top: 0; }
+  .index li:nth-child(odd) { border-left: 0; }
+  .index li:nth-child(5) { border-left: 0; }
+  .index li:last-child { grid-column: 1 / -1; }
+}
+
+/* chapters */
+.ch { max-width: var(--grid-max); margin-inline: auto; padding: var(--sp-5) var(--gutter) 0; }
+.ch__body { padding: var(--sp-9) 0 var(--sp-10); display: grid; gap: var(--sp-7); }
+.ch__head { display: grid; justify-items: center; text-align: center; gap: var(--sp-4); }
+.ch__head .label { margin-right: -0.26em; }
+.ch__lede { margin: 0; max-width: 58ch; color: var(--ink-2); font-size: var(--t-md); line-height: 1.65; text-wrap: pretty; }
+.ch__lede code, .note code, .step p code, .parts code, .ledger3 code, .inst code, .fact code { font: 400 0.86em/1.4 var(--font-mono); background: var(--sunk); padding: 1px 5px; overflow-wrap: anywhere; }
+.note { margin: 0 auto; max-width: 62ch; color: var(--muted); font-size: var(--t-sm); text-align: center; text-wrap: pretty; }
+
+/* hairline grids */
+.cells { display: grid; gap: 1px; background: var(--line); border: 1px solid var(--line); }
+.cells > * { background: var(--bg); }
+
+/* 01 the parts */
+.parts { grid-template-columns: repeat(4, 1fr); list-style: none; margin: 0; padding: 0; }
+.parts li { padding: var(--sp-6) var(--sp-5); display: grid; gap: var(--sp-2); align-content: start; text-align: center; justify-items: center; }
+.parts h3 { margin: 0; font: 500 var(--t-lg)/1.2 var(--font-display); letter-spacing: 0.04em; }
+.parts p { margin: 0; color: var(--muted); font-size: var(--t-sm); }
+.parts .label { margin-right: -0.26em; }
+@media (max-width: 900px) { .parts { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 520px) { .parts { grid-template-columns: 1fr; } }
+
+.loop { list-style: none; margin: 0 auto; padding: 0; display: flex; flex-wrap: wrap; justify-content: center; gap: var(--sp-2) 0; max-width: 900px; counter-reset: loop; }
+.loop li { display: inline-flex; align-items: center; font: 500 var(--t-2xs)/1 var(--font-display); letter-spacing: 0.22em; text-transform: uppercase; color: var(--ink); }
+.loop li::before { counter-increment: loop; content: counter(loop); color: var(--accent); margin-right: var(--sp-2); letter-spacing: 0; }
+.loop li + li::after { content: none; }
+.loop li:not(:last-child)::after { content: ""; display: inline-block; width: 28px; height: 1px; background: var(--line-strong); margin: 0 var(--sp-3); }
+
+/* code / terminal */
+.term { position: relative; border: 1px solid var(--line); background: var(--sunk); min-width: 0; }
+.term__bar { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3); padding: 0 0 0 var(--sp-4); border-bottom: 1px solid var(--line); min-height: 44px; }
+.term__bar .label { margin: 0; }
+.copy { min-height: 44px; padding: 0 var(--sp-4); border: 0; border-left: 1px solid var(--line); background: transparent; color: var(--muted); cursor: pointer; font: 500 var(--t-2xs)/1 var(--font-display); letter-spacing: 0.2em; text-transform: uppercase; transition: color var(--dur-1) var(--ease); }
+.copy:hover { color: var(--accent); }
+html:not(.js) .copy { display: none; }
+.term pre { margin: 0; padding: var(--sp-5); overflow-x: auto; font: 400 var(--t-sm)/1.75 var(--font-mono); color: var(--ink); tab-size: 2; }
+.term pre:focus-visible { outline-offset: -2px; }
+.term .c { color: var(--muted); }
+.term .p { color: var(--accent); user-select: none; }
+
+.split { display: grid; grid-template-columns: 5fr 7fr; gap: var(--sp-7); align-items: start; }
+.split--even { grid-template-columns: 1fr 1fr; }
+@media (max-width: 900px) { .split, .split--even { grid-template-columns: minmax(0, 1fr); gap: var(--sp-6); } }
+.facts { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+.facts li { padding: var(--sp-4) 0; border-bottom: 1px solid var(--line); display: grid; gap: var(--sp-1); }
+.facts b { font: 500 var(--t-base)/1.4 var(--font-display); letter-spacing: 0.03em; font-weight: 500; }
+.facts span { color: var(--muted); font-size: var(--t-sm); }
+.facts code { font: 400 0.86em/1.4 var(--font-mono); background: var(--sunk); padding: 1px 5px; overflow-wrap: anywhere; }
+
+/* 03 the router: one-point perspective */
+.persp { margin: 0; display: grid; gap: var(--sp-5); justify-items: center; }
+.persp svg { width: 100%; max-width: 900px; height: auto; display: block; color: var(--ink); overflow: visible; }
+.persp .rail { stroke: var(--line-strong); }
+.persp .ring { fill: none; stroke: var(--ink); stroke-width: 1; }
+.persp .ring--gated { stroke-dasharray: 6 6; }
+.persp .ring--auth { stroke: var(--accent); stroke-width: 1.5; }
+.persp .tag { fill: var(--bg); }
+.persp .num { font: 400 26px/1 var(--font-display); letter-spacing: 0.12em; fill: var(--ink); }
+.persp .num--auth { fill: var(--accent); }
+.persp .cap { font: 500 13px/1 var(--font-display); letter-spacing: 0.3em; fill: var(--muted); text-transform: uppercase; }
+.persp .vp { fill: var(--accent); }
+.persp figcaption { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--sp-2) var(--sp-6); }
+.key { display: inline-flex; align-items: center; gap: var(--sp-3); font: 500 var(--t-2xs)/1 var(--font-display); letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); }
+.key i { display: inline-block; width: 28px; height: 0; border-top: 1px solid var(--ink); }
+.key i.g { border-top-style: dashed; }
+.key i.a { border-top: 2px solid var(--accent); }
+@media (max-width: 600px) { .persp .cap { display: none; } .persp .num { font-size: 34px; } }
+@media (prefers-reduced-motion: no-preference) {
+  .js-motion .persp[data-reveal] .ring, .js-motion .persp[data-reveal] .tagged { opacity: 0; transform: scale(0.96); transform-box: fill-box; transform-origin: center; transition: opacity var(--dur-3) var(--ease), transform var(--dur-3) var(--ease); }
+  .js-motion .persp[data-reveal].is-in .ring, .js-motion .persp[data-reveal].is-in .tagged { opacity: 1; transform: none; }
+  .js-motion .persp .s1 { transition-delay: 100ms !important; }
+  .js-motion .persp .s2 { transition-delay: 300ms !important; }
+  .js-motion .persp .s3 { transition-delay: 500ms !important; }
+  .js-motion .persp .s4 { transition-delay: 700ms !important; }
+}
+
+.steps { grid-template-columns: repeat(4, 1fr); list-style: none; margin: 0; padding: 0; }
+.step { padding: var(--sp-6) var(--sp-5); display: grid; gap: var(--sp-3); align-content: start; }
+.step__n { font: 400 var(--t-lg)/1 var(--font-display); letter-spacing: 0.16em; color: var(--ink); }
+.step--auth .step__n { color: var(--accent); }
+.step h3 { margin: 0; font: 500 var(--t-md)/1.3 var(--font-display); letter-spacing: 0.03em; }
+.step p { margin: 0; color: var(--muted); font-size: var(--t-sm); }
+@media (max-width: 900px) { .steps { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 520px) { .steps { grid-template-columns: 1fr; } }
+
+.backends { width: 100%; border-collapse: collapse; font-size: var(--t-sm); }
+.backends caption { text-align: left; padding-bottom: var(--sp-3); }
+.backends th, .backends td { text-align: left; padding: var(--sp-4) var(--sp-4) var(--sp-4) 0; border-bottom: 1px solid var(--line); vertical-align: baseline; }
+.backends thead th { font: 500 var(--t-2xs)/1.4 var(--font-display); letter-spacing: 0.22em; text-transform: uppercase; color: var(--muted); border-bottom-color: var(--line-strong); }
+.backends tbody th { font: 500 var(--t-base)/1.4 var(--font-display); letter-spacing: 0.03em; }
+.backends td { color: var(--ink-2); }
+.backends code { font: 400 0.9em/1.4 var(--font-mono); background: var(--sunk); padding: 1px 5px; }
+.state { display: inline-block; font: 500 var(--t-2xs)/1 var(--font-display); letter-spacing: 0.2em; text-transform: uppercase; padding: 6px 8px; border: 1px solid var(--line-strong); color: var(--muted); white-space: nowrap; }
+.state--auth { border-color: var(--accent); color: var(--accent); }
+@media (max-width: 700px) {
+  .backends thead { display: none; }
+  .backends tr { display: grid; gap: var(--sp-2); padding: var(--sp-4) 0; border-bottom: 1px solid var(--line); }
+  .backends th, .backends td { padding: 0; border: 0; }
+}
+
+/* 04 System One: three instrument frames */
+.insts { grid-template-columns: repeat(3, 1fr); list-style: none; margin: 0; padding: 0; }
+.inst { display: grid; grid-template-rows: auto auto auto 1fr; gap: var(--sp-4); padding: var(--sp-6) var(--sp-5) var(--sp-5); position: relative; }
+.inst::before, .inst::after { content: ""; position: absolute; width: 14px; height: 14px; border: 0 solid var(--line-strong); }
+.inst::before { top: 10px; left: 10px; border-width: 1px 0 0 1px; }
+.inst::after { top: 10px; right: 10px; border-width: 1px 1px 0 0; }
+.inst__head { display: grid; justify-items: center; gap: var(--sp-2); text-align: center; }
+.inst__head .label { margin-right: -0.26em; }
+.inst h3 { margin: 0; font: 400 var(--t-xl)/1 var(--font-display); letter-spacing: 0.2em; margin-right: -0.2em; text-transform: uppercase; }
+.inst svg { width: 100%; height: auto; display: block; color: var(--ink); }
+.inst .axis { stroke: var(--line-strong); }
+.inst .bar { fill: var(--ink); opacity: 0.16; }
+.inst .bar--pick { fill: var(--accent); opacity: 1; }
+.inst .peak { stroke: var(--accent); stroke-dasharray: 3 4; }
+.inst .tick { font: 500 10px/1 var(--font-display); letter-spacing: 0.1em; fill: var(--muted); text-transform: uppercase; }
+.inst .val { font: 400 12px/1 var(--font-mono); fill: var(--ink); }
+.inst .mark { fill: var(--accent); }
+.inst .track { stroke: var(--ink); }
+.inst p { margin: 0; color: var(--muted); font-size: var(--t-sm); text-align: center; }
+.readout { margin: 0; border-top: 1px solid var(--line); font: 400 var(--t-xs)/1.5 var(--font-mono); }
+.readout div { display: flex; justify-content: space-between; gap: var(--sp-3); padding: var(--sp-2) 0; border-bottom: 1px solid var(--line); }
+.readout dt { color: var(--muted); }
+.readout dd { margin: 0; color: var(--ink); }
+@media (max-width: 900px) { .insts { grid-template-columns: 1fr; } .inst { max-width: 520px; margin-inline: auto; width: 100%; } .insts { background: transparent; border: 0; gap: var(--sp-5); } .inst { border: 1px solid var(--line); } }
+
+.formula { display: grid; justify-items: center; gap: var(--sp-4); text-align: center; padding: var(--sp-7) var(--sp-5); border-block: 1px solid var(--line); }
+.formula .formula__eq { margin: 0; max-width: none; font: 300 clamp(1.25rem, 3.4vw, 2rem)/1.3 var(--font-mono); letter-spacing: 0.02em; color: var(--ink); overflow-wrap: anywhere; }
+.formula .formula__eq em { font-style: normal; color: var(--accent); }
+.formula p { margin: 0; max-width: 60ch; color: var(--muted); font-size: var(--t-sm); }
+
+/* 05 dottie-os: the boundary */
+.os-top { align-items: center; }
+.bound { display: block; width: 100%; max-width: 520px; height: auto; margin-inline: auto; color: var(--ink); }
+.bound .edge { fill: none; stroke: var(--ink); stroke-dasharray: 4 5; }
+.bound .box { fill: var(--surface); stroke: var(--ink); }
+.bound .box--core { stroke: var(--accent); stroke-width: 1.5; }
+.bound .ln { stroke: var(--line-strong); fill: none; }
+.bound .t { font: 500 14px/1 var(--font-display); letter-spacing: 0.2em; fill: var(--muted); text-transform: uppercase; }
+.bound .t--ink { fill: var(--ink); }
+.bound .t--mono { font: 400 14px/1 var(--font-mono); letter-spacing: 0; text-transform: none; fill: var(--ink); }
+.bound .dot { fill: var(--accent); }
+
+/* 06 hive */
+.tree { margin: 0; }
+
+/* 07 status ledger */
+.ledger3 { grid-template-columns: repeat(3, 1fr); }
+.ledger3 > section { padding: var(--sp-6) var(--sp-5); display: grid; gap: var(--sp-4); align-content: start; }
+.ledger3 h3 { margin: 0; display: flex; align-items: center; gap: var(--sp-3); font: 500 var(--t-2xs)/1.4 var(--font-display); letter-spacing: var(--track-label); text-transform: uppercase; color: var(--muted); }
+.ledger3 h3 i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; border: 1px solid var(--ink); }
+.ledger3 .is-shipped h3 i { background: var(--ink); }
+.ledger3 .is-rule h3 i { background: var(--accent); border-color: var(--accent); border-radius: 0; }
+.ledger3 ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
+.ledger3 li { padding: var(--sp-3) 0; border-top: 1px solid var(--line); font-size: var(--t-sm); color: var(--ink-2); }
+.ledger3 li b { display: block; font: 500 var(--t-base)/1.4 var(--font-display); letter-spacing: 0.02em; color: var(--ink); font-weight: 500; margin-bottom: 2px; }
+@media (max-width: 900px) { .ledger3 { grid-template-columns: 1fr; } }
+
+/* end card */
+.d-end .endcard__title { letter-spacing: 0.01em; }
+.d-end__links { margin-top: var(--sp-4); display: flex; align-items: center; flex-wrap: wrap; justify-content: center; gap: var(--sp-4); }
+.endcard .d-end__links .btn { margin-top: 0; }
+.soon { display: inline-flex; align-items: center; gap: var(--sp-3); min-height: 48px; padding: 0 var(--sp-6); border: 1px dashed var(--line-strong); color: var(--muted); font: 500 var(--t-xs)/1 var(--font-display); letter-spacing: 0.22em; text-transform: uppercase; }
+
+/* the opening's first-load pass: short, never blocks, never under reduced motion */
+@media (prefers-reduced-motion: no-preference) {
+  .js .d-open .opening__place { animation: fade 1.1s var(--ease) 0.1s both; }
+  .js .d-open .opening__name { animation: track-in 1.6s var(--ease) 0.2s both; }
+  .js .d-open .opening__rule { animation: draw 1.1s var(--ease) 0.8s both; }
+  .js .d-open .opening__lede { animation: rise 1.1s var(--ease) 1s both; }
+  .js .d-open .opening__cta { animation: rise 1.1s var(--ease) 1.15s both; }
+  .js .d-open .opening__field { animation: fade-field 2s var(--ease) both; }
+}
+
+@media (max-width: 600px) {
+  .d-open .opening__name { letter-spacing: 0.22em; margin-right: -0.22em; }
+  .ch__body { padding: var(--sp-8) 0 var(--sp-9); gap: var(--sp-6); }
+  .term pre { font-size: var(--t-xs); padding: var(--sp-4); white-space: pre-wrap; overflow-wrap: anywhere; }
+  .loop li:not(:last-child)::after { width: 14px; margin: 0 var(--sp-2); }
+}
+@media print {
+  .index, .copy, .persp svg, .bound, .inst svg { display: none; }
+  .ch__body { padding: var(--sp-5) 0; }
+  .term { background: #fff; }
+}
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="chrome">
+  <div class="chrome__in">
+    <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Menu">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><line class="l1" x1="4" y1="8" x2="20" y2="8"/><line class="l2" x1="4" y1="16" x2="20" y2="16"/></svg>
+    </button>
+    <a class="chrome__brand" href="/">JC Davis</a>
+    <nav class="chrome__nav" id="primary-nav" aria-label="Primary">
+      <ul class="chrome__list chrome__list--l">
+        <li><a href="/#work">Work</a></li>
+        <li><a href="/#lab">Lab</a></li>
+        <li><a href="/chips/">Chips</a></li>
+      </ul>
+      <ul class="chrome__list chrome__list--r">
+        <li><a href="/dottie/" aria-current="page">Dottie</a></li>
+        <li><a href="/#craft">Craft</a></li>
+        <li><a href="/#contact">Contact</a></li>
+      </ul>
+    </nav>
+    <button class="theme-toggle" type="button" aria-label="Switch theme">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.25"/><path class="half" d="M12 3.5a8.5 8.5 0 0 1 0 17z"/></svg>
+    </button>
+  </div>
+</header>
+
+<main id="main">
+
+  <!-- Title card -->
+  <section class="opening d-open" id="top" aria-labelledby="d-title">
+    <svg class="opening__field" viewBox="0 0 1600 1000" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+      <g fill="none" stroke="currentColor" stroke-width="1" vector-effect="non-scaling-stroke">
+        <path d="M0 0 800 500M1600 0 800 500M0 1000 800 500M1600 1000 800 500"/>
+        <rect x="80" y="45" width="1440" height="910"/>
+        <rect x="224" y="140" width="1152" height="720"/>
+        <rect x="368" y="230" width="864" height="540"/>
+        <rect x="512" y="320" width="576" height="360"/>
+      </g>
+    </svg>
+    <span class="crop crop--tl" aria-hidden="true"></span><span class="crop crop--tr" aria-hidden="true"></span>
+    <span class="crop crop--bl" aria-hidden="true"></span><span class="crop crop--br" aria-hidden="true"></span>
+    <div class="opening__card">
+      <p class="label label--accent opening__place">The platform</p>
+      <h1 class="opening__name" id="d-title">Dottie</h1>
+      <hr class="rule opening__rule">
+      <p class="opening__lede">An orchestration platform built around a measured loop. Goals go in, one router sends each to the cheapest tier that can do the work, and every run leaves a measured trace.</p>
+      <div class="opening__cta">
+        <a class="btn btn--accent" href="#scout">Install scout</a>
+        <a class="btn" href="https://github.com/jcdavis131/dottie" rel="noopener">GitHub</a>
+      </div>
+    </div>
+  </section>
+
+  <nav class="index" aria-label="On this page">
+    <ol>
+      <li><a href="#platform"><b>01</b>Platform</a></li>
+      <li><a href="#scout"><b>02</b>scout</a></li>
+      <li><a href="#router"><b>03</b>Router</a></li>
+      <li><a href="#system-one"><b>04</b>System One</a></li>
+      <li><a href="#dottie-os"><b>05</b>dottie-os</a></li>
+      <li><a href="#hive"><b>06</b>Hive</a></li>
+      <li><a href="#status"><b>07</b>Status</a></li>
+    </ol>
+  </nav>
+
+  <!-- 01 Platform -->
+  <section class="ch" id="platform" aria-labelledby="platform-title">
+    <div class="frame__bar" aria-hidden="true"><span>01</span><span class="frame__bar-rule"></span><span>07</span></div>
+    <div class="ch__body">
+      <header class="ch__head" data-reveal>
+        <p class="label">github.com/jcdavis131/dottie</p>
+        <h2 class="title" id="platform-title">One monorepo</h2>
+        <p class="ch__lede">Dottie is the whole platform in one repository: the harness, the router, the decision model, the local sidecar and the sites around them. Four parts carry the story.</p>
+      </header>
+      <ul class="cells parts" data-reveal>
+        <li><p class="label">The CLI</p><h3>scout</h3><p>The harness's front door. One entry point, plugins behind it.</p><p><code>apps/scout-cli</code></p></li>
+        <li><p class="label">The policy</p><h3>The router</h3><p>One routing policy that picks a tier for each goal.</p><p><code>packages/dottie-loop</code></p></li>
+        <li><p class="label">The model</p><h3>System One</h3><p>Typed questions, answered as Choice, Score and Noul.</p><p><code>apps/jev-v0</code></p></li>
+        <li><p class="label">The sidecar</p><h3>dottie-os</h3><p>Serves System One at <code>/decide</code> on your machine.</p><p>local · tailnet</p></li>
+      </ul>
+      <div data-reveal>
+        <p class="note" style="margin-bottom:var(--sp-4)">The loop the parts serve. Every step writes down what it measured.</p>
+        <ol class="loop" aria-label="The loop">
+          <li>Route</li><li>Execute</li><li>Record</li><li>Mine</li><li>Retrain</li><li>Gate</li><li>Serve</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- 02 scout -->
+  <section class="ch" id="scout" aria-labelledby="scout-title">
+    <div class="frame__bar" aria-hidden="true"><span>02</span><span class="frame__bar-rule"></span><span>07</span></div>
+    <div class="ch__body">
+      <header class="ch__head" data-reveal>
+        <p class="label">apps/scout-cli</p>
+        <h2 class="title" id="scout-title">scout</h2>
+        <p class="ch__lede">Dottie's command line. The harness gets exactly one tool, and every capability is a plugin behind <code>scout --json</code>, each declaring what it may touch.</p>
+      </header>
+      <div class="split" data-reveal>
+        <ul class="facts">
+          <li><b>60+ plugins, one entry point</b><span>Harness, MCP, forge, vector and more, each a subcommand.</span></li>
+          <li><b>Default deny</b><span>Every plugin declares network, filesystem and secrets in a manifest. Undeclared means refused.</span></li>
+          <li><b>Real tool calls</b><span>A goal like <code>mcp:&lt;server&gt;__&lt;tool&gt;</code> runs a real external call through the meta-MCP layer, under an allowlist.</span></li>
+          <li><b>Measured runs</b><span><code>harness run</code> records latency, status and token cost for every step. Zero is written down as a measured zero.</span></li>
+        </ul>
+        <div class="term">
+          <div class="term__bar"><p class="label">Install with uv</p><button class="copy" type="button" data-copy="scout-cmds" aria-label="Copy the install commands">Copy</button></div>
+<pre id="scout-cmds" tabindex="0" aria-label="scout install and example commands"><span class="p">$ </span>git clone https://github.com/jcdavis131/dottie.git
+<span class="p">$ </span>cd dottie
+<span class="p">$ </span>uv sync --all-groups --frozen
+<span class="p">$ </span>uv run scout --help
+
+<span class="c"># route a goal with the deterministic heuristic</span>
+<span class="p">$ </span>uv run scout --json harness route \
+    "compare Stripe vs Lemon Squeezy Aug 2026"
+
+<span class="c"># route, plan, execute, write the measured timeline</span>
+<span class="p">$ </span>uv run scout harness run "ship the harness loop" --json
+
+<span class="c"># serve scout itself as one MCP server</span>
+<span class="p">$ </span>uv run scout mcp serve</pre>
+        </div>
+      </div>
+      <p class="note" data-reveal>The standalone <code>scout-cli</code> repository is superseded; scout lives in the monorepo at <a class="inline" href="https://github.com/jcdavis131/dottie/tree/main/apps/scout-cli" rel="noopener">apps/scout-cli</a>.</p>
+    </div>
+  </section>
+
+  <!-- 03 Router -->
+  <section class="ch" id="router" aria-labelledby="router-title">
+    <div class="frame__bar" aria-hidden="true"><span>03</span><span class="frame__bar-rule"></span><span>07</span></div>
+    <div class="ch__body">
+      <header class="ch__head" data-reveal>
+        <p class="label">packages/dottie-loop · router.py</p>
+        <h2 class="title" id="router-title">The router</h2>
+        <p class="ch__lede">One routing policy chooses among five tiers, from deterministic to agentic epic. A goal passes through four gates, in order, on its way to a tier.</p>
+      </header>
+
+      <figure class="persp" data-reveal>
+        <svg viewBox="0 0 1000 560" role="img" aria-labelledby="persp-t persp-d" focusable="false">
+          <title id="persp-t">The router's decision order, drawn as frames receding to one point</title>
+          <desc id="persp-d">Four nested frames. The outer frame, 01, is hard constraints. Inside it, 02, the heuristic, drawn in the accent colour because it is authoritative today. Inside that, 03, the learned recommendation, dashed because it only applies when the checkpoint has passed the gate. Innermost, 04, escalation, dashed because it only happens after a recorded insufficiency. The vanishing point is the chosen tier.</desc>
+          <g class="rail" fill="none" stroke-width="1">
+            <path d="M20 20 500 280M980 20 500 280M20 540 500 280M980 540 500 280"/>
+          </g>
+          <g class="s1"><rect class="ring" x="60" y="40" width="880" height="480"/></g>
+          <g class="s2"><rect class="ring ring--auth" x="170" y="100" width="660" height="360"/></g>
+          <g class="s3"><rect class="ring ring--gated" x="280" y="160" width="440" height="240"/></g>
+          <g class="s4"><rect class="ring ring--gated" x="380" y="214" width="240" height="132"/></g>
+          <g class="tagged s1"><rect class="tag" x="462" y="24" width="76" height="32"/><text class="num" x="500" y="50" text-anchor="middle">01</text></g>
+          <g class="tagged s2"><rect class="tag" x="462" y="84" width="76" height="32"/><text class="num num--auth" x="500" y="110" text-anchor="middle">02</text></g>
+          <g class="tagged s3"><rect class="tag" x="462" y="144" width="76" height="32"/><text class="num" x="500" y="170" text-anchor="middle">03</text></g>
+          <g class="tagged s4"><rect class="tag" x="462" y="198" width="76" height="32"/><text class="num" x="500" y="224" text-anchor="middle">04</text></g>
+          <text class="cap" x="500" y="506" text-anchor="middle">Goal</text>
+          <circle class="vp" cx="500" cy="280" r="6"/>
+          <text class="cap" x="500" y="312" text-anchor="middle">Tier</text>
+        </svg>
+        <figcaption>
+          <span class="key"><i></i>Always applied</span>
+          <span class="key"><i class="g"></i>Only under a condition</span>
+          <span class="key"><i class="a"></i>Authoritative today</span>
+        </figcaption>
+      </figure>
+
+      <ol class="cells steps" data-reveal>
+        <li class="step"><span class="step__n">01</span><h3>Hard constraints</h3><p>Policy exclusions first. Restricted goals are not routed automatically, and nothing runs when neither a model nor a tool is available.</p></li>
+        <li class="step step--auth"><span class="step__n">02</span><h3>Heuristic</h3><p>Deterministic when it can satisfy the goal, otherwise the heuristic tier. Always available, and it has the final word today.</p></li>
+        <li class="step"><span class="step__n">03</span><h3>Learned, if gated</h3><p>A learned answer counts only if its artifact says <code>gate_passed: true</code>, a human stamped it, and it picks an equal or cheaper tier.</p></li>
+        <li class="step"><span class="step__n">04</span><h3>Escalate, if recorded</h3><p>A more capable tier only after a recorded insufficiency: when it happened and what failed. Never on a hunch.</p></li>
+      </ol>
+
+      <div class="split split--even" data-reveal>
+        <table class="backends">
+          <caption class="label">Three backends, one policy</caption>
+          <thead><tr><th scope="col">Backend</th><th scope="col">What it is</th><th scope="col">Today</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Heuristic</th><td>MoMA-lite rules over the goal text and its side effects.</td><td><span class="state state--auth">Authoritative</span></td></tr>
+            <tr><th scope="row">Learned MLP</th><td>The orchestrator model from the training factory, <code>apps/ava-factory</code>.</td><td><span class="state">Advisory</span></td></tr>
+            <tr><th scope="row">System One</th><td>A typed question sent to dottie-os over <code>/decide</code>.</td><td><span class="state">Advisory</span></td></tr>
+          </tbody>
+        </table>
+        <ul class="facts">
+          <li><b>Advisory means logged and shown</b><span>Learned and System One answers are recorded next to the heuristic's and displayed. They do not change the tier until a checkpoint passes the gate and a human stamps it.</span></li>
+          <li><b>The last recorded comparison</b><span>On a 57-record measured hold-out, the learned candidate scored 87.7% and the heuristic 89.3%. The gate did not pass, so the heuristic stayed.</span></li>
+          <li><b>Traces feed the next model</b><span>Routing traces from real harness runs feed a training loop on the GPU host. Unifying scout and jarvisd on this one policy is in progress.</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 System One -->
+  <section class="ch" id="system-one" aria-labelledby="s1-title">
+    <div class="frame__bar" aria-hidden="true"><span>04</span><span class="frame__bar-rule"></span><span>07</span></div>
+    <div class="ch__body">
+      <header class="ch__head" data-reveal>
+        <p class="label">Contract · jev-decision-schema-1.0.0</p>
+        <h2 class="title" id="s1-title">System One</h2>
+        <p class="ch__lede">The decision model. It takes state and a set of typed questions and answers each with a closed distribution, never free text. Three question types, frozen in one schema.</p>
+      </header>
+
+      <p class="note" data-reveal>The three frames below are what <code>/decide</code> returns today with no checkpoint loaded: <code>mode: untrained</code>, uniform over the offered options. The shapes are the contract. The numbers are exactly what an untrained model owes you.</p>
+
+      <ol class="cells insts" data-reveal>
+        <li class="inst">
+          <div class="inst__head"><p class="label">One of a closed set</p><h3>Choice</h3></div>
+          <svg viewBox="0 0 240 150" role="img" aria-label="Three equal bars for billing, technical and other, each at one third. Billing is marked as the choice.">
+            <line class="axis" x1="10" y1="120" x2="230" y2="120"/>
+            <line class="peak" x1="10" y1="53" x2="230" y2="53"/>
+            <rect class="bar bar--pick" x="23" y="53" width="44" height="67"/>
+            <rect class="bar" x="98" y="53" width="44" height="67"/>
+            <rect class="bar" x="173" y="53" width="44" height="67"/>
+            <text class="val" x="45" y="44" text-anchor="middle">.333</text>
+            <text class="val" x="120" y="44" text-anchor="middle">.333</text>
+            <text class="val" x="195" y="44" text-anchor="middle">.333</text>
+            <text class="tick" x="45" y="138" text-anchor="middle">billing</text>
+            <text class="tick" x="120" y="138" text-anchor="middle">technical</text>
+            <text class="tick" x="195" y="138" text-anchor="middle">other</text>
+          </svg>
+          <dl class="readout"><div><dt>choice</dt><dd>billing</dd></div><div><dt>shape_concentration</dt><dd>0.333</dd></div></dl>
+          <p>Pick one label from 2 to 255 named options. On a perfect tie the first key wins, and the probabilities say it was a tie.</p>
+        </li>
+        <li class="inst">
+          <div class="inst__head"><p class="label">A level on an ordered scale</p><h3>Score</h3></div>
+          <svg viewBox="0 0 240 150" role="img" aria-label="An ordered scale of four levels, 0 to 3, each with probability one quarter. The expected score, 1.5, is marked between levels 1 and 2.">
+            <line class="axis" x1="30" y1="96" x2="210" y2="96"/>
+            <g class="track"><line x1="30" y1="86" x2="30" y2="106"/><line x1="90" y1="86" x2="90" y2="106"/><line x1="150" y1="86" x2="150" y2="106"/><line x1="210" y1="86" x2="210" y2="106"/></g>
+            <rect class="bar" x="18" y="46" width="24" height="36"/>
+            <rect class="bar" x="78" y="46" width="24" height="36"/>
+            <rect class="bar" x="138" y="46" width="24" height="36"/>
+            <rect class="bar" x="198" y="46" width="24" height="36"/>
+            <text class="val" x="30" y="38" text-anchor="middle">.25</text>
+            <text class="val" x="90" y="38" text-anchor="middle">.25</text>
+            <text class="val" x="150" y="38" text-anchor="middle">.25</text>
+            <text class="val" x="210" y="38" text-anchor="middle">.25</text>
+            <path class="mark" d="M120 90l7 12h-14z"/>
+            <text class="tick" x="30" y="126" text-anchor="middle">none</text>
+            <text class="tick" x="90" y="126" text-anchor="middle">minor</text>
+            <text class="tick" x="150" y="126" text-anchor="middle">major</text>
+            <text class="tick" x="210" y="126" text-anchor="middle">blocking</text>
+            <text class="val" x="120" y="144" text-anchor="middle">1.5</text>
+          </svg>
+          <dl class="readout"><div><dt>score</dt><dd>1.5</dd></div><div><dt>shape_concentration</dt><dd>0.25</dd></div></dl>
+          <p>Place the state on a rubric of 2 to 10 named levels. The score is the expected level, with a legend back to the words.</p>
+        </li>
+        <li class="inst">
+          <div class="inst__head"><p class="label">Yes or no, as a number</p><h3>Noul</h3></div>
+          <svg viewBox="0 0 240 150" role="img" aria-label="A line from 0 to 1 with a marker at 0.5.">
+            <line class="track" x1="30" y1="84" x2="210" y2="84"/>
+            <line class="track" x1="30" y1="74" x2="30" y2="94"/>
+            <line class="track" x1="210" y1="74" x2="210" y2="94"/>
+            <line class="axis" x1="75" y1="79" x2="75" y2="89"/>
+            <line class="axis" x1="165" y1="79" x2="165" y2="89"/>
+            <circle class="mark" cx="120" cy="84" r="7"/>
+            <text class="val" x="120" y="60" text-anchor="middle">0.5</text>
+            <text class="tick" x="30" y="116" text-anchor="middle">0 · no</text>
+            <text class="tick" x="210" y="116" text-anchor="middle">1 · yes</text>
+          </svg>
+          <dl class="readout"><div><dt>noul</dt><dd>0.5</dd></div><div><dt>shape_concentration</dt><dd>n/a</dd></div></dl>
+          <p>A yes-or-no question answered as one probability of yes, between 0 and 1. The number is the whole answer.</p>
+        </li>
+      </ol>
+
+      <div class="formula" data-reveal>
+        <p class="label label--accent">shape_concentration</p>
+        <p class="formula__eq"><em>max</em>ᵢ p(optionᵢ)</p>
+        <p>The largest probability in a Choice or Score answer. It describes the shape of the distribution: 1/n when the model spreads evenly over n options, 1 when all the mass sits on one. It is a named statistic, not a promise about accuracy, so System One never calls it confidence and makes no calibration claim.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 dottie-os -->
+  <section class="ch" id="dottie-os" aria-labelledby="os-title">
+    <div class="frame__bar" aria-hidden="true"><span>05</span><span class="frame__bar-rule"></span><span>07</span></div>
+    <div class="ch__body">
+      <header class="ch__head" data-reveal>
+        <p class="label">The local sidecar</p>
+        <h2 class="title" id="os-title">dottie-os</h2>
+        <p class="ch__lede">dottie-os serves System One on your own machine or tailnet. Tools ask it a typed question over <code>POST /decide</code> and get typed answers back. Nothing is published to a public host.</p>
+      </header>
+      <div class="split split--even os-top" data-reveal>
+        <svg class="bound" viewBox="0 0 520 300" role="img" aria-label="A dashed boundary labelled your machine or tailnet. Inside it, scout and the router send requests to dottie-os at 127.0.0.1 port 8770, which answers /decide.">
+          <rect class="edge" x="8" y="22" width="504" height="270"/>
+          <rect x="105" y="8" width="310" height="28" fill="var(--bg)"/>
+          <text class="t" x="260" y="28" text-anchor="middle">Your machine · tailnet</text>
+          <rect class="box" x="36" y="68" width="156" height="64"/>
+          <text class="t t--ink" x="114" y="105" text-anchor="middle">scout</text>
+          <rect class="box" x="36" y="186" width="156" height="64"/>
+          <text class="t t--ink" x="114" y="223" text-anchor="middle">router</text>
+          <path class="ln" d="M192 100h34v59h72M192 218h34v-59"/>
+          <text class="t t--mono" x="262" y="150" text-anchor="middle">/decide</text>
+          <rect class="box box--core" x="298" y="112" width="192" height="94"/>
+          <circle class="dot" cx="298" cy="159" r="4.5"/>
+          <text class="t t--ink" x="394" y="150" text-anchor="middle">dottie-os</text>
+          <text class="t t--mono" x="394" y="178" text-anchor="middle">127.0.0.1:8770</text>
+        </svg>
+        <ul class="facts">
+            <li><b>Loopback by default</b><span>The reference server binds <code>127.0.0.1:8770</code> unless told otherwise. Reach it over your tailnet, not the open internet.</span></li>
+            <li><b>Refuses rather than guesses</b><span>Every request is checked against the frozen schema: 1 to 32 questions, at most 64 KB. A schema violation is a <code>422</code>, an oversized body a <code>413</code>; nothing is silently truncated.</span></li>
+            <li><b>Where it lives</b><span>The reference <code>/decide</code> server is <code>apps/jev-v0</code>. The sidecar runs on the GPU host; <code>apps/dottie-os</code> in the repo mirrors its data-curation scripts.</span></li>
+          </ul>
+      </div>
+      <div class="split split--even" data-reveal>
+        <div class="term">
+          <div class="term__bar"><p class="label">Request · POST /decide</p><button class="copy" type="button" data-copy="decide-req" aria-label="Copy the example request">Copy</button></div>
+<pre id="decide-req" tabindex="0" aria-label="Example /decide request">{
+  "schema": "jev-decision-schema-1.0.0",
+  "state": {
+    "ticket": "TD-1001",
+    "message": "Charged twice on invoice 4412."
+  },
+  "questions": {
+    "team": {
+      "type": "choice",
+      "instructions":
+        "Which team should handle this ticket?",
+      "criteria": {
+        "billing": "Charges, invoices, refunds",
+        "technical": "Bugs, outages, integrations",
+        "other": "None of these"
+      }
+    },
+    "urgent": {
+      "type": "noul",
+      "instructions":
+        "Does the sender ask for help today?"
+    }
+  }
+}</pre>
+        </div>
+        <div class="term">
+          <div class="term__bar"><p class="label">Response · untrained, rounded</p></div>
+<pre tabindex="0" aria-label="Example /decide response with no checkpoint loaded, values rounded">{
+  "schema": "jev-decision-schema-1.0.0",
+  "model": "jev-v0-untrained",
+  "mode": "untrained",
+  "answers": {
+    "team": {
+      "type": "choice",
+      "choice": "billing",
+      "probabilities": {
+        "billing": 0.333,
+        "technical": 0.333,
+        "other": 0.333
+      },
+      "shape_concentration": 0.333
+    },
+    "urgent": { "type": "noul", "noul": 0.5 }
+  }
+}</pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 06 Hive -->
+  <section class="ch" id="hive" aria-labelledby="hive-title">
+    <div class="frame__bar" aria-hidden="true"><span>06</span><span class="frame__bar-rule"></span><span>07</span></div>
+    <div class="ch__body">
+      <header class="ch__head" data-reveal>
+        <p class="label">Designed · not built</p>
+        <h2 class="title" id="hive-title">The hive</h2>
+        <p class="ch__lede">A way to run a team of agents on plain files next to the sidecar: a roster, a shared blackboard, a task ledger, mailboxes and append-only logs. No database; everything readable with <code>cat</code>. It exists today as a design, not as code.</p>
+      </header>
+      <div class="split" data-reveal>
+        <ul class="facts">
+          <li><b>One writer per file</b><span>Each agent writes only inside its own directory. One process commits to git; agents never do.</span></li>
+          <li><b>Fail-closed delivery</b><span>A router moves messages from one outbox to another inbox. Undeliverable mail bounces to the orchestrator; malformed mail is quarantined and logged, never dropped.</span></li>
+          <li><b>A human at the boundary</b><span>Pause, gate, steer and halt are enforced where actions leave the hive. Destructive operations need an explicit confirmation.</span></li>
+        </ul>
+        <div class="term tree">
+          <div class="term__bar"><p class="label">hive/ · the planned layout</p></div>
+<pre tabindex="0" aria-label="Planned hive directory layout">hive/
+  registry.json   <span class="c"># roster: agent, role, capabilities</span>
+  board.md        <span class="c"># shared blackboard, one scribe</span>
+  tasks.json      <span class="c"># task ledger</span>
+  log.jsonl       <span class="c"># append-only event feed</span>
+  costs.jsonl     <span class="c"># append-only cost ledger</span>
+  agents/&lt;id&gt;/
+    identity.md   <span class="c"># who I am, what I may do</span>
+    memory.md     <span class="c"># long-term memory</span>
+    inbox/        <span class="c"># delivered to me</span>
+    outbox/       <span class="c"># waiting for the router</span>
+    cursor.json   <span class="c"># nothing is read twice</span></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 07 Status -->
+  <section class="ch" id="status" aria-labelledby="status-title">
+    <div class="frame__bar" aria-hidden="true"><span>07</span><span class="frame__bar-rule"></span><span>07</span></div>
+    <div class="ch__body">
+      <header class="ch__head" data-reveal>
+        <p class="label">As of September 2026</p>
+        <h2 class="title" id="status-title">Status</h2>
+        <p class="ch__lede">What runs, what is being built, and the rules that do not bend while it is.</p>
+      </header>
+      <div class="cells ledger3" data-reveal>
+        <section class="is-shipped" aria-labelledby="st-shipped">
+          <h3 id="st-shipped"><i aria-hidden="true"></i>Shipped</h3>
+          <ul>
+            <li><b>scout</b>The CLI in the monorepo: harness route and run, meta-MCP, forge, 60+ plugins.</li>
+            <li><b>The heuristic router</b>MoMA-lite over five tiers, authoritative in the harness.</li>
+            <li><b>The System One contract</b>Frozen <code>jev-decision-schema-1.0.0</code> and a typed <code>/decide</code> server.</li>
+            <li><b>Gates as code</b><code>dottie-loop</code>: evaluation gates, promotion and rollback records that can stop an advance.</li>
+          </ul>
+        </section>
+        <section class="is-progress" aria-labelledby="st-progress">
+          <h3 id="st-progress"><i aria-hidden="true"></i>In progress</h3>
+          <ul>
+            <li><b>One router</b>A single policy in <code>dottie-loop</code> for scout and jarvisd, with heuristic, learned MLP and System One backends.</li>
+            <li><b>System One checkpoints</b>A small model with LoRA and pointer heads. None has passed the gate.</li>
+            <li><b>The training loop</b>Real routing traces into training on the GPU host.</li>
+            <li><b>The console</b>A web console for dottie-os, planned at os.jcamd.com.</li>
+            <li><b>The hive</b>Designed; not yet built.</li>
+          </ul>
+        </section>
+        <section class="is-rule" aria-labelledby="st-rules">
+          <h3 id="st-rules"><i aria-hidden="true"></i>The rules</h3>
+          <ul>
+            <li><b>Nothing auto-promotes</b>A checkpoint is authoritative only if its artifact says <code>gate_passed: true</code> and a human stamped it.</li>
+            <li><b>No synthetic champions</b>Synthetic rows never train a champion. Router training data is real harness traces only.</li>
+            <li><b>No calibration claims</b>Probabilities are named for what they are: <code>shape_concentration</code>, <code>backend_confidence</code>.</li>
+            <li><b>No champion without a measurement</b>A model is called live only when it has been measured.</li>
+          </ul>
+        </section>
+      </div>
+    </div>
+  </section>
+
+  <!-- End card -->
+  <section class="endcard d-end" id="source" aria-labelledby="source-title">
+    <div class="endcard__in" data-reveal>
+      <p class="label label--accent">Source</p>
+      <h2 class="endcard__title" id="source-title">Everything above is in one repository.</h2>
+      <p class="endcard__text">MIT licensed, solo, built on public and free-tier tools. Read the code; when this page and the code disagree, the code is right.</p>
+      <div class="d-end__links">
+        <a class="btn btn--accent" href="https://github.com/jcdavis131/dottie" rel="noopener">github.com/jcdavis131/dottie</a>
+        <span class="soon">Console <span aria-hidden="true">·</span> coming soon</span>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="colophon">
+  <svg class="colophon__mark" viewBox="0 0 40 40" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="1"><rect x="0.5" y="0.5" width="39" height="39"/><rect x="10.5" y="10.5" width="19" height="19"/><path d="M.5.5l10 10M39.5.5l-10 10M.5 39.5l10-10M39.5 39.5l-10-10"/></g><circle cx="20" cy="20" r="2.5" fill="var(--accent)"/></svg>
+  <p class="colophon__name">JC Davis</p>
+  <p class="label">Austin, Texas</p>
+  <ul class="colophon__links">
+    <li><a href="/#work">Work</a></li>
+    <li><a href="/dottie/" aria-current="page">Dottie</a></li>
+    <li><a href="/graphify/">Graph</a></li>
+    <li><a href="/chips/">Chips</a></li>
+    <li><a href="https://github.com/jcdavis131" rel="noopener">GitHub</a></li>
+    <li><a href="https://alamost.com">Alamo St Advisors</a></li>
+  </ul>
+  <p class="label colophon__legal">© 2026 JC Davis</p>
+</footer>
+
+<script>
+(function () {
+  document.querySelectorAll('.copy[data-copy]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var pre = document.getElementById(btn.getAttribute('data-copy'));
+      if (!pre || !navigator.clipboard) return;
+      var text = pre.innerText.replace(/^\$ /gm, '');
+      navigator.clipboard.writeText(text).then(function () {
+        btn.textContent = 'Copied';
+        setTimeout(function () { btn.textContent = 'Copy'; }, 1600);
+      }, function () {});
+    });
+  });
+})();
+</script>
+<script src="/assets/frame.js" defer></script>
+</body>
+</html>
