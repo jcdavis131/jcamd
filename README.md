@@ -8,6 +8,7 @@ Texas. Static HTML/CSS, no build step, served by the Vercel project `jcamd`.
 | `index.html` | Portfolio: opening card, the work as a sequence of frames, timeline, craft, lab, stack, contact |
 | `assets/frame.css` / `frame.js` | Shared design layer for every page: tokens (type scale, spacing, one accent, light + dark), header, footer, theme toggle, reveals, print |
 | `assets/portfolio.css` | Home page composition |
+| `dottie/index.html` | Dottie: the platform, scout, the router (one-point-perspective diagram), System One (Choice / Score / Noul), dottie-os, the hive, and an honest status ledger |
 | `chips/index.html` | CPU vs GPU vs DPU, exploded in 3D (three.js); the stages stay dark in both themes |
 | `graphify/` | Static knowledge-graph viewer |
 | `404.html` | Not-found page (Vercel serves it automatically) |
