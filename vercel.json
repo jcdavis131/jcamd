@@ -3,6 +3,8 @@
   "redirects": [
     { "source": "/knowledge", "destination": "/", "permanent": true },
     { "source": "/journal", "destination": "/", "permanent": true },
+    { "source": "/family", "destination": "/", "permanent": true },
+    { "source": "/family/(.*)", "destination": "/", "permanent": true },
     { "source": "/arcade", "destination": "https://hoops.dumbmodel.com", "permanent": true }
   ],
   "headers": [

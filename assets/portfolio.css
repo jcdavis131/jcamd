@@ -152,7 +152,7 @@
 
 /* ── Lab ─────────────────────────────────────────────────────────────── */
 .lab { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--sp-5); grid-template-columns: 1fr; }
-@media (min-width: 900px) { .lab { grid-template-columns: repeat(3, 1fr); } }
+@media (min-width: 900px) { .lab { grid-template-columns: repeat(2, 1fr); } }
 .lab__item {
   position: relative;
   display: grid; grid-template-rows: auto auto 1fr auto; gap: var(--sp-3);
@@ -165,6 +165,13 @@
 .lab__item h3 { margin: 0; font: 500 var(--t-lg)/1.25 var(--font-display); letter-spacing: 0.02em; }
 .lab__item p:not(.label) { margin: 0; color: var(--muted); font-size: var(--t-sm); }
 .lab__open::before { content: ""; position: absolute; inset: 0; }
+.lab + .lab__group { margin-top: var(--sp-8); }
+.lab__group {
+  display: flex; align-items: baseline; justify-content: center; gap: var(--sp-4);
+  margin: 0 0 var(--sp-5); padding-bottom: var(--sp-3); border-bottom: 1px solid var(--line);
+}
+.lab__group .label { margin: 0; }
+@media (min-width: 900px) { .lab__item--feature { grid-column: 1 / -1; } }
 
 /* ── Stack ───────────────────────────────────────────────────────────── */
 .stack { margin: 0 auto; max-width: 760px; border-top: 1px solid var(--line); }
