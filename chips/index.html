@@ -6,65 +6,71 @@
 <title>CPU vs GPU vs DPU — Exploded in 3D | JC Davis</title>
 <meta name="description" content="Three processors exploded in interactive 3D: EPYC 9654, H100, BlueField-3. Every block labeled, every difference explained — ELI5 to expert.">
 <link rel="canonical" href="https://jcamd.com/chips/">
-<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
-<meta name="theme-color" content="#14110d">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="JC Davis">
 <meta property="og:title" content="CPU vs GPU vs DPU — Exploded in 3D">
 <meta property="og:description" content="Three chips, exploded layer by layer in 3D. Hover every block, compare every component class, understand why they differ.">
 <meta property="og:url" content="https://jcamd.com/chips/">
+<meta property="og:image" content="https://jcamd.com/assets/og/og-chips.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://jcamd.com/assets/og/og-chips.png">
+<script>(function(r){r.classList.add('js');try{var t=localStorage.getItem('jcamd-theme');if(t==='light'||t==='dark')r.setAttribute('data-theme',t)}catch(e){}})(document.documentElement)</script>
+<link rel="preload" href="/assets/fonts/jost-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<meta name="theme-color" content="#f3f1ec">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0c0b0a">
+<link rel="stylesheet" href="/assets/frame.css">
 <style>
 :root{
-  --bg:#14110d; --bg2:#1b1712; --ink:#f2ede2; --muted:#a89b85;
-  --line:rgba(242,237,226,.14); --accent:#d08a5a;
+  /* page tokens follow the shared light/dark theme (frame.css); the 3D
+     stages are always dark screens, so they re-declare the dark set */
+  --bg2:var(--surface); --card:var(--surface); --radius:2px;
   --cpu:#e08a4c; --gpu:#58b0a6; --dpu:#7aa0d8;
-  --card:#1e1913; --radius:14px;
+  --seg-bg:var(--surface);
 }
-*{box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{margin:0;background:var(--bg);color:var(--ink);
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,"Helvetica Neue",Arial,sans-serif;
-  -webkit-font-smoothing:antialiased;line-height:1.6;font-size:16px}
+:root:not([data-theme-resolved="dark"]){--cpu:#b8612a;--gpu:#2f8479;--dpu:#4a70ad}
+.stage-hero,.scale-stage,#pin,#vchange{
+  --bg:#0c0b0a; --bg2:#141210; --card:#191613; --ink:#ece8e1; --ink-2:#cfc9bf; --muted:#a39d93;
+  --line:rgba(236,232,225,.14); --accent:#e8553b; --on-accent:#0c0b0a;
+  --cpu:#e08a4c; --gpu:#58b0a6; --dpu:#7aa0d8; --seg-bg:rgba(12,11,10,.78);
+  color:var(--ink);
+}
 .wrap{max-width:1180px;margin:0 auto;padding:0 22px}
-/* 40px sticky nav */
-.top{position:sticky;top:0;z-index:80;background:rgba(20,17,13,.94);
-  backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
-.top-in{display:flex;align-items:center;justify-content:space-between;min-height:40px;padding:8px 22px;max-width:1280px;margin:0 auto}
-.brand{font-family:Georgia,"Times New Roman",serif;font-weight:bold;color:var(--ink);text-decoration:none;font-size:1rem}
-.top nav{display:flex;gap:18px;flex-wrap:wrap}
-.top nav a{color:var(--muted);text-decoration:none;font-size:.85rem}
-.top nav a:hover,.top nav a.on{color:var(--ink)}
 
 /* ============ HERO STAGE: the visualization is the page ============ */
-.stage-hero{position:relative;height:calc(100svh - 41px);min-height:620px;background:#0e0c09;overflow:hidden}
+.stage-hero{position:relative;height:calc(100svh - var(--header-h));min-height:620px;background:#0e0c09;overflow:hidden}
 #scene{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab}
 #scene:active{cursor:grabbing}
 #labels{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:5}
-.label{position:absolute;transform:translate(-50%,-130%);white-space:nowrap;
-  font-size:11px;letter-spacing:.02em;color:var(--ink);
+.stage-label,#labels .label,#build-labels .label{position:absolute;transform:translate(-50%,-130%);white-space:nowrap;
+  font-size:10.5px;letter-spacing:.1em;line-height:1.5;color:var(--ink);
   background:rgba(20,17,13,.78);border:1px solid var(--line);
   padding:3px 9px 3px 7px;border-radius:999px;backdrop-filter:blur(4px);
   transition:opacity .25s}
-.label .dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:6px;vertical-align:1px}
-.label::after{content:"";position:absolute;left:50%;top:100%;width:1px;height:14px;
+#labels .label .dot,#build-labels .label .dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:6px;vertical-align:1px}
+#labels .label::after,#build-labels .label::after{content:"";position:absolute;left:50%;top:100%;width:1px;height:14px;
   background:linear-gradient(rgba(242,237,226,.5),transparent)}
-.label.dim{opacity:0!important}
+#labels .label.dim,#build-labels .label.dim{opacity:0!important}
 /* minimal overlay headline */
 .ovl-title{position:absolute;top:18px;left:22px;z-index:10;pointer-events:none;max-width:min(420px,72vw)}
-.ovl-title .kicker{color:var(--accent);text-transform:uppercase;letter-spacing:.18em;font-size:.7rem;margin:0 0 6px}
-.ovl-title h1{font-family:Georgia,serif;font-weight:normal;font-size:clamp(1.3rem,2.6vw,1.9rem);line-height:1.2;margin:0 0 6px;
+.ovl-title .kicker{color:var(--accent);text-transform:uppercase;letter-spacing:.26em;font-size:.6875rem;font-family:var(--font-display);margin:0 0 6px}
+.ovl-title h1{font-family:var(--font-display);font-weight:400;letter-spacing:.08em;text-transform:uppercase;font-size:clamp(1.3rem,2.6vw,1.9rem);line-height:1.2;margin:0 0 6px;
   text-shadow:0 2px 14px rgba(0,0,0,.7)}
 .ovl-title p{margin:0;font-size:.82rem;color:var(--muted);text-shadow:0 1px 10px rgba(0,0,0,.8)}
 /* top-right control cluster */
 .ovl-ctrl{position:absolute;top:18px;right:22px;z-index:10;display:flex;flex-direction:column;gap:8px;align-items:flex-end}
-.seg{display:flex;gap:6px;background:rgba(20,17,13,.78);border:1px solid var(--line);
+.seg{display:flex;gap:6px;background:var(--seg-bg);border:1px solid var(--line);
   border-radius:999px;padding:5px;backdrop-filter:blur(6px);flex-wrap:wrap;justify-content:flex-end}
 .seg .cap{font-size:.68rem;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);align-self:center;padding:0 4px 0 8px}
 .pill{border:1px solid transparent;background:transparent;color:var(--muted);
   border-radius:999px;padding:5px 12px;font-size:.78rem;cursor:pointer;white-space:nowrap}
 .pill:hover{color:var(--ink)}
-.pill.on{background:var(--accent);color:#14110d;font-weight:700}
+.pill.on{background:var(--accent);color:var(--on-accent);font-weight:700}
 .pill[data-focus="cpu"].on{background:var(--cpu)}
 .pill[data-focus="gpu"].on{background:var(--gpu)}
 .pill[data-focus="dpu"].on{background:var(--dpu)}
@@ -162,8 +168,9 @@ body{margin:0;background:var(--bg);color:var(--ink);
   text-align:center;padding:40px;color:var(--muted)}
 
 /* ============ below-stage panels ============ */
-.section{padding:60px 0;border-top:1px solid var(--line)}
-h2{font-family:Georgia,serif;font-weight:normal;font-size:clamp(1.5rem,3.4vw,2.1rem);margin:0 0 8px}
+.section{padding:var(--sp-9) 0;border-top:1px solid var(--line)}
+h2{font-family:var(--font-display);font-weight:400;font-size:var(--t-xl);letter-spacing:.1em;text-transform:uppercase;line-height:1.15;margin:0 0 12px}
+h3,h4{font-family:var(--font-display);font-weight:500;letter-spacing:.02em}
 .sub{color:var(--muted);margin:0 0 28px;max-width:720px}
 #diff-sec{display:none}
 #diff-sec.show{display:block}
@@ -198,8 +205,10 @@ td .c{font-weight:600} td .why{display:block;color:var(--muted);font-size:.78rem
 .prov a{color:var(--accent)}
 .prov ul{margin:8px 0;padding-left:20px}
 .prov li{margin:5px 0}
-footer.site{padding:34px 0 44px;color:var(--muted);font-size:.85rem;border-top:1px solid var(--line)}
-footer.site a{color:var(--accent);text-decoration:none}
+.page-note{padding:var(--sp-7) var(--gutter) 0;text-align:center;color:var(--muted);font-size:var(--t-sm);border-top:1px solid var(--line)}
+.page-note p{margin:0}
+.section .kicker{font-family:var(--font-display)}
+.prov a{color:var(--ink);text-decoration:underline;text-decoration-color:var(--accent);text-underline-offset:3px}
 /* ============ scale section: individual vs scaled ============ */
 #scale-sec .lede{color:var(--muted);margin:0 0 18px;max-width:760px}
 #scale-pills{margin-bottom:18px;flex-wrap:wrap;width:fit-content;max-width:100%}
@@ -215,7 +224,7 @@ footer.site a{color:var(--accent);text-decoration:none}
 .scale-legend i{width:10px;height:10px;border-radius:50%;display:inline-block}
 .scale-cap{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px}
 .scale-cap h3{margin:0 0 8px;font-size:1.25rem}
-.scale-cap .why{margin:0 0 14px;color:#d8d2c6;font-size:.95rem;line-height:1.55}
+.scale-cap .why{margin:0 0 14px;color:var(--ink-2);font-size:.95rem;line-height:1.55}
 .scale-stats{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px}
 .scale-stats span{font-size:.72rem;border:1px solid var(--line);border-radius:999px;
   padding:4px 11px;color:var(--muted);background:rgba(255,255,255,.02)}
@@ -294,17 +303,31 @@ footer.site a{color:var(--accent);text-decoration:none}
 </style>
 </head>
 <body>
-<header class="top">
-  <div class="top-in">
-    <a class="brand" href="/">JC Davis</a>
-    <nav>
-      <a href="/">Home</a>
-      <a href="/chips/" class="on">Chips, Exploded</a>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="chrome">
+  <div class="chrome__in">
+    <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Menu">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><line class="l1" x1="4" y1="8" x2="20" y2="8"/><line class="l2" x1="4" y1="16" x2="20" y2="16"/></svg>
+    </button>
+    <a class="chrome__brand" href="/">JC Davis</a>
+    <nav class="chrome__nav" id="primary-nav" aria-label="Primary">
+      <ul class="chrome__list chrome__list--l">
+        <li><a href="/#work">Work</a></li>
+        <li><a href="/#lab">Lab</a></li>
+        <li><a href="/chips/" aria-current="page">Chips</a></li>
+      </ul>
+      <ul class="chrome__list chrome__list--r">
+        <li><a href="/#craft">Craft</a></li>
+        <li><a href="/#contact">Contact</a></li>
+      </ul>
     </nav>
+    <button class="theme-toggle" type="button" aria-label="Switch theme">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.25"/><path class="half" d="M12 3.5a8.5 8.5 0 0 1 0 17z"/></svg>
+    </button>
   </div>
 </header>
 
-<main>
+<main id="main">
 <!-- ================= THE STAGE ================= -->
 <section class="stage-hero" id="stage-hero" aria-label="Interactive 3D exploded view of a CPU, GPU and DPU">
   <canvas id="scene"></canvas>
@@ -591,11 +614,22 @@ footer.site a{color:var(--accent);text-decoration:none}
 </section>
 </main>
 
-<footer class="site">
-  <div class="wrap">
-    <p><a href="/">← JC Davis</a> · CPU vs GPU vs DPU, exploded. Schematic models; specs verified Sep 2026.</p>
-  </div>
+<div class="page-note"><p>CPU vs GPU vs DPU, exploded. Schematic models; specs verified Sep 2026.</p></div>
+<footer class="colophon">
+  <svg class="colophon__mark" viewBox="0 0 40 40" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="1"><rect x="0.5" y="0.5" width="39" height="39"/><rect x="10.5" y="10.5" width="19" height="19"/><path d="M.5.5l10 10M39.5.5l-10 10M.5 39.5l10-10M39.5 39.5l-10-10"/></g><circle cx="20" cy="20" r="2.5" fill="var(--accent)"/></svg>
+  <p class="colophon__name">JC Davis</p>
+  <p class="label">Austin, Texas</p>
+  <ul class="colophon__links">
+    <li><a href="/#work">Work</a></li>
+    <li><a href="/family/">Family</a></li>
+    <li><a href="/graphify/">Graph</a></li>
+    <li><a href="/chips/" aria-current="page">Chips</a></li>
+    <li><a href="https://github.com/jcdavis131" rel="noopener">GitHub</a></li>
+    <li><a href="https://alamost.com">Alamo St Advisors</a></li>
+  </ul>
+  <p class="label colophon__legal">© 2026 JC Davis</p>
 </footer>
+<script src="/assets/frame.js" defer></script>
 <script src="./assets/three.min.js"></script>
 <script>
 /* ================= explanation depth ================= */

@@ -1,0 +1,3 @@
+Jost (latin subset, variable weight 300–600), self-hosted as jost-latin.woff2.
+Copyright 2020 The Jost Project Authors (https://github.com/indestructible-type/Jost).
+Licensed under the SIL Open Font License, Version 1.1 — https://openfontlicense.org
