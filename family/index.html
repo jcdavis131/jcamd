@@ -6,49 +6,62 @@
 <title>Family Neural Architecture — J. Cameron Davis</title>
 <meta name="description" content="Enter a birth date and get a live, personalized daily feed — plus the brain-model backend behind it: pyswisseph, Ray, FastAPI, and a graph second brain.">
 <link rel="canonical" href="https://jcamd.com/family/">
-<meta name="theme-color" content="#e8e4da">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://jcamd.com/family/">
 <meta property="og:title" content="Family Neural Architecture — J. Cameron Davis">
 <meta property="og:description" content="A live, personalized daily feed computed in your browser, plus the brain-model backend it's based on: pyswisseph, Ray, FastAPI, graph + RAG.">
-<meta name="twitter:card" content="summary">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23faf9f5' stroke='%232c2a26' stroke-width='2'/%3E%3Ctext x='16' y='21' text-anchor='middle' font-family='monospace' font-size='11' font-weight='700' fill='%232c2a26'%3EJC%3C/text%3E%3C/svg%3E">
+<meta property="og:site_name" content="JC Davis">
+<meta property="og:image" content="https://jcamd.com/assets/og/og-family.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://jcamd.com/assets/og/og-family.png">
+<script>(function(r){r.classList.add('js');try{var t=localStorage.getItem('jcamd-theme');if(t==='light'||t==='dark')r.setAttribute('data-theme',t)}catch(e){}})(document.documentElement)</script>
+<link rel="preload" href="/assets/fonts/jost-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<meta name="theme-color" content="#f3f1ec">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0c0b0a">
+
+<link rel="stylesheet" href="/assets/frame.css">
 <link rel="stylesheet" href="/assets/site.css">
 <link rel="stylesheet" href="/assets/responsive-patch.css">
 <link rel="stylesheet" href="/assets/family.css">
 <link rel="stylesheet" href="/assets/motion.css">
 </head>
 <body>
-<a class="skip-link" href="#main-content">Skip to content</a>
-
-<header class="site-header">
-  <div class="site-header__inner">
-    <a class="site-brand" href="/">
-      <span class="site-brand__mark" aria-hidden="true">JC</span>
-      <span class="site-brand__text">
-        <span class="site-brand__name">J. Cameron Davis</span>
-        <span class="site-brand__tag">Workforce intelligence</span>
-      </span>
-    </a>
-    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">Menu</button>
-    <nav class="site-nav" id="site-nav" aria-label="Primary">
-      <a href="#feed">Your feed</a>
-      <a href="#chart">Full chart</a>
-      <a href="#architecture">Architecture</a>
-      <a href="#wheel">The wheel</a>
-      <a href="#profiles">Profiles</a>
-      <a href="#second-brain">Second brain</a>
-      <a class="nav-cta" href="/#lab">Back to lab</a>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="chrome">
+  <div class="chrome__in">
+    <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Menu">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><line class="l1" x1="4" y1="8" x2="20" y2="8"/><line class="l2" x1="4" y1="16" x2="20" y2="16"/></svg>
+    </button>
+    <a class="chrome__brand" href="/">JC Davis</a>
+    <nav class="chrome__nav" id="primary-nav" aria-label="Primary">
+      <ul class="chrome__list chrome__list--l">
+        <li><a href="/#work">Work</a></li>
+        <li><a href="/#lab">Lab</a></li>
+        <li><a href="/chips/">Chips</a></li>
+      </ul>
+      <ul class="chrome__list chrome__list--r">
+        <li><a href="/#craft">Craft</a></li>
+        <li><a href="/#contact">Contact</a></li>
+      </ul>
     </nav>
+    <button class="theme-toggle" type="button" aria-label="Switch theme">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.25"/><path class="half" d="M12 3.5a8.5 8.5 0 0 1 0 17z"/></svg>
+    </button>
   </div>
 </header>
 
-<main id="main-content">
+<main id="main">
 
   <header class="hero">
     <div class="hero__sheet">
       <div class="hero__meta">
-        <span>Sheet 06 · Family app</span>
+        <span>Lab · Family app</span>
         <span>Side project · private instance</span>
       </div>
       <h1>Family Neural Architecture.</h1>
@@ -58,6 +71,14 @@
         <a class="btn btn--fill" href="#feed">Get your feed</a>
         <a class="btn" href="#architecture">Read the architecture</a>
       </div>
+      <nav class="site-nav contents" aria-label="On this page">
+        <a href="#feed">Your feed</a>
+        <a href="#chart">Full chart</a>
+        <a href="#architecture">Architecture</a>
+        <a href="#wheel">The wheel</a>
+        <a href="#profiles">Profiles</a>
+        <a href="#second-brain">Second brain</a>
+      </nav>
     </div>
   </header>
 
@@ -239,20 +260,17 @@
       <svg viewBox="0 0 240 240" role="img" aria-labelledby="wheel-svg-title wheel-svg-desc">
         <title id="wheel-svg-title">The 64-gate wheel</title>
         <desc id="wheel-svg-desc">A circle divided into 64 evenly spaced ticks of 5.625 degrees each, with a marker at 302.25 degrees indicating where Gate 41 begins the sequence.</desc>
-        <circle cx="120" cy="120" r="104" fill="none" stroke="#b5aea2" stroke-width="2"/>
-        <circle cx="120" cy="120" r="92" fill="none" stroke="#2c2a26" stroke-width="10"
+        <circle class="w-faint" cx="120" cy="120" r="104" fill="none" stroke-width="1"/>
+        <circle class="w-ink" cx="120" cy="120" r="92" fill="none" stroke-width="10"
                 stroke-dasharray="1.8 7.232" stroke-dashoffset="0.9"/>
-        <circle cx="120" cy="120" r="74" fill="none" stroke="#b5aea2" stroke-width="1.5" stroke-dasharray="3 5"/>
+        <circle class="w-faint" cx="120" cy="120" r="74" fill="none" stroke-width="1" stroke-dasharray="3 5"/>
         <g transform="rotate(-302.25 120 120)">
-          <line x1="180" y1="120" x2="199" y2="120" stroke="#3d5a73" stroke-width="3"/>
-          <circle cx="204" cy="120" r="6" fill="#3d5a73"/>
+          <line class="w-acc" x1="180" y1="120" x2="199" y2="120" stroke-width="2"/>
+          <circle class="w-acc" cx="204" cy="120" r="5"/>
         </g>
-        <text x="120" y="114" text-anchor="middle" font-family="ui-monospace, monospace"
-              font-size="13" font-weight="700" fill="#2c2a26">GATE 41</text>
-        <text x="120" y="132" text-anchor="middle" font-family="ui-monospace, monospace"
-              font-size="10" fill="#5e5850">302.25°</text>
-        <text x="120" y="150" text-anchor="middle" font-family="ui-monospace, monospace"
-              font-size="9" fill="#5e5850">5.625° / GATE</text>
+        <text x="120" y="114" text-anchor="middle" class="t-ink" font-size="13" font-weight="500" letter-spacing="2">GATE 41</text>
+        <text x="120" y="132" text-anchor="middle" class="t-mut" font-size="10" letter-spacing="1">302.25°</text>
+        <text x="120" y="150" text-anchor="middle" class="t-mut" font-size="9" letter-spacing="1.5">5.625° / GATE</text>
       </svg>
       <figcaption>
         <strong>One tick per gate.</strong> Subtract the wheel's origin from a body's longitude, take it modulo 360, floor-divide by the gate width, and use the result as an index into the wheel sequence. The sequence is not numerically ordered — Gate 41 is followed by 19, then 13 — so the lookup table is the map, and the arithmetic is only there to find the slot.
@@ -539,40 +557,25 @@ def generate_insights(natal_gates, transit_gates, age) -&gt; dict:
     </div>
   </section>
 
-  <footer class="site-footer">
-    <div class="site-footer__grid">
-      <div>
-        <p class="site-footer__brand">J. Cameron Davis</p>
-        <p class="site-footer__tag">Workforce intelligence</p>
-        <p class="site-footer__note">I-O measurement, agents, neural nets. Meta is the day job; consulting is separate. This one is a side project.</p>
-      </div>
-      <div>
-        <p class="site-footer__title">This page</p>
-        <ul class="site-footer__list">
-          <li><a href="#feed">Your feed</a></li>
-          <li><a href="#chart">Full chart</a></li>
-          <li><a href="#architecture">Architecture</a></li>
-          <li><a href="#wheel">The wheel</a></li>
-          <li><a href="#profiles">Profiles</a></li>
-          <li><a href="#second-brain">Second brain</a></li>
-        </ul>
-      </div>
-      <div>
-        <p class="site-footer__title">Links</p>
-        <ul class="site-footer__list">
-          <li><a href="/">Home</a></li>
-          <li><a href="/#lab">Lab</a></li>
-          <li><a href="/graphify/">Personal Graphify</a></li>
-          <li><a href="https://github.com/jcdavis131">GitHub</a></li>
-        </ul>
-      </div>
-    </div>
-    <div class="site-footer__legal">
-      <span>© 2026 J. Cameron Davis</span>
-    </div>
-  </footer>
+  <p class="page-note">J. Cameron Davis — I-O measurement, agents, neural nets. Meta is the day job; consulting is separate. This one is a side project.</p>
 </main>
 
+<footer class="colophon">
+  <svg class="colophon__mark" viewBox="0 0 40 40" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="1"><rect x="0.5" y="0.5" width="39" height="39"/><rect x="10.5" y="10.5" width="19" height="19"/><path d="M.5.5l10 10M39.5.5l-10 10M.5 39.5l10-10M39.5 39.5l-10-10"/></g><circle cx="20" cy="20" r="2.5" fill="var(--accent)"/></svg>
+  <p class="colophon__name">JC Davis</p>
+  <p class="label">Austin, Texas</p>
+  <ul class="colophon__links">
+    <li><a href="/#work">Work</a></li>
+    <li><a href="/family/">Family</a></li>
+    <li><a href="/graphify/">Graph</a></li>
+    <li><a href="/chips/">Chips</a></li>
+    <li><a href="https://github.com/jcdavis131" rel="noopener">GitHub</a></li>
+    <li><a href="https://alamost.com">Alamo St Advisors</a></li>
+  </ul>
+  <p class="label colophon__legal">© 2026 JC Davis</p>
+</footer>
+
+<script src="/assets/frame.js" defer></script>
 <script src="/assets/site.js" defer></script>
 <script src="/assets/family-app.js" defer></script>
 </body>
