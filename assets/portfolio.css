@@ -152,7 +152,7 @@
 
 /* ── Lab ─────────────────────────────────────────────────────────────── */
 .lab { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--sp-5); grid-template-columns: 1fr; }
-@media (min-width: 900px) { .lab { grid-template-columns: repeat(3, 1fr); } }
+@media (min-width: 900px) { .lab { grid-template-columns: repeat(2, 1fr); } }
 .lab__item {
   position: relative;
   display: grid; grid-template-rows: auto auto 1fr auto; gap: var(--sp-3);

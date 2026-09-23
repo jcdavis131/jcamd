@@ -21,18 +21,16 @@ ROOT = Path(__file__).resolve().parent.parent
 REQUIRED_LINKS = [
     "https://hoops.dumbmodel.com",
     "/graphify/",
-    "/family/",
 ]
 # Hosts that no longer serve anything of ours; a link to one is a dead click.
 RETIRED_HOSTS = ["hoops.jcamd.com", "bhenre.com", "arcade.dumbmodel.com", "training.jcamd.com"]
 REQUIRED_PAGES = [
-    "index.html", "graphify/index.html", "family/index.html", "chips/index.html", "404.html",
+    "index.html", "graphify/index.html", "chips/index.html", "404.html",
     "vercel.json", "favicon.ico", "site.webmanifest", "sitemap.xml", "robots.txt",
 ]
 # page -> public URL expected in sitemap.xml (404 is noindex, so it's excluded)
 PAGES = {
     "index.html": "https://jcamd.com/",
-    "family/index.html": "https://jcamd.com/family/",
     "chips/index.html": "https://jcamd.com/chips/",
     "graphify/index.html": "https://jcamd.com/graphify/",
     "404.html": None,
